@@ -1,0 +1,280 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import SectionHead from '../components/SectionHead.astro';
+import Icon from '../components/Icon.astro';
+import AwakenExplorer from '../components/AwakenExplorer.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { featureGroups, rateBook } from '../data/features';
+import { awakenClassCount } from '../data/classes';
+import { site } from '../data/site';
+
+const toc = [
+  ...featureGroups.map((g) => ({ id: g.id, label: g.title })),
+  { id: 'awaken', label: '覺醒技能' },
+  { id: 'rates', label: '倍率與規格' },
+];
+---
+
+<Base title="伺服器特色" description="嗜血天堂II 經典服的完整特色：經驗 5 倍、隨身布告欄、免費內掛、90 級覺醒技能、職業平衡調整、每週 PvP 活動與 96 級史詩首領。">
+  <PageHero
+    crumb="伺服器特色"
+    title="伺服器特色"
+    lead="經典的骨架，現代的便利"
+    desc="保留天堂II經典版的節奏與職業體系，再加上隨身布告欄、免費內掛與 90 級覺醒技能。以下每一項，都來自伺服器實際設定。"
+  />
+
+  <nav class="toc" aria-label="本頁目錄">
+    <div class="container">
+      <ul class="toc__list">
+        {
+          toc.map((t, i) => (
+            <li>
+              <a href={`#${t.id}`}>
+                <span class="toc__no tnum">{i + 1}</span>
+                {t.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </nav>
+
+  {
+    featureGroups.map((g, gi) => (
+      <section class:list={['section', gi % 2 === 1 && 'section--alt']} id={g.id} aria-labelledby={`fg-${g.id}`}>
+        <div class="container">
+          <SectionHead title={g.title} id={`fg-${g.id}`} desc={g.lede} />
+          <ul class="fg">
+            {g.items.map((f) => (
+              <li class="fcard">
+                <div class="fcard__top">
+                  <span class="ibox" aria-hidden="true">
+                    <Icon name={f.icon} />
+                  </span>
+                  {f.tag && <span class="tag">{f.tag}</span>}
+                </div>
+                <h3 class="fcard__title">{f.title}</h3>
+                <p class="fcard__desc">{f.desc}</p>
+                {f.cmd && (
+                  <button class="fcard__cmd" type="button" data-copy={f.cmd} aria-label={`複製指令 ${f.cmd}`}>
+                    <span class="cmd">{f.cmd}</span>
+                    <Icon name="copy" />
+                    <span data-copy-label>複製</span>
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+          {gi === 1 && (
+            <p class="note fg__note">
+              <Icon name="shield" />
+              <span>死亡、戰鬥中、紫名或紅名、PvP 活動與奧林匹亞中、交易或擺攤中、攻城區域與監獄內，無法使用布告欄的商店、輔助、傳送與服務。</span>
+            </p>
+          )}
+        </div>
+      </section>
+    ))
+  }
+
+  <section class="section section--white" id="awaken" aria-labelledby="awaken-title">
+    <div class="container">
+      <SectionHead
+        title={`90 級覺醒技能（${awakenClassCount} 個職業）`}
+        id="awaken-title"
+        desc="每個三轉職業各有 1 個被動、1 個主動技能，移植自覺醒版本並依經典數值縮小。90 級學 Lv1、95 級學 Lv2、99 級學 Lv3，到等級自動學會；只有主職業學得到。斜線分隔的數字依序是 Lv1／Lv2／Lv3。"
+      />
+      <AwakenExplorer />
+    </div>
+  </section>
+
+  <section class="section section--alt" id="rates" aria-labelledby="rates-title">
+    <div class="container">
+      <SectionHead title="倍率與規格" id="rates-title" desc="所有數值都取自伺服器設定檔。" />
+      <div class="spec">
+        <div>
+          <div class="table-wrap">
+            <table class="table">
+              <caption class="sr-only">倍率</caption>
+              <thead>
+                <tr>
+                  <th scope="col">項目</th>
+                  <th scope="col">倍率</th>
+                  <th scope="col">說明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">{rateBook.hero.label}</th>
+                  <td class="spec__v tnum">×{rateBook.hero.value}</td>
+                  <td>{rateBook.hero.note}</td>
+                </tr>
+                {
+                  rateBook.items.map((r) => (
+                    <tr>
+                      <th scope="row">{r.label}</th>
+                      <td class="spec__v tnum">{`${r.prefix}${r.value}`}</td>
+                      <td>{r.note}</td>
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </table>
+          </div>
+          <p class="note spec__premium"><Icon name="crown" /><span>{rateBook.premium}</span></p>
+        </div>
+        <div class="table-wrap">
+          <table class="table">
+            <caption class="sr-only">伺服器規格</caption>
+            <thead>
+              <tr>
+                <th scope="col">規格</th>
+                <th scope="col">設定</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                site.specs.map(([k, v]) => (
+                  <tr>
+                    <th scope="row" class="spec__k">{k}</th>
+                    <td>{v}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CtaBand />
+</Base>
+
+<style>
+  .toc {
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+  }
+  .toc__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-block: 12px;
+  }
+  .toc__list a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 12px 4px 4px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .toc__list a:hover {
+    color: var(--link);
+    border-color: var(--brand-200);
+  }
+  .toc__no {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    font-size: 0.78rem;
+    color: #fff;
+    background: var(--brand-500);
+  }
+
+  .fg {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .fcard {
+    display: flex;
+    flex-direction: column;
+    padding: 16px 18px 18px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+  }
+  .fcard__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .fcard__title {
+    margin-top: 12px;
+    font-size: 1.08rem;
+  }
+  .fcard__desc {
+    margin-top: 4px;
+    font-size: 0.93rem;
+    line-height: 1.75;
+    color: var(--ink-2);
+  }
+  .fcard__cmd {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    padding: 3px 10px 3px 3px;
+    font-size: 0.82rem;
+    color: var(--ink-2);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .fcard__cmd :global(svg) {
+    width: 14px;
+    height: 14px;
+  }
+  .fcard__cmd:hover {
+    color: var(--link);
+    border-color: var(--brand-200);
+  }
+  .fcard__cmd:global(.is-copied) {
+    color: var(--ok);
+    border-color: #9fd3b4;
+    background: var(--ok-bg);
+  }
+  .fg__note {
+    margin-top: 16px;
+  }
+
+  .spec {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+  }
+  .spec__v {
+    font-weight: 700;
+    color: var(--brand-600);
+    white-space: nowrap;
+  }
+  .spec__k {
+    white-space: nowrap;
+  }
+  .spec__premium {
+    margin-top: 12px;
+  }
+  @media (max-width: 1040px) {
+    .fg {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .spec {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 600px) {
+    .fg {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

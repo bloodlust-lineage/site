@@ -1,0 +1,100 @@
+---
+/**
+ * 首頁「冒險手冊」：章節磁磚，點了直接打開冒險手冊的該章節（手冊支援 #章節代號）
+ */
+import { url } from '../../lib/url';
+import SectionHead from '../SectionHead.astro';
+import Icon from '../Icon.astro';
+import type { IconName } from '../../data/icons';
+
+const topics: { id: string; label: string; icon: IconName }[] = [
+  { id: 'srv-newbie', label: '新手入門', icon: 'chest' },
+  { id: 'srv-info', label: '伺服器資訊', icon: 'castle' },
+  { id: 'srv-bbs', label: '布告欄功能', icon: 'board' },
+  { id: 'srv-commands', label: '玩家指令', icon: 'book' },
+  { id: 'srv-autohunt', label: '自動狩獵', icon: 'bot' },
+  { id: 'srv-pvp', label: 'PvP 與活動', icon: 'pvp' },
+  { id: 'quest-class', label: '轉職與職業', icon: 'rank' },
+  { id: 'inst-dungeons', label: '副本', icon: 'portal' },
+  { id: 'inst-epic', label: '史詩首領', icon: 'dragon' },
+  { id: 'enh-enchant', label: '裝備強化', icon: 'upgrade' },
+  { id: 'gear-progression', label: '裝備成長路線', icon: 'sword' },
+  { id: 'gear-craft', label: '矮人工房製作', icon: 'loot' },
+];
+---
+
+<section class="section" id="handbook" aria-labelledby="hh-title">
+  <div class="container">
+    <SectionHead
+      title="冒險手冊"
+      id="hh-title"
+      desc="怪物掉落、商店價格、製作配方、強化機率、副本規則……由程式直接讀取伺服器資料產生，伺服器改了什麼，手冊就跟著更新。"
+    >
+      <a class="btn btn--primary" href={url('/handbook/')}><Icon name="book" />翻開冒險手冊</a>
+    </SectionHead>
+    <ul class="hbk">
+      {
+        topics.map((t) => (
+          <li>
+            <a class="hbk__item" href={url(`/handbook/#${t.id}`)}>
+              <span class="hbk__icon" aria-hidden="true">
+                <Icon name={t.icon} />
+              </span>
+              {t.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .hbk {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .hbk__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 100%;
+    padding: 8px 10px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--link);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    transition: border-color 0.15s, background-color 0.15s;
+  }
+  .hbk__item:hover {
+    color: var(--link-hover);
+    background: var(--brand-50);
+    border-color: var(--brand-200);
+  }
+  .hbk__icon {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    flex: none;
+    color: var(--gold-300);
+    background: var(--band-800);
+    border: 1px solid #000;
+  }
+  .hbk__icon :global(svg) {
+    width: 22px;
+    height: 22px;
+  }
+  @media (max-width: 1040px) {
+    .hbk {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 560px) {
+    .hbk {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

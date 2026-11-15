@@ -1,0 +1,346 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import SectionHead from '../components/SectionHead.astro';
+import Icon from '../components/Icon.astro';
+import { site } from '../data/site';
+import { url } from '../lib/url';
+
+const { client, patch } = site.downloads;
+
+/** 兩個都要下載：先主程式、再登錄器補丁（主程式不含最新的 system） */
+const packs = [
+  { key: 'client', step: 1, ...client, icon: 'chest' as const, extraLabel: '安裝空間' },
+  { key: 'patch', step: 2, ...patch, icon: 'upgrade' as const, extraLabel: '使用方式' },
+];
+
+const install = [
+  { t: '下載遊戲主程式', d: `主要載點是單一壓縮檔（${client.size}），三個載點擇一下載即可；下載不順時改用 Google 雲端硬碟的備用載點，選分割檔的話 3 個都要下載。` },
+  { t: '解壓縮到遊戲資料夾', d: `用 7-Zip 或 WinRAR 解壓縮到 D:\\Games\\嗜血天堂II 這類路徑（${client.unpacked}），不要放在 C:\\Program Files 底下。` },
+  { t: '套用登錄器補丁', d: '下載 system.rar 並解壓縮，把 system 資料夾整個覆蓋到遊戲資料夾。主程式不含最新的 system，這一步不能省略。' },
+  { t: '執行 system\\L2.exe', d: '打開遊戲資料夾裡的 system，執行 L2.exe；跳出系統管理員權限的詢問時按「是」。可以建立桌面捷徑方便之後開啟。' },
+  { t: '登入並建立角色', d: '第一次登入會自動建立帳號（帳號 4～14 碼、密碼 4～16 碼英文或數字）。在奇岩城鎮出生後，按 Alt+B 打開布告欄。' },
+];
+
+const reqs = [
+  ['作業系統', 'Windows 10／11（64 位元）'],
+  ['處理器', 'Intel Core i5 或同等級以上'],
+  ['記憶體', '8 GB 以上（多開建議 16 GB）'],
+  ['顯示卡', '支援 DirectX 9.0c，建議使用獨立顯示卡'],
+  ['硬碟空間', '安裝時需 40 GB 以上（含壓縮檔），建議 SSD'],
+  ['網路', '穩定的寬頻網路'],
+];
+
+const trouble = [
+  { q: 'Google 雲端硬碟顯示下載次數過多', a: '熱門檔案短時間內被大量下載時，Google 會暫時限制下載。請改用另一個載點，或隔天再試。' },
+  { q: '防毒軟體刪除或阻擋 L2.exe', a: '本服的 L2.exe 是修改過的版本，部分防毒軟體會誤判。請把遊戲資料夾加入防毒軟體的排除清單，再重新解壓縮登錄器補丁。' },
+  { q: '跳出「Windows 已保護您的電腦」', a: '按「其他資訊」→「仍要執行」。這是因為檔案沒有商業數位簽章，不代表有毒。' },
+  { q: '執行後沒有反應或閃退', a: '請以系統管理員身分執行 L2.exe，並更新顯示卡驅動程式、安裝 DirectX 9.0c 執行階段。' },
+  { q: '無法連線或登入失敗', a: '先確認已經套用最新的登錄器補丁，再看是不是例行維護時間（每週一、四、六 21:00），並留意 Discord 的臨時維護公告。' },
+  { q: '道具、技能名稱空白或顯示錯誤', a: '登錄器補丁沒有套用完整。請下載最新版，把整個 system 資料夾覆蓋到遊戲資料夾，不要只挑部分檔案。' },
+  { q: '第 6 個視窗進入遊戲後被踢出', a: '同一台電腦最多同時開啟 5 個遊戲視窗，第 6 個視窗會在約 5 秒後登出。' },
+];
+---
+
+<Base title="下載遊戲" description="下載嗜血天堂II 經典服的遊戲主程式與登錄器補丁，附安裝步驟、建議配備與常見問題排除。">
+  <PageHero
+    crumb="下載遊戲"
+    title="下載遊戲"
+    lead="只差一步，就能抵達亞丁"
+    desc={`客戶端版本：${site.client.chronicle}（協定 ${site.client.protocol}）。下載主程式、套用登錄器補丁、執行 L2.exe，第一次登入即自動建立帳號。`}
+  />
+
+  <section class="section" aria-labelledby="dl-title">
+    <div class="container">
+      <SectionHead title="下載項目" id="dl-title" desc="兩個都要下載：先裝遊戲主程式，再套用登錄器補丁。" />
+      <div class="packs">
+        {
+          packs.map((p) => (
+            <article class="pack">
+              <header class="pack__head">
+                <span class="num">{p.step}</span>
+                <div class="pack__name-wrap">
+                  <h3 class="pack__name">{p.name}</h3>
+                  <p class="pack__note">
+                    <span class="sr-only">步驟 {p.step}：</span>
+                    {p.note}
+                  </p>
+                </div>
+                <span class="ibox" aria-hidden="true">
+                  <Icon name={p.icon} />
+                </span>
+              </header>
+              <dl class="pack__meta">
+                <div>
+                  <dt>檔案大小</dt>
+                  <dd class="tnum">{p.size}</dd>
+                </div>
+                {p.version && (
+                  <div>
+                    <dt>目前版本</dt>
+                    <dd class="tnum">{p.version}</dd>
+                  </div>
+                )}
+                <div class:list={[p.version && 'pack__meta-wide']}>
+                  <dt>{p.extraLabel}</dt>
+                  <dd>{p.unpacked}</dd>
+                </div>
+              </dl>
+              <div class="pack__btns">
+                {p.links.length > 0 ? (
+                  p.links.map((l, j) => (
+                    <a href={l.url} class:list={['btn', j === 0 ? 'btn--primary' : 'btn--light btn--sm']} target="_blank" rel="noopener">
+                      <Icon name={j === 0 ? 'down' : 'external'} />
+                      {l.label}
+                      {!l.label.includes(p.name) && <span class="sr-only">（{p.name}）</span>}
+                    </a>
+                  ))
+                ) : (
+                  <a href={site.links.discord} class="btn btn--primary" target="_blank" rel="noopener">
+                    <Icon name="discord" />
+                    前往 Discord 取得
+                  </a>
+                )}
+              </div>
+              {p.links.length > 0 && (
+                <ul class="bullets pack__links">
+                  {p.links.map((l) => (
+                    <li>
+                      {p.links.length > 1 && <b>{l.label}：</b>}
+                      {l.desc}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </article>
+          ))
+        }
+      </div>
+      <div class="dl-notes">
+        <p class="note">
+          <Icon name="shield" />
+          <span>Google 雲端硬碟的備用載點會顯示「檔案過大，Google 無法掃描病毒」，這是因為檔案太大，按<b>「仍要下載」</b>就會開始下載。</span>
+        </p>
+        <p class="note">
+          <Icon name="lock" />
+          <span>
+            請只從本頁或官方 Discord 公告的連結下載，別人轉傳的檔案可能被動過手腳。載點失效或補丁出新版時，會先公告在
+            <a class="text-link" href={site.links.discord} target="_blank" rel="noopener">官方 Discord</a>。
+          </span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--alt" aria-labelledby="dl-install">
+    <div class="container">
+      <SectionHead title="安裝步驟" id="dl-install" desc="五個步驟完成安裝，第一次登入就會自動建立帳號。" />
+      <ol class="inst">
+        {
+          install.map((s, i) => (
+            <li class="inst__step">
+              <span class="num">{i + 1}</span>
+              <div>
+                <h3 class="inst__t">{s.t}</h3>
+                <p class="inst__d">{s.d}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+      <div class="card patch-how">
+        <h3 class="patch-how__t"><Icon name="upgrade" />已經安裝過？更新只要換登錄器補丁</h3>
+        <p>
+          登錄器補丁出新版時會公告在 Discord（目前是 <span class="cmd">{patch.version}</span> 版）。下載 system.rar 並解壓縮，把
+          <span class="cmd">system</span> 資料夾整個覆蓋到遊戲資料夾（例如 <span class="cmd">D:\Games\嗜血天堂II\system</span>），出現「取代檔案」時選擇全部取代即可，不用重新下載主程式。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--white" aria-label="建議配備與疑難排解">
+    <div class="container req-grid">
+      <div>
+        <SectionHead title="建議配備" id="dl-req" />
+        <div class="table-wrap">
+          <table class="table">
+            <caption class="sr-only">建議配備</caption>
+            <tbody>
+              {
+                reqs.map(([k, v]) => (
+                  <tr>
+                    <th scope="row" class="req__k">{k}</th>
+                    <td>{v}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <SectionHead title="疑難排解" id="dl-trouble" />
+        <div class="acc">
+          {
+            trouble.map((t) => (
+              <details class="acc__item">
+                <summary>
+                  <span class="acc__mark" aria-hidden="true" />
+                  {t.q}
+                </summary>
+                <div class="acc__body">
+                  <p>{t.a}</p>
+                </div>
+              </details>
+            ))
+          }
+        </div>
+        <p class="trouble__more muted">
+          其他問題請到 <a class="text-link" href={site.links.discord} target="_blank" rel="noopener">官方 Discord</a> 找管理員，或先看看
+          <a class="text-link" href={url('/guide/#faq')}>新手指南的常見問題</a>。
+        </p>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .packs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .pack {
+    display: flex;
+    flex-direction: column;
+    padding: 20px 22px 22px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-top: 4px solid var(--brand-500);
+  }
+  .pack__head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .pack__name-wrap {
+    flex: 1;
+    min-width: 0;
+  }
+  .pack__name {
+    font-size: 1.35rem;
+    line-height: 1.25;
+  }
+  .pack__note {
+    margin-top: 2px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--brand-600);
+  }
+  .pack__meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 16px;
+    margin-top: 16px;
+    padding: 12px 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+  }
+  .pack__meta dt {
+    font-size: 0.82rem;
+    color: var(--ink-3);
+  }
+  .pack__meta dd {
+    font-weight: 700;
+    color: var(--ink-strong);
+  }
+  .pack__meta .pack__meta-wide {
+    grid-column: 1 / -1;
+  }
+  .pack__btns {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center; /* 備用載點是小按鈕，不要被拉成和主要按鈕一樣高 */
+    gap: 10px;
+    margin-top: 18px;
+  }
+  .pack__links {
+    margin-top: 14px;
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: var(--ink-2);
+  }
+  .pack__links b {
+    color: var(--ink-strong);
+  }
+  .dl-notes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .inst {
+    display: grid;
+    gap: 8px;
+  }
+  .inst__step {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 14px;
+    align-items: start;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+  }
+  .inst__t {
+    font-size: 1.05rem;
+    line-height: 1.6;
+  }
+  .inst__d {
+    margin-top: 2px;
+    font-size: 0.93rem;
+    color: var(--ink-2);
+  }
+  .patch-how {
+    margin-top: 16px;
+    padding: 16px 18px;
+    border-left: 4px solid var(--gold-400);
+    color: var(--ink-2);
+  }
+  .patch-how__t {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 1.1rem;
+  }
+  .patch-how__t :global(svg) {
+    width: 22px;
+    height: 22px;
+    color: var(--brand-500);
+  }
+
+  .req-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: 32px 40px;
+    align-items: start;
+  }
+  .req__k {
+    width: 6.5em;
+    white-space: nowrap;
+  }
+  .trouble__more {
+    margin-top: 14px;
+    font-size: 0.92rem;
+  }
+
+  @media (max-width: 960px) {
+    .packs,
+    .dl-notes,
+    .req-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

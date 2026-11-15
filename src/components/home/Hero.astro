@@ -1,0 +1,250 @@
+---
+/**
+ * 首頁主視覺：整片血月場景當背景（Scene 元件），左邊疊上品牌與重點資訊
+ */
+import { site } from '../../data/site';
+import { url } from '../../lib/url';
+import Icon from '../Icon.astro';
+import Scene from '../Scene.astro';
+
+/** 開服倒數：site.ts 填了開服時間才顯示狀態列。沒有 JavaScript 時顯示開服時間，有的話換成倒數 */
+const launch = site.status.launchDate;
+const launchAt = launch ? new Date(launch) : null;
+const launchText =
+  launchAt && !Number.isNaN(launchAt.getTime())
+    ? `${new Intl.DateTimeFormat('zh-TW', { timeZone: 'Asia/Taipei', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(launchAt)} 開服`
+    : '';
+
+const facts: [string, string][] = [
+  ['客戶端', `${site.client.chronicle}（協定 ${site.client.protocol}）`],
+  ['帳號', '第一次登入自動建立，免註冊'],
+  ['費用', '免費遊玩，贊助完全自願'],
+];
+const chips = site.heroRates.map((r) => `${r.label} ${r.pre === '×' ? `×${r.value}` : `${r.pre}${r.value}`}${r.post ? ` ${r.post}` : ''}`);
+---
+
+<section class="hero" aria-labelledby="hero-title">
+  <Scene variant="home" />
+
+  <div class="container hero__inner">
+    <div class="hero__text">
+      {
+        launchText && (
+          <p class="hero__status" data-launch={launch}>
+            <span class="hero__dot" aria-hidden="true" />
+            <span class="hero__status-label">{site.status.label}</span>
+            <span class="hero__sep" aria-hidden="true" />
+            <span class="tnum" data-launch-text>{launchText}</span>
+          </p>
+        )
+      }
+      <p class="hero__kicker">{site.latin} · {site.editionLatin}</p>
+      <h1 class="hero__title" id="hero-title">
+        {site.name}<span class="hero__ed">{site.edition}</span>
+      </h1>
+      <p class="hero__tagline">{site.tagline}</p>
+      <p class="hero__lede">經驗 5 倍、等級上限 99 的天堂II經典伺服器。隨身布告欄、免費內掛、90 級覺醒技能，以及七位 96 級史詩首領。</p>
+
+      <dl class="hero__facts">
+        {
+          facts.map(([k, v]) => (
+            <div>
+              <dt>{k}</dt>
+              <dd>{v}</dd>
+            </div>
+          ))
+        }
+      </dl>
+
+      <div class="hero__btns">
+        <a href={url('/download/')} class="btn btn--primary"><Icon name="down" />下載遊戲</a>
+        <a href={url('/guide/')} class="btn"><Icon name="book" />新手指南</a>
+        <a href={url('/handbook/')} class="btn"><Icon name="board" />冒險手冊</a>
+        <a href={site.links.discord} class="btn btn--discord" target="_blank" rel="noopener">
+          <Icon name="discord" />加入 Discord<span class="sr-only">（另開新視窗）</span>
+        </a>
+      </div>
+
+      <ul class="hero__chips" aria-label="倍率重點">
+        {chips.map((t) => <li>{t}</li>)}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<script>
+  // 開服倒數（site.ts 有填開服時間時才有這個元素）
+  const status = document.querySelector<HTMLElement>('[data-launch]');
+  if (status?.dataset.launch) {
+    const target = new Date(status.dataset.launch).getTime();
+    const out = status.querySelector<HTMLElement>('[data-launch-text]');
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const tick = () => {
+      if (!out || Number.isNaN(target)) return;
+      const diff = target - Date.now();
+      if (diff <= 0) {
+        out.textContent = '伺服器已正式開放';
+        return;
+      }
+      const s = Math.floor(diff / 1000);
+      const d = Math.floor(s / 86400);
+      out.textContent = `開服倒數 ${d} 天 ${pad(Math.floor((s % 86400) / 3600))}:${pad(Math.floor((s % 3600) / 60))}:${pad(s % 60)}`;
+    };
+    tick();
+    window.setInterval(tick, 1000);
+  }
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    overflow: hidden;
+    color: var(--band-text);
+    background: #0b0508;
+    border-bottom: 3px solid var(--brand-500);
+  }
+  .hero__inner {
+    position: relative;
+    z-index: 1;
+  }
+  .hero__text {
+    max-width: min(610px, 54%);
+    padding-block: 56px 92px;
+  }
+
+  .hero__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding: 4px 12px;
+    font-size: 0.88rem;
+    background: rgb(0 0 0 / 0.3);
+    border: 1px solid rgb(255 236 228 / 0.25);
+  }
+  .hero__dot {
+    width: 8px;
+    height: 8px;
+    background: var(--brand-400);
+  }
+  .hero__status-label {
+    font-weight: 700;
+    color: #fff;
+  }
+  .hero__sep {
+    width: 1px;
+    height: 0.9em;
+    background: rgb(255 236 228 / 0.35);
+  }
+
+  .hero__kicker {
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--gold-300);
+  }
+  .hero__title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 16px;
+    margin-top: 6px;
+    font-size: clamp(2.6rem, 2rem + 2.6vw, 3.5rem);
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    line-height: 1.15;
+    color: #fbf0d8;
+    text-shadow: 0 2px 18px rgb(0 0 0 / 0.55);
+  }
+  .hero__ed {
+    padding: 2px 10px;
+    font-size: 0.4em;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1.5;
+    color: var(--gold-300);
+    border: 1px solid rgb(236 202 106 / 0.55);
+    text-shadow: none;
+  }
+  .hero__tagline {
+    margin-top: 14px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  .hero__lede {
+    margin-top: 6px;
+    max-width: 36em;
+    color: #d9cbc4;
+  }
+
+  .hero__facts {
+    display: grid;
+    gap: 4px;
+    max-width: 500px;
+    margin-top: 22px;
+    padding: 12px 16px;
+    background: rgb(14 7 10 / 0.55);
+    border: 1px solid rgb(255 236 228 / 0.2);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  .hero__facts div {
+    display: grid;
+    grid-template-columns: 4.5em 1fr;
+    gap: 10px;
+  }
+  .hero__facts dt {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--gold-300);
+    line-height: 1.9;
+  }
+  .hero__facts dd {
+    color: #fff;
+  }
+
+  .hero__btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 22px;
+  }
+  .hero__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 18px;
+    margin-top: 18px;
+    font-size: 0.9rem;
+    color: #d9cbc4;
+    text-shadow: 0 1px 6px rgb(0 0 0 / 0.7);
+  }
+  .hero__chips li {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .hero__chips li::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--gold-400);
+  }
+
+  /* 窄螢幕：文字在上，下方留給血月與城堡 */
+  @media (max-width: 1000px) {
+    .hero__text {
+      max-width: none;
+      padding-block: 44px 350px;
+    }
+  }
+  @media (max-width: 480px) {
+    .hero__text {
+      padding-block: 36px 304px;
+    }
+    .hero__btns .btn {
+      flex: 1 1 calc(50% - 5px);
+      padding-inline: 10px;
+    }
+  }
+</style>

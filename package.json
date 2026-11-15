@@ -1,0 +1,24 @@
+{
+  "name": "bloodlust-classic-site",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "description": "嗜血天堂II 經典服 — 官方網站",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "icons": "node scripts/fetch-icons.mjs",
+    "sync-handbook": "node scripts/sync-handbook.mjs",
+    "og": "node scripts/og.mjs"
+  },
+  "dependencies": {
+    "astro": "5.18.2"
+  },
+  "devDependencies": {
+    "sharp": "0.34.5"
+  },
+  "engines": {
+    "node": ">=20.3.0"
+  }
+}

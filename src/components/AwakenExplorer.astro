@@ -1,0 +1,271 @@
+---
+/**
+ * 90 級覺醒技能：依職業體系分頁，列出每個三轉職業的被動與主動技能
+ * 網址加上 #awaken-<體系 id>（例如 #awaken-archer）會直接打開該體系
+ */
+import { archetypes } from '../data/classes';
+import Icon from './Icon.astro';
+---
+
+<div class="ax" data-ax>
+  <div class="ax__tabs" role="tablist" aria-label="職業體系">
+    {
+      archetypes.map((a, i) => (
+        <button
+          class="ax__tab"
+          role="tab"
+          type="button"
+          id={`ax-tab-${a.id}`}
+          aria-controls={`ax-panel-${a.id}`}
+          aria-selected={i === 0 ? 'true' : 'false'}
+          tabindex={i === 0 ? 0 : -1}
+          data-ax-tab={a.id}
+        >
+          <Icon name={a.icon} />
+          <span class="ax__tab-name">{a.name}</span>
+          <span class="ax__tab-count tnum">{a.classes.length}</span>
+        </button>
+      ))
+    }
+  </div>
+
+  {
+    archetypes.map((a, i) => (
+      <section class="ax__panel" role="tabpanel" id={`ax-panel-${a.id}`} aria-labelledby={`ax-tab-${a.id}`} data-ax-panel hidden={i !== 0}>
+        <header class="ax__head">
+          <span class="ibox" aria-hidden="true">
+            <Icon name={a.icon} />
+          </span>
+          <div>
+            <h3 class="ax__name">
+              {a.name}
+              <span class="ax__count">{a.classes.length} 個職業</span>
+            </h3>
+            <p class="ax__blurb">{a.blurb}</p>
+          </div>
+        </header>
+
+        {a.shared && (
+          <div class="ax__shared">
+            {a.shared.map((s) => (
+              <div class="ax__shared-item">
+                <p class="ax__sk-name">
+                  <span class="tag">共用技能</span>
+                  {s.name}
+                  <span class="ax__lv">Lv.{s.lv}</span>
+                </p>
+                <p class="ax__sk-desc">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <ul class="ax__list">
+          {a.classes.map((c) => (
+            <li class="ax__cls">
+              <p class="ax__cls-name">{c.name}</p>
+              <div class="ax__sk">
+                <p class="ax__sk-name">
+                  <span class="tag tag--mute">被動</span>
+                  {c.passive.name}
+                  <span class="ax__lv">Lv.{c.passive.lv}</span>
+                </p>
+                <p class="ax__sk-desc">{c.passive.desc}</p>
+              </div>
+              <div class="ax__sk">
+                <p class="ax__sk-name">
+                  <span class="tag tag--gold">主動</span>
+                  {c.active.name}
+                  <span class="ax__lv">Lv.{c.active.lv}</span>
+                </p>
+                <p class="ax__sk-desc">{c.active.desc}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-ax]').forEach((root) => {
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[data-ax-tab]')];
+    const panels = [...root.querySelectorAll<HTMLElement>('[data-ax-panel]')];
+    const select = (i: number, focus = false) => {
+      tabs.forEach((t, k) => {
+        t.setAttribute('aria-selected', String(k === i));
+        t.tabIndex = k === i ? 0 : -1;
+      });
+      panels.forEach((p, k) => (p.hidden = k !== i));
+      if (focus) tabs[i].focus();
+    };
+    tabs.forEach((t, i) => {
+      t.addEventListener('click', () => select(i));
+      t.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          select((i + 1) % tabs.length, true);
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          select((i - 1 + tabs.length) % tabs.length, true);
+        }
+      });
+    });
+    // 從首頁的職業體系連結進來時（#awaken-archer），直接打開該體系
+    const fromHash = () => {
+      const m = location.hash.match(/^#awaken-([a-z]+)$/);
+      if (!m) return;
+      const i = tabs.findIndex((t) => t.dataset.axTab === m[1]);
+      if (i < 0) return;
+      select(i);
+      (root.parentElement?.closest('section') ?? root).scrollIntoView({ block: 'start' });
+    };
+    fromHash();
+    window.addEventListener('hashchange', fromHash);
+  });
+</script>
+
+<style>
+  .ax__tabs {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .ax__tab {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 6px 10px;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-bottom-width: 3px;
+    transition: background-color 0.15s, border-color 0.15s;
+  }
+  .ax__tab :global(svg) {
+    width: 34px;
+    height: 34px;
+    color: var(--ink-3);
+  }
+  .ax__tab:hover {
+    background: var(--surface-2);
+  }
+  .ax__tab-count {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    font-size: 0.72rem;
+    font-weight: 400;
+    color: var(--ink-3);
+  }
+  .ax__tab[aria-selected='true'] {
+    background: var(--brand-50);
+    border-color: #e3b3ba;
+    border-bottom-color: var(--brand-500);
+    color: var(--brand-700);
+  }
+  .ax__tab[aria-selected='true'] :global(svg) {
+    color: var(--brand-500);
+  }
+
+  .ax__panel {
+    margin-top: 12px;
+    padding: clamp(18px, 2.6vw, 28px);
+    background: var(--surface);
+    border: 1px solid var(--line);
+  }
+  .ax__panel[hidden] {
+    display: none;
+  }
+  :global(.no-js) .ax__panel[hidden] {
+    display: block;
+  }
+  .ax__head {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .ax__name {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+    font-size: 1.3rem;
+  }
+  .ax__count {
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: var(--ink-3);
+  }
+  .ax__blurb {
+    margin-top: 4px;
+    color: var(--ink-2);
+  }
+  .ax__shared {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 10px;
+    margin-top: 18px;
+  }
+  .ax__shared-item {
+    padding: 12px 14px;
+    background: var(--brand-50);
+    border: 1px solid #ecc9ce;
+  }
+  .ax__list {
+    margin-top: 18px;
+    border-top: 1px solid var(--line);
+  }
+  .ax__cls {
+    display: grid;
+    grid-template-columns: 150px minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px 24px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .ax__cls:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+  .ax__cls-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--brand-700);
+  }
+  .ax__sk-name {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    font-weight: 700;
+    color: var(--ink-strong);
+  }
+  .ax__lv {
+    font-size: 0.78rem;
+    font-weight: 400;
+    color: var(--ink-3);
+  }
+  .ax__sk-desc {
+    margin-top: 4px;
+    font-size: 0.9rem;
+    line-height: 1.75;
+    color: var(--ink-2);
+  }
+  @media (max-width: 900px) {
+    .ax__tabs {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .ax__cls {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 480px) {
+    .ax__tabs {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>

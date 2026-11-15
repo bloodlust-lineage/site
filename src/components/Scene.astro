@@ -1,0 +1,489 @@
+---
+/**
+ * 血月場景：分層疊出景深（由後往前）
+ *   天空 → 星空 → 月暈與血月 → 雲帶 → 遠山 → 霧 → 中景山脈 → 岩峰上的城堡 → 飛鳥 → 霧 → 前景森林
+ * 全部是建置時產生的原創 SVG 與 CSS 漸層，不載入圖片。
+ *
+ * 版面用兩個 CSS 變數控制「主景」（月亮＋城堡）的位置與大小：
+ *   --fx：主景中心的水平位置　--ph：主景高度　--pb：主景底部位移
+ */
+import { citadel, range, treeline, starfield, streak } from '../lib/scene';
+
+interface Props {
+  /** home＝首頁主視覺；page＝子頁面標頭（主景放大、只露出尖塔與月亮） */
+  variant?: 'home' | 'page';
+}
+const { variant = 'home' } = Astro.props;
+
+const c = citadel();
+const far = range(11, 2400, 200, { peaks: 15, low: 0.34, high: 0.96 });
+const mid = range(29, 2400, 160, { peaks: 10, low: 0.3, high: 0.88, rough: 1.2 });
+const trees = treeline(5, 2400, 96, { count: 190, minH: 12, maxH: 48, ground: 20 });
+const stars = starfield(3, 190, 1600, 420);
+
+/** 雲帶：[路徑, 不透明度] */
+const clouds: [string, number][] = [
+  [streak(41, 96, 268, 452, 16), 0.94],
+  [streak(42, 364, 116, 320, 11), 0.82],
+  [streak(43, 40, 176, 204, 8), 0.7],
+  [streak(44, 468, 212, 262, 9), 0.78],
+  [streak(45, 250, 330, 300, 9), 0.6],
+];
+
+/** 月亮前的飛鳥：[x, y, 大小] */
+const birds: [number, number, number][] = [
+  [214, 132, 1.25],
+  [236, 118, 0.95],
+  [254, 142, 0.8],
+  [198, 156, 0.7],
+  [282, 104, 0.62],
+  [228, 172, 0.55],
+  [556, 96, 0.7],
+  [582, 116, 0.5],
+];
+
+/** 會閃爍的幾扇窗（挑分散在各處的） */
+const pick = [0, 3, 7, 11, 15, 19].map((i) => c.lights[i % c.lights.length]);
+const pct = (n: number, total: number) => `${((n / total) * 100).toFixed(2)}%`;
+---
+
+<div class:list={['scene', `scene--${variant}`]} aria-hidden="true">
+  <div class="scene__sky"></div>
+
+  <svg class="scene__stars" viewBox="0 0 1600 420" preserveAspectRatio="xMidYMin slice">
+    {stars.filter((s) => !s.tw).map((s) => <circle cx={s.x} cy={s.y} r={s.r} opacity={s.o} />)}
+    {/* 幾顆較亮的星加上十字星芒 */}
+    {stars.filter((s) => s.r >= 1.3).map((s) => <path class="flare" d={`M${s.x - 4.5} ${s.y}h9M${s.x} ${s.y - 4.5}v9`} opacity={s.o * 0.6} />)}
+  </svg>
+  {/* 會閃爍的星星分成三層，整層一起變淡變亮（只動透明度，不必重繪） */}
+  {
+    [1, 2, 3].map((g) => (
+      <svg class={`scene__stars scene__stars--tw tw${g}`} viewBox="0 0 1600 420" preserveAspectRatio="xMidYMin slice">
+        {stars.filter((s) => s.tw === g).map((s) => <circle cx={s.x} cy={s.y} r={s.r} opacity={s.o} />)}
+      </svg>
+    ))
+  }
+
+  <!-- 血月 -->
+  <div class="scene__piece scene__piece--moon">
+    <div class="scene__halo"></div>
+    <svg class="scene__moon" viewBox={`0 0 ${c.w} ${c.h}`}>
+      <defs>
+        <radialGradient id="m-base" cx="0.4" cy="0.35" r="0.76">
+          <stop offset="0" stop-color="#ffe2cd" />
+          <stop offset="0.24" stop-color="#ffb096" />
+          <stop offset="0.54" stop-color="#ee625e" />
+          <stop offset="0.84" stop-color="#b3213a" />
+          <stop offset="1" stop-color="#7a1026" />
+        </radialGradient>
+        <radialGradient id="m-limb">
+          <stop offset="0.7" stop-color="#4a0616" stop-opacity="0" />
+          <stop offset="1" stop-color="#4a0616" stop-opacity="0.62" />
+        </radialGradient>
+        <filter id="m-bloom" x="-0.3" y="-0.3" width="1.6" height="1.6" color-interpolation-filters="sRGB">
+          <feGaussianBlur stdDeviation="16" />
+        </filter>
+        <!-- 月海：低頻雜訊取出大塊暗斑 -->
+        <filter id="m-mare" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.011 0.013" numOctaves="4" seed="11" />
+          <feColorMatrix type="matrix" values="0 0 0 0 0.42  0 0 0 0 0.03  0 0 0 0 0.12  2.6 0 0 0 -1.18" />
+          <feGaussianBlur stdDeviation="1.4" />
+        </filter>
+        <!-- 表面顆粒 -->
+        <filter id="m-grain" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="2" seed="4" />
+          <feColorMatrix type="matrix" values="0 0 0 0 0.3  0 0 0 0 0.02  0 0 0 0 0.08  1.5 0 0 0 -0.62" />
+        </filter>
+        <clipPath id="m-clip"><circle cx="330" cy="215" r="160" /></clipPath>
+      </defs>
+      <circle cx="330" cy="215" r="165" fill="#ff8f7c" opacity="0.55" filter="url(#m-bloom)" />
+      <circle cx="330" cy="215" r="160" fill="url(#m-base)" />
+      <g clip-path="url(#m-clip)">
+        <rect x="170" y="55" width="320" height="320" filter="url(#m-mare)" opacity="0.46" />
+        <rect x="170" y="55" width="320" height="320" filter="url(#m-grain)" opacity="0.2" />
+        <g fill="#8a1a30" opacity="0.2">
+          <circle cx="262" cy="150" r="13" />
+          <circle cx="398" cy="262" r="19" />
+          <circle cx="296" cy="300" r="9" />
+          <circle cx="412" cy="140" r="7" />
+          <circle cx="236" cy="246" r="6" />
+        </g>
+        <g fill="none" stroke="#ffe3d2" stroke-opacity="0.22" stroke-width="1">
+          <path d="M253 158a13 13 0 0 0 20 2" />
+          <path d="M385 275a19 19 0 0 0 28 4" />
+          <path d="M290 306a9 9 0 0 0 14 1" />
+        </g>
+      </g>
+      <circle cx="330" cy="215" r="160" fill="url(#m-limb)" />
+      <circle cx="330" cy="215" r="159.5" fill="none" stroke="#ffd9c9" stroke-opacity="0.3" />
+    </svg>
+
+    <svg class="scene__clouds" viewBox={`0 0 ${c.w} ${c.h}`}>
+      <defs>
+        <!-- 雲身與上緣受光：兩端漸漸淡出，不留尖角 -->
+        <linearGradient id="k-cloud" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#2a0d17" stop-opacity="0" />
+          <stop offset="0.2" stop-color="#2a0d17" />
+          <stop offset="0.8" stop-color="#2a0d17" />
+          <stop offset="1" stop-color="#2a0d17" stop-opacity="0" />
+        </linearGradient>
+        <linearGradient id="k-edge" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#ffb9a6" stop-opacity="0" />
+          <stop offset="0.25" stop-color="#ffb9a6" stop-opacity="0.55" />
+          <stop offset="0.75" stop-color="#ffb9a6" stop-opacity="0.55" />
+          <stop offset="1" stop-color="#ffb9a6" stop-opacity="0" />
+        </linearGradient>
+      </defs>
+      {
+        clouds.map(([d, o]) => (
+          <g opacity={o}>
+            <path d={d} fill="url(#k-edge)" transform="translate(0 -1.5)" />
+            <path d={d} fill="url(#k-cloud)" />
+          </g>
+        ))
+      }
+    </svg>
+  </div>
+
+  <!-- 遠山 -->
+  <svg class="scene__range scene__range--far" viewBox="0 0 2400 200" preserveAspectRatio="xMidYMax slice">
+    <defs>
+      <linearGradient id="s-far" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#4a1522" />
+        <stop offset="1" stop-color="#6a1d2d" />
+      </linearGradient>
+      <linearGradient id="s-lit" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffa08f" stop-opacity="0.26" />
+        <stop offset="0.75" stop-color="#ffa08f" stop-opacity="0" />
+      </linearGradient>
+    </defs>
+    <path d={far.body} fill="url(#s-far)" />
+    <path d={far.lit} fill="url(#s-lit)" />
+  </svg>
+  <div class="scene__haze scene__haze--far"></div>
+
+  <!-- 中景山脈 -->
+  <svg class="scene__range scene__range--mid" viewBox="0 0 2400 160" preserveAspectRatio="xMidYMax slice">
+    <defs>
+      <linearGradient id="s-mid" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#2a0c15" />
+        <stop offset="1" stop-color="#3e111d" />
+      </linearGradient>
+      <linearGradient id="s-lit2" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ff8f84" stop-opacity="0.2" />
+        <stop offset="0.8" stop-color="#ff8f84" stop-opacity="0" />
+      </linearGradient>
+    </defs>
+    <path d={mid.body} fill="url(#s-mid)" />
+    <path d={mid.lit} fill="url(#s-lit2)" />
+  </svg>
+
+  <!-- 岩峰上的城堡 -->
+  <div class="scene__piece scene__piece--citadel">
+    <svg class="scene__citadel" viewBox={`0 0 ${c.w} ${c.h}`}>
+      <defs set:html={c.defs} />
+      <Fragment set:html={c.body} />
+    </svg>
+    <div class="scene__lights">
+      {pick.map((l, i) => <i style={`left:${pct(l.x, c.w)};top:${pct(l.y, c.h)};--i:${i}`} />)}
+    </div>
+    <svg class="scene__birds" viewBox={`0 0 ${c.w} ${c.h}`}>
+      {birds.map(([x, y, s]) => <path d={`M${x} ${y}q${5 * s} ${-6 * s} ${9 * s} ${-0.5 * s}q${4 * s} ${-5.5 * s} ${9 * s} ${0.5 * s}`} stroke-width={1.5 * s} />)}
+    </svg>
+  </div>
+
+  <div class="scene__mist"></div>
+  <div class="scene__haze scene__haze--near"></div>
+
+  <!-- 前景森林 -->
+  <svg class="scene__trees" viewBox="0 0 2400 96" preserveAspectRatio="xMidYMax slice">
+    <path d={trees} />
+  </svg>
+
+  <div class="scene__scrim"></div>
+</div>
+
+<style>
+  .scene {
+    --fx: calc(50% + min(336px, 50% - 348px));
+    --ph: min(100%, 640px);
+    --pb: 0px;
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  /* 支援容器查詢單位的瀏覽器：主景最寬佔畫面六成，並貼齊右側，視窗變窄時跟著縮小 */
+  @supports (width: 1cqw) {
+    .scene {
+      container-type: size;
+      --ph: min(100cqh, 640px, 50cqw);
+      --fx: min(50cqw + 336px, 100cqw - var(--ph) * 0.6 + 14px);
+    }
+  }
+  .scene svg {
+    position: absolute;
+    display: block;
+    max-width: none;
+  }
+  .scene__sky {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(90% 70% at var(--fx) 104%, rgb(176 44 60 / 0.5), transparent 62%),
+      linear-gradient(180deg, #0b0508 0%, #13090e 24%, #240d16 50%, #47131f 78%, #6a1b29 100%);
+  }
+  .scene__stars {
+    inset: 0 0 auto;
+    width: 100%;
+    height: min(100%, 420px);
+    fill: #ffe9de;
+  }
+  .flare {
+    fill: none;
+    stroke: #ffe9de;
+    stroke-width: 0.6;
+    stroke-linecap: round;
+  }
+  .scene__stars--tw {
+    animation: scene-twinkle 4.6s ease-in-out infinite;
+  }
+  .scene__stars--tw.tw2 {
+    animation-duration: 6.1s;
+    animation-delay: -2.2s;
+  }
+  .scene__stars--tw.tw3 {
+    animation-duration: 7.7s;
+    animation-delay: -4.4s;
+  }
+  @keyframes scene-twinkle {
+    50% {
+      opacity: 0.15;
+    }
+  }
+
+  /* 主景：月亮與城堡共用同一個定位框，中間可以夾進山脈圖層 */
+  .scene__piece {
+    position: absolute;
+    left: var(--fx);
+    bottom: var(--pb);
+    height: var(--ph);
+    aspect-ratio: 720 / 600;
+    transform: translateX(-50%);
+  }
+  .scene__piece > svg {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .scene__halo {
+    position: absolute;
+    left: 45.83%;
+    top: 35.83%;
+    width: 142%;
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(
+      circle,
+      rgb(255 150 132 / 0.4) 0%,
+      rgb(238 74 84 / 0.3) 20%,
+      rgb(196 40 60 / 0.16) 36%,
+      rgb(150 24 44 / 0.07) 52%,
+      transparent 68%
+    );
+    animation: scene-breathe 9s ease-in-out infinite;
+  }
+  @keyframes scene-breathe {
+    50% {
+      opacity: 0.82;
+    }
+  }
+  .scene__clouds {
+    filter: blur(0.5px);
+    animation: scene-drift 70s ease-in-out infinite alternate;
+  }
+  @keyframes scene-drift {
+    from {
+      transform: translate3d(-3%, 0, 0);
+    }
+    to {
+      transform: translate3d(3%, 0, 0);
+    }
+  }
+
+  .scene__range {
+    left: 0;
+    bottom: 0;
+    width: 100%;
+  }
+  .scene__range--far {
+    height: min(200px, 36%);
+  }
+  .scene__range--mid {
+    height: min(150px, 27%);
+  }
+  .scene__haze {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+  .scene__haze--far {
+    height: min(170px, 32%);
+    background: linear-gradient(180deg, transparent, rgb(170 48 66 / 0.26) 50%, rgb(120 30 46 / 0.12));
+  }
+  .scene__haze--near {
+    height: min(130px, 24%);
+    background: linear-gradient(180deg, transparent, rgb(96 22 36 / 0.5) 62%, rgb(30 8 14 / 0.75));
+  }
+
+  /* 岩峰腳下緩慢飄移的霧（圖樣每 50% 重複一次，往左移 50% 剛好接上） */
+  .scene__mist {
+    position: absolute;
+    left: 0;
+    bottom: 3%;
+    width: 200%;
+    height: 27%;
+    opacity: 0.55;
+    background:
+      radial-gradient(18% 50% at 12% 60%, rgb(214 96 110 / 0.34), transparent 70%),
+      radial-gradient(22% 44% at 37% 48%, rgb(214 96 110 / 0.26), transparent 70%),
+      radial-gradient(18% 50% at 62% 60%, rgb(214 96 110 / 0.34), transparent 70%),
+      radial-gradient(22% 44% at 87% 48%, rgb(214 96 110 / 0.26), transparent 70%);
+    animation: scene-mist 90s linear infinite;
+  }
+  @keyframes scene-mist {
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+
+  /* 窗光閃爍：獨立一層小光暈，只動透明度 */
+  .scene__lights {
+    position: absolute;
+    inset: 0;
+  }
+  .scene__lights i {
+    position: absolute;
+    width: 3.6%;
+    aspect-ratio: 1;
+    margin: -1.8% 0 0 -1.8%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgb(255 204 130 / 0.95), rgb(255 138 56 / 0.4) 42%, transparent 70%);
+    opacity: 0.3;
+    animation: scene-flicker 5s ease-in-out infinite;
+    animation-duration: calc(4s + var(--i) * 0.9s);
+    animation-delay: calc(var(--i) * -1.3s);
+  }
+  @keyframes scene-flicker {
+    0%,
+    100% {
+      opacity: 0.22;
+    }
+    38% {
+      opacity: 0.85;
+    }
+    46% {
+      opacity: 0.45;
+    }
+    60% {
+      opacity: 1;
+    }
+    82% {
+      opacity: 0.35;
+    }
+  }
+  .scene__birds {
+    fill: none;
+    stroke: #14080c;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    animation: scene-glide 16s ease-in-out infinite alternate;
+  }
+  @keyframes scene-glide {
+    from {
+      transform: translate3d(-1.2%, 0.8%, 0);
+    }
+    to {
+      transform: translate3d(1.4%, -0.9%, 0);
+    }
+  }
+
+  .scene__trees {
+    left: 0;
+    bottom: -1px;
+    width: 100%;
+    height: min(96px, 18%);
+    fill: #090406;
+  }
+  /* 文字那一側壓暗，確保標題與說明清楚 */
+  .scene__scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgb(11 5 8 / 0.78) 0%, rgb(11 5 8 / 0.5) 34%, rgb(11 5 8 / 0) 58%);
+  }
+
+  /* ---------- 子頁面標頭：主景放大，露出尖塔與月亮 ---------- */
+  .scene.scene--page {
+    --fx: calc(50% + min(350px, 50% - 190px));
+    --ph: 205%;
+    --pb: -82%;
+  }
+  .scene--page .scene__range--far {
+    height: 44%;
+  }
+  .scene--page .scene__range--mid {
+    height: 30%;
+  }
+  .scene--page .scene__trees {
+    height: 24%;
+  }
+  .scene--page .scene__haze--near {
+    height: 40%;
+  }
+
+  /* ---------- 窄螢幕：文字在上，主景置中在下 ---------- */
+  @media (max-width: 1000px) {
+    .scene.scene--home {
+      --fx: 50%;
+      --ph: 330px;
+    }
+    .scene--home .scene__scrim {
+      background: linear-gradient(180deg, rgb(11 5 8 / 0.5) 0%, rgb(11 5 8 / 0.3) 40%, rgb(11 5 8 / 0) 62%);
+    }
+    .scene--home .scene__range--far {
+      height: 150px;
+    }
+    .scene--home .scene__range--mid {
+      height: 110px;
+    }
+    .scene--home .scene__trees {
+      height: 70px;
+    }
+    .scene.scene--page {
+      --fx: 88%;
+      --ph: 170%;
+      --pb: -66%;
+    }
+    .scene--page .scene__scrim {
+      background: linear-gradient(90deg, rgb(11 5 8 / 0.84) 0%, rgb(11 5 8 / 0.6) 55%, rgb(11 5 8 / 0.2) 100%);
+    }
+  }
+  /* 手機的子頁面：月亮只從右邊探出半個，文字後面壓暗一點 */
+  @media (max-width: 640px) {
+    .scene.scene--page {
+      --fx: 108%;
+      --ph: 128%;
+      --pb: -40%;
+    }
+    .scene--page .scene__scrim {
+      background: linear-gradient(90deg, rgb(11 5 8 / 0.86) 0%, rgb(11 5 8 / 0.66) 58%, rgb(11 5 8 / 0.3) 100%);
+    }
+  }
+  @media (max-width: 480px) {
+    .scene.scene--home {
+      --ph: 290px;
+    }
+  }
+</style>

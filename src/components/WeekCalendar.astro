@@ -1,0 +1,275 @@
+---
+/**
+ * 每週戰場行事曆：7 欄週曆＋「下一場」倒數（依台灣時間即時計算）
+ */
+import { schedule, weekdays, kindLabel, type EventKind } from '../data/schedule';
+
+const byDay = weekdays.map((_, i) =>
+  schedule.filter((e) => e.days.includes(i + 1)).sort((a, b) => a.start.localeCompare(b.start)),
+);
+const kinds = Object.keys(kindLabel) as EventKind[];
+---
+
+<div class="wk" data-week>
+  <div class="wk__next" aria-live="polite">
+    <div class="wk__next-head">
+      <span class="tag tag--next" data-next-state>下一場</span>
+      <span class="wk__clock">伺服器時間 <b class="tnum" data-server-clock>--:--:--</b></span>
+    </div>
+    <p class="wk__title" data-next-title>每週戰場</p>
+    <p class="wk__when" data-next-when>週一～週六每晚都有活動，週日攻城</p>
+    <p class="wk__count tnum" data-next-count>--:--:--</p>
+    <p class="wk__desc" data-next-desc>依台灣時間（UTC+8）即時計算。</p>
+  </div>
+
+  <div class="wk__grid">
+    {
+      byDay.map((events, i) => (
+        <section class="wk__day" data-day={i + 1} aria-label={weekdays[i]}>
+          <header class="wk__dh">{weekdays[i]}</header>
+          <ul class="wk__list">
+            {events.map((e) => (
+              <li class={`wk__ev wk__ev--${e.kind}`} data-ev={e.id} title={e.title}>
+                <span class="wk__t tnum">
+                  {e.start}
+                  {e.end && <span class="wk__end">–{e.end}</span>}
+                </span>
+                <span class="wk__n">{e.short}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+  </div>
+
+  <ul class="wk__legend" aria-label="圖例">
+    {
+      kinds.map((k) => (
+        <li class={`wk__lg wk__ev--${k}`}>
+          <i aria-hidden="true" />
+          {kindLabel[k]}
+        </li>
+      ))
+    }
+    <li class="wk__lg wk__lg--note">每天 06:30 每日重置</li>
+  </ul>
+</div>
+
+<script>
+  import '../scripts/schedule';
+</script>
+
+<style>
+  .wk {
+    display: grid;
+    grid-template-columns: minmax(240px, 0.36fr) 1fr;
+    grid-template-areas: 'next grid' 'legend legend';
+    gap: 16px 20px;
+  }
+  .wk__next {
+    grid-area: next;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-top: 4px solid var(--brand-500);
+  }
+  .wk__next-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .wk__clock {
+    font-size: 0.85rem;
+    color: var(--ink-3);
+  }
+  .wk__clock b {
+    color: var(--ink-strong);
+  }
+  .wk__title {
+    margin-top: 14px;
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--ink-strong);
+  }
+  .wk__when {
+    margin-top: 2px;
+    font-weight: 700;
+    color: var(--brand-600);
+  }
+  .wk__count {
+    margin-top: 12px;
+    font-size: 2.1rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--ink-strong);
+  }
+  .wk__desc {
+    margin-top: auto;
+    padding-top: 14px;
+    font-size: 0.88rem;
+    color: var(--ink-2);
+  }
+
+  .wk__grid {
+    grid-area: grid;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    background: var(--surface);
+    border: 1px solid var(--line);
+  }
+  .wk__day {
+    position: relative;
+    min-height: 240px;
+    padding-bottom: 10px;
+  }
+  .wk__day + .wk__day {
+    border-left: 1px solid var(--line);
+  }
+  .wk__dh {
+    padding: 8px 6px;
+    font-weight: 700;
+    text-align: center;
+    color: var(--ink-strong);
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--line);
+  }
+  .wk__day.is-today {
+    background: #fffaf0;
+  }
+  .wk__day.is-today .wk__dh {
+    color: #fff;
+    background: var(--brand-500);
+    border-bottom-color: var(--brand-700);
+  }
+  .wk__day.is-today .wk__dh::after {
+    content: '・今天';
+    font-weight: 400;
+    font-size: 0.85em;
+  }
+  .wk__list {
+    display: grid;
+    gap: 6px;
+    padding: 8px 6px 0;
+  }
+  .wk__ev {
+    --k: var(--ink-3);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 5px 6px 5px 9px;
+    font-size: 0.82rem;
+    line-height: 1.35;
+    background: color-mix(in srgb, var(--k) 7%, #fff);
+    border: 1px solid color-mix(in srgb, var(--k) 22%, #fff);
+    border-left: 3px solid var(--k);
+  }
+  .wk__t {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--k);
+  }
+  .wk__end {
+    font-weight: 400;
+  }
+  .wk__n {
+    color: var(--ink);
+  }
+  .wk__ev.is-next {
+    background: var(--gold-100);
+    border-color: var(--gold-500);
+    border-left-color: var(--k);
+    box-shadow: 0 0 0 1px var(--gold-500);
+  }
+  .wk__ev.is-past {
+    opacity: 0.45;
+  }
+  .wk__ev--pvp {
+    --k: #c42b40;
+  }
+  .wk__ev--olympiad {
+    --k: #9a7612;
+  }
+  .wk__ev--siege {
+    --k: #c95520;
+  }
+  .wk__ev--boss {
+    --k: #7a4cc2;
+  }
+  .wk__ev--maint {
+    --k: #6b7280;
+  }
+  .wk__ev--reset {
+    --k: #2e6db8;
+  }
+
+  .wk__legend {
+    grid-area: legend;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    font-size: 0.85rem;
+    color: var(--ink-2);
+  }
+  .wk__lg {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .wk__lg i {
+    width: 10px;
+    height: 10px;
+    background: var(--k);
+  }
+  .wk__lg--note {
+    margin-left: auto;
+    color: var(--ink-3);
+  }
+
+  @media (max-width: 1080px) {
+    .wk {
+      grid-template-columns: 1fr;
+      grid-template-areas: 'next' 'grid' 'legend';
+    }
+  }
+  @media (max-width: 760px) {
+    .wk__grid {
+      grid-template-columns: 1fr;
+    }
+    .wk__day {
+      display: grid;
+      grid-template-columns: 76px 1fr;
+      min-height: 0;
+      padding: 0;
+    }
+    .wk__day + .wk__day {
+      border-left: 0;
+      border-top: 1px solid var(--line);
+    }
+    .wk__dh {
+      display: grid;
+      place-items: center;
+      border-bottom: 0;
+      border-right: 1px solid var(--line);
+    }
+    .wk__day.is-today .wk__dh {
+      border-right-color: var(--brand-700);
+    }
+    .wk__day.is-today .wk__dh::after {
+      content: '今天';
+    }
+    .wk__list {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 8px;
+    }
+    .wk__lg--note {
+      margin-left: 0;
+    }
+  }
+</style>

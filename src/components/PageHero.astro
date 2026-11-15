@@ -1,0 +1,85 @@
+---
+/**
+ * 子頁面標頭：血月場景當背景（主景放大，只露出尖塔與月亮），
+ * 上面是麵包屑、頁名、一句副標與說明；預設插槽可放按鈕
+ */
+import { url } from '../lib/url';
+import Scene from './Scene.astro';
+
+interface Props {
+  crumb: string;
+  title: string;
+  lead?: string;
+  desc?: string;
+}
+const { crumb, title, lead, desc } = Astro.props;
+---
+
+<section class="ph" aria-labelledby="ph-title">
+  <Scene variant="page" />
+  <div class="container ph__inner">
+    <nav class="ph__crumb" aria-label="麵包屑">
+      <a href={url('/')}>首頁</a>
+      <span aria-hidden="true">›</span>
+      <span aria-current="page">{crumb}</span>
+    </nav>
+    <h1 class="ph__title" id="ph-title">{title}</h1>
+    {lead && <p class="ph__lead">{lead}</p>}
+    {desc && <p class="ph__desc">{desc}</p>}
+    {Astro.slots.has('default') && <div class="ph__actions"><slot /></div>}
+  </div>
+</section>
+
+<style>
+  .ph {
+    position: relative;
+    overflow: hidden;
+    color: var(--band-text);
+    background: #0b0508;
+    border-bottom: 3px solid var(--brand-500);
+  }
+  .ph__inner {
+    position: relative;
+    z-index: 1;
+    padding-block: 34px 52px;
+  }
+  .ph__crumb {
+    display: flex;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--band-muted);
+  }
+  .ph__crumb a:hover {
+    color: var(--gold-300);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .ph__crumb [aria-current] {
+    color: var(--band-text);
+  }
+  .ph__title {
+    margin-top: 14px;
+    font-size: clamp(2rem, 1.6rem + 1.6vw, 2.75rem);
+    letter-spacing: 0.04em;
+    color: #fbf0d8;
+    text-shadow: 0 2px 16px rgb(0 0 0 / 0.55);
+  }
+  .ph__lead {
+    margin-top: 6px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  .ph__desc {
+    margin-top: 10px;
+    max-width: 44em;
+    color: #d9cbc4;
+    text-shadow: 0 1px 6px rgb(0 0 0 / 0.6);
+  }
+  .ph__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 22px;
+  }
+</style>

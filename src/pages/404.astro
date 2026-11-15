@@ -1,0 +1,56 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import Emblem from '../components/Emblem.astro';
+import { url } from '../lib/url';
+---
+
+<Base title="迷失在霧中" noindex>
+  <section class="section nf">
+    <div class="container nf__inner">
+      <Emblem size={64} />
+      <p class="nf__code tnum">404</p>
+      <h1 class="nf__title">你迷失在亞丁的霧中</h1>
+      <p class="nf__desc">這條路通往的地方已經不存在了。也許是傳送卷軸出了差錯，也許它從來就不在地圖上。</p>
+      <div class="nf__btns">
+        <a href={url('/')} class="btn btn--primary">回到首頁</a>
+        <a href={url('/guide/')} class="btn btn--light">新手指南<Icon name="arrow" /></a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .nf {
+    padding-block: clamp(64px, 10vw, 120px);
+  }
+  .nf__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .nf__code {
+    margin-top: 18px;
+    font-size: 4.5rem;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--brand-500);
+  }
+  .nf__title {
+    margin-top: 10px;
+    font-size: clamp(1.6rem, 1.3rem + 1.4vw, 2.2rem);
+  }
+  .nf__desc {
+    margin-top: 10px;
+    max-width: 30em;
+    color: var(--ink-2);
+  }
+  .nf__btns {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 26px;
+  }
+</style>

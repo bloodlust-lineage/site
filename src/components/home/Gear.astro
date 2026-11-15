@@ -1,0 +1,170 @@
+---
+/**
+ * 首頁「裝備之路」：無等級 → D → C → B → A → S → 王朝 → 封印中
+ * 依據：冒險手冊「裝備等級與成長路線」。尚未開放的階段不寫名稱，只以封印呈現（決策 D16）。
+ */
+import SectionHead from '../SectionHead.astro';
+import Icon from '../Icon.astro';
+import { url } from '../../lib/url';
+
+const tiers = [
+  { g: '無', name: '無等級', lv: '1～19', how: '新手禮物 +16 武器，布告欄商店直購', c: '#7d8592' },
+  { g: 'D', name: 'D 級', lv: '20～39', how: '布告欄「一般裝備」用金幣購買', c: '#3a70c8' },
+  { g: 'C', name: 'C 級', lv: '40～51', how: '布告欄「一般裝備」用金幣購買', c: '#2a8f60' },
+  { g: 'B', name: 'B 級', lv: '52～60', how: '克魯瑪高塔掉落、C 級升級、矮人製作', c: '#b77f12' },
+  { g: 'A', name: 'A 級', lv: '61～75', how: '隨機製作、B 級升級、70～85 級狩獵首領', c: '#c64d36' },
+  { g: 'S', name: 'S 級', lv: '76～', how: 'A 級特殊升級、86～93 級首領、帝國之墓與傲慢之塔', c: '#7f4fc9' },
+  { g: '朝', name: '王朝', lv: '81～', how: '匹黎茲「特殊升級」：S 級成品＋首領材料', c: '#9a7420' },
+];
+---
+
+<section class="section section--alt" id="gear" aria-labelledby="hg-title">
+  <div class="container">
+    <SectionHead title="裝備之路" id="hg-title" desc="從無等級一路走到王朝。本服關閉越級裝備懲罰，等級還沒到也能先穿上高一級的裝備。">
+      <a class="link" href={url('/handbook/#gear-progression')}>裝備成長路線<Icon name="arrow" /></a>
+    </SectionHead>
+
+    <ol class="gt-track">
+      {
+        tiers.map((t) => (
+          <li class="gt" style={`--c:${t.c}`}>
+            <span class:list={['gt__badge', !/[A-Z]/.test(t.g) && 'gt__badge--cjk']} aria-hidden="true">{t.g}</span>
+            <p class="gt__name">{t.name}</p>
+            <p class="gt__lv tnum">Lv. {t.lv}</p>
+            <p class="gt__how">{t.how}</p>
+          </li>
+        ))
+      }
+      <li class="gt gt--sealed">
+        <span class="gt__badge" aria-hidden="true"><Icon name="lock" /></span>
+        <p class="gt__name">封印中</p>
+        <p class="gt__lv">Lv. ???</p>
+        <p class="gt__how">更古老的力量仍在沉睡，將隨伺服器進度逐一解封。</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<style>
+  .gt-track {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .gt-track::before {
+    content: '';
+    position: absolute;
+    left: 6%;
+    right: 6%;
+    top: 34px;
+    height: 2px;
+    background: repeating-linear-gradient(90deg, var(--line-2) 0 6px, transparent 6px 10px);
+  }
+  .gt {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 14px 8px 14px;
+    text-align: center;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--c);
+  }
+  .gt__badge {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    font-size: 1.2rem;
+    font-weight: 900;
+    line-height: 1;
+    color: #fff;
+    background: var(--c);
+    border: 1px solid rgb(0 0 0 / 0.35);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.25), inset 0 -2px 0 rgb(0 0 0 / 0.15);
+  }
+  .gt__badge--cjk {
+    font-size: 1rem;
+  }
+  .gt__name {
+    margin-top: 10px;
+    font-weight: 700;
+    color: var(--ink-strong);
+  }
+  .gt__lv {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--c);
+  }
+  .gt__how {
+    margin-top: 6px;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: var(--ink-2);
+  }
+  .gt--sealed {
+    --c: var(--brand-500);
+    background: var(--brand-50);
+    border-style: dashed;
+    border-color: var(--brand-200);
+    border-top: 3px solid var(--brand-500);
+  }
+  .gt--sealed .gt__badge {
+    color: var(--brand-500);
+    background: #fff;
+    border: 1px dashed var(--brand-500);
+    box-shadow: none;
+  }
+  .gt--sealed .gt__badge :global(svg) {
+    width: 20px;
+    height: 20px;
+  }
+  .gt--sealed .gt__name {
+    color: var(--brand-700);
+  }
+  @media (max-width: 1040px) {
+    .gt-track {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .gt-track::before {
+      display: none;
+    }
+  }
+  @media (max-width: 560px) {
+    .gt-track {
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+    .gt {
+      display: grid;
+      grid-template-columns: 38px 1fr auto;
+      grid-template-areas: 'badge name lv' 'badge how how';
+      column-gap: 12px;
+      align-items: center;
+      text-align: left;
+      padding: 10px 12px;
+      border-top-width: 1px;
+      border-left: 4px solid var(--c);
+    }
+    .gt--sealed {
+      border-top-width: 1px;
+      border-left: 4px solid var(--brand-500);
+    }
+    .gt__badge {
+      grid-area: badge;
+    }
+    .gt__name {
+      grid-area: name;
+      margin-top: 0;
+    }
+    .gt__lv {
+      grid-area: lv;
+    }
+    .gt__how {
+      grid-area: how;
+      margin-top: 0;
+    }
+  }
+</style>

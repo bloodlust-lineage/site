@@ -1,0 +1,235 @@
+---
+/**
+ * 首頁「怎麼開始」＋「本週戰場」（依台灣時間即時標出下一場）
+ */
+import { journey } from '../../data/guide';
+import { schedule, weekdays } from '../../data/schedule';
+import { url } from '../../lib/url';
+import SectionHead from '../SectionHead.astro';
+import Icon from '../Icon.astro';
+
+/** 首頁只列玩家會參加的活動（不含維護、重置） */
+const show = ['pvp-zone', 'siege', 'last-hero', 'zaken', 'tvt', 'olympiad', 'antharas'];
+const dayText = (days: number[]) =>
+  days.length === 7 ? '每天' : days.length === 6 && !days.includes(7) ? '週一～六' : days.map((d) => weekdays[d - 1]).join('、');
+const rows = schedule
+  .filter((e) => show.includes(e.id))
+  .sort((a, b) => a.start.localeCompare(b.start) || a.days[0] - b.days[0])
+  .map((e) => ({ id: e.id, title: e.title, when: `${dayText(e.days)} ${e.start}${e.end ? `～${e.end}` : ''}` }));
+---
+
+<section class="section section--white" aria-label="怎麼開始與本週戰場">
+  <div class="container sw">
+    <div class="sw__col">
+      <SectionHead title="怎麼開始" id="hs-title" desc="不用註冊、不用跑任務，四個步驟就能進入遊戲。" />
+      <ol class="sw__steps">
+        {
+          journey.map((s, i) => (
+            <li class="sw__step">
+              <span class="num">{i + 1}</span>
+              <span class="sw__ico" aria-hidden="true">
+                <Icon name={s.icon} />
+              </span>
+              <div>
+                <p class="sw__t">{s.title}</p>
+                <p class="sw__d">{s.desc}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+      <div class="sw__btns">
+        <a class="btn btn--primary btn--sm" href={url('/download/')}><Icon name="down" />下載遊戲</a>
+        <a class="btn btn--light btn--sm" href={url('/guide/')}>完整新手指南</a>
+      </div>
+    </div>
+
+    <div class="sw__col" data-week-mini>
+      <SectionHead title="本週戰場" id="hw-title" desc="週一到週六每晚都有活動，週日奇岩攻城。時間皆為伺服器時間（台灣時間）。" />
+      <div class="sw__next" aria-live="polite">
+        <span class="tag tag--next" data-mini-state>下一場</span>
+        <p class="sw__next-t"><b data-mini-title>每週戰場</b><span data-mini-when></span></p>
+        <p class="sw__count tnum" data-mini-count></p>
+      </div>
+      <ol class="sw__tl">
+        {
+          rows.map((r) => (
+            <li class="sw__ev" data-mini-ev={r.id}>
+              <span class="sw__mark" aria-hidden="true" />
+              <span class="sw__when tnum">{r.when}</span>
+              <span class="sw__title">{r.title}</span>
+              <span class="tag tag--mute" data-mini-chip></span>
+            </li>
+          ))
+        }
+      </ol>
+      <a class="link sw__more" href={url('/events/')}>完整行事曆與活動規則<Icon name="arrow" /></a>
+    </div>
+  </div>
+</section>
+
+<script>
+  import '../../scripts/schedule';
+</script>
+
+<style>
+  .sw {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 32px 48px;
+  }
+  .sw__steps {
+    display: grid;
+    gap: 8px;
+  }
+  .sw__step {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    gap: 12px;
+    align-items: start;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+  }
+  .sw__ico {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    color: var(--brand-500);
+  }
+  .sw__ico :global(svg) {
+    width: 26px;
+    height: 26px;
+  }
+  .sw__t {
+    font-weight: 700;
+    color: var(--ink-strong);
+    line-height: 1.75;
+  }
+  .sw__d {
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: var(--ink-2);
+  }
+  .sw__btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .sw__next {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 6px 12px;
+    padding: 12px 14px;
+    background: var(--gold-100);
+    border: 1px solid #e2c977;
+  }
+  .sw__next-t {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 10px;
+    min-width: 0;
+  }
+  .sw__next-t b {
+    color: var(--ink-strong);
+  }
+  .sw__next-t span {
+    font-size: 0.88rem;
+    color: var(--ink-2);
+  }
+  .sw__count {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ink-strong);
+  }
+  .sw__count:empty {
+    display: none;
+  }
+
+  .sw__tl {
+    position: relative;
+    display: grid;
+    gap: 4px;
+    margin-top: 14px;
+  }
+  .sw__tl::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 14px;
+    bottom: 14px;
+    border-left: 2px dashed var(--line-2);
+  }
+  .sw__ev {
+    position: relative;
+    display: grid;
+    grid-template-columns: 16px 10.5em 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 0;
+  }
+  .sw__mark {
+    width: 16px;
+    height: 16px;
+    background: #fff;
+    border: 2px solid var(--line-2);
+  }
+  .sw__ev.is-top .sw__mark {
+    background: var(--gold-400);
+    border-color: #8a6a12;
+  }
+  .sw__when {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--ink-strong);
+  }
+  .sw__title {
+    color: var(--ink-2);
+  }
+  .sw__ev.is-top .sw__title {
+    font-weight: 700;
+    color: var(--ink-strong);
+  }
+  .tag:empty {
+    display: none;
+  }
+  .sw__more {
+    margin-top: 12px;
+  }
+
+  @media (max-width: 960px) {
+    .sw {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 480px) {
+    .sw__ev {
+      grid-template-columns: 16px 1fr auto;
+      grid-template-areas: 'mark when chip' 'mark title chip';
+      row-gap: 0;
+    }
+    .sw__mark {
+      grid-area: mark;
+    }
+    .sw__when {
+      grid-area: when;
+    }
+    .sw__title {
+      grid-area: title;
+    }
+    .sw__ev :global([data-mini-chip]) {
+      grid-area: chip;
+    }
+    .sw__next {
+      grid-template-columns: auto 1fr;
+    }
+    .sw__count {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

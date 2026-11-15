@@ -1,0 +1,73 @@
+---
+/**
+ * 區塊標題：左側紅色色條＋標題，下面一行灰色說明；右側可放按鈕或連結（預設插槽）
+ */
+interface Props {
+  title: string;
+  desc?: string;
+  id?: string;
+  align?: 'left' | 'center';
+  as?: 'h1' | 'h2' | 'h3';
+}
+const { title, desc, id, align = 'left', as: Tag = 'h2' } = Astro.props;
+const hasAside = Astro.slots.has('default');
+---
+
+<header class:list={['sh', align === 'center' && 'sh--center']}>
+  <div class="sh__text">
+    <Tag class="sh__title" id={id}>{title}</Tag>
+    {desc && <p class="sh__desc">{desc}</p>}
+  </div>
+  {hasAside && <div class="sh__aside"><slot /></div>}
+</header>
+
+<style>
+  .sh {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px 24px;
+    margin-bottom: 24px;
+  }
+  .sh__text {
+    min-width: 0;
+    flex: 1 1 420px;
+  }
+  .sh__title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: clamp(1.4rem, 1.2rem + 0.8vw, 1.75rem);
+    letter-spacing: 0.02em;
+  }
+  .sh__title::before {
+    content: '';
+    width: 5px;
+    height: 1em;
+    flex: none;
+    background: var(--brand-500);
+  }
+  .sh__desc {
+    margin-top: 6px;
+    max-width: 62em;
+    color: var(--ink-2);
+  }
+  .sh__aside {
+    flex: none;
+  }
+  .sh--center {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .sh--center .sh__text {
+    flex: none;
+  }
+  .sh--center .sh__title {
+    justify-content: center;
+  }
+  .sh--center .sh__desc {
+    margin-inline: auto;
+  }
+</style>

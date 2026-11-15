@@ -1,0 +1,57 @@
+---
+/**
+ * 常見問題：展開式問答（首頁只顯示前幾題，附「看全部問題」）
+ */
+import { faq } from '../data/faq';
+import { url } from '../lib/url';
+import SectionHead from './SectionHead.astro';
+
+interface Props {
+  limit?: number;
+  /** 區塊底色 */
+  tone?: 'plain' | 'alt' | 'white';
+}
+const { limit, tone = 'alt' } = Astro.props;
+const items = limit ? faq.slice(0, limit) : faq;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: items.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
+---
+
+<section class:list={['section', tone === 'alt' && 'section--alt', tone === 'white' && 'section--white']} id="faq" aria-labelledby="faq-title">
+  <div class="container container--narrow">
+    <SectionHead title="常見問題" id="faq-title" />
+    <div class="acc">
+      {
+        items.map((f) => (
+          <details class="acc__item">
+            <summary>
+              <span class="acc__mark" aria-hidden="true" />
+              {f.q}
+            </summary>
+            <div class="acc__body">
+              <p>{f.a}</p>
+            </div>
+          </details>
+        ))
+      }
+    </div>
+    {
+      limit && limit < faq.length && (
+        <a class="btn btn--light btn--sm faq__more" href={url('/guide/#faq')}>
+          看全部問題
+        </a>
+      )
+    }
+  </div>
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+</section>
+
+<style>
+  .faq__more {
+    margin-top: 18px;
+  }
+</style>

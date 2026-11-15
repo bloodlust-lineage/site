@@ -1,0 +1,176 @@
+---
+/**
+ * 首頁「七位史詩首領」
+ */
+import { epicBosses } from '../../data/bosses';
+import { instances } from '../../data/events';
+import { url } from '../../lib/url';
+import SectionHead from '../SectionHead.astro';
+import Icon from '../Icon.astro';
+
+const instanceNames = [...new Set(instances.map((x) => x.name))];
+---
+
+<section class="section section--white" id="bosses" aria-labelledby="hb-title">
+  <div class="container">
+    <SectionHead title="七位史詩首領" id="hb-title" desc="全部提升到 96 級。出現與被擊敗時都會全服公告，並寫下最後一擊的勇士與血盟。">
+      <a class="link" href={url('/events/#bosses')}>首領與副本時程<Icon name="arrow" /></a>
+    </SectionHead>
+
+    <ul class="bc-grid">
+      {
+        epicBosses.map((b) => (
+          <li class="bc">
+            <div class="bc__head">
+              <span class="bc__icon" aria-hidden="true">
+                <Icon name={b.icon} />
+              </span>
+              <div>
+                <h3 class="bc__name">{b.name}</h3>
+                <p class="bc__lv">
+                  Lv.{b.level}・{b.latin}
+                </p>
+              </div>
+            </div>
+            <dl class="bc__facts">
+              <div>
+                <dt>地點</dt>
+                <dd>{b.location}</dd>
+              </div>
+              <div>
+                <dt>重生</dt>
+                <dd>{b.respawn}</dd>
+              </div>
+              <div>
+                <dt>掉落</dt>
+                <dd>{b.drops.join('、')}</dd>
+              </div>
+            </dl>
+          </li>
+        ))
+      }
+      <li class="bc bc--more">
+        <a href={url('/events/#bosses')}>
+          <span class="bc__icon" aria-hidden="true"><Icon name="portal" /></span>
+          <span class="bc__more-t">副本一覽</span>
+          <span class="bc__more-d">{instanceNames.join('、')}的等級、人數與獎勵</span>
+          <span class="link">看副本規則<Icon name="arrow" /></span>
+        </a>
+      </li>
+    </ul>
+
+    <p class="bc__note muted">史詩首領的掉落一律落在地上，5 分鐘內只有歸屬隊伍能撿。所有首領同時掉落狩獵硬幣、嗜血結晶等本服製作材料。</p>
+  </div>
+</section>
+
+<style>
+  .bc-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .bc {
+    padding: 14px 16px 16px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+  }
+  .bc__head {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .bc__icon {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    flex: none;
+    color: var(--gold-300);
+    background: var(--band-800);
+    border: 1px solid #000;
+    box-shadow: inset 0 0 0 2px #3a2429;
+  }
+  .bc__icon :global(svg) {
+    width: 34px;
+    height: 34px;
+  }
+  .bc__name {
+    font-size: 1.05rem;
+  }
+  .bc__lv {
+    font-size: 0.8rem;
+    color: var(--ink-3);
+  }
+  .bc__facts {
+    display: grid;
+    gap: 4px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+    font-size: 0.88rem;
+  }
+  .bc__facts div {
+    display: grid;
+    grid-template-columns: 2.6em 1fr;
+    gap: 6px;
+  }
+  .bc__facts dt {
+    font-weight: 700;
+    color: var(--brand-600);
+  }
+  .bc__facts dd {
+    color: var(--ink);
+  }
+  .bc--more {
+    padding: 0;
+    background: var(--surface-2);
+    border-style: dashed;
+    border-color: var(--line-2);
+  }
+  .bc--more a {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    height: 100%;
+    padding: 14px 16px 16px;
+  }
+  .bc--more .bc__icon {
+    color: #fff;
+    background: var(--brand-500);
+    box-shadow: none;
+    border-color: var(--brand-700);
+  }
+  .bc__more-t {
+    margin-top: 4px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--ink-strong);
+  }
+  .bc__more-d {
+    font-size: 0.88rem;
+    color: var(--ink-2);
+  }
+  .bc--more .link {
+    margin-top: auto;
+  }
+  .bc--more a:hover .link {
+    color: var(--link-hover);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .bc__note {
+    margin-top: 16px;
+    font-size: 0.9rem;
+  }
+  @media (max-width: 1040px) {
+    .bc-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 560px) {
+    .bc-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

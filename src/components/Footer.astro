@@ -1,0 +1,151 @@
+---
+/**
+ * 頁尾：深色圖示帶＋淺色資訊區（品牌、導覽、伺服器時間、聲明）
+ */
+import { site } from '../data/site';
+import { url } from '../lib/url';
+import Emblem from './Emblem.astro';
+import Icon from './Icon.astro';
+import type { IconName } from '../data/icons';
+
+const year = new Date().getFullYear();
+const strip: IconName[] = [
+  'knight', 'sword', 'queenAnt', 'potion', 'archer', 'crown', 'core', 'book', 'mage', 'gems', 'orfen', 'siege',
+  'rogue', 'helm', 'baium', 'coins', 'summoner', 'laurel', 'zaken', 'castle', 'warrior', 'dragon', 'antharas', 'support',
+  'scarlet', 'pvp', 'chest', 'portal',
+];
+---
+
+<footer class="ft">
+  <div class="ft__strip" aria-hidden="true">
+    <div class="ft__icons">
+      {[...strip, ...strip].map((n) => <Icon name={n} />)}
+    </div>
+  </div>
+
+  <div class="container ft__main">
+    <div class="ft__brand">
+      <a href={url('/')} class="ft__logo">
+        <Emblem size={34} />
+        <span>{site.name} {site.edition}</span>
+      </a>
+      <p class="ft__tag">{site.tagline}</p>
+      <p class="ft__clock">
+        伺服器時間 <b class="tnum" data-server-clock>--:--:--</b>（台灣時間 UTC+8）
+      </p>
+      <p class="ft__small">每週一、四、六 21:00 例行重啟</p>
+    </div>
+
+    <nav class="ft__nav" aria-label="頁尾導覽">
+      <ul>
+        {site.nav.map((n) => <li><a href={url(n.href)}>{n.label}</a></li>)}
+        <li><a href={url('/download/')}>下載遊戲</a></li>
+        <li><a href={site.links.discord} target="_blank" rel="noopener">官方 Discord<span class="sr-only">（另開新視窗）</span></a></li>
+      </ul>
+    </nav>
+
+    <div class="ft__legal">
+      <p>Lineage II 與天堂II 為 NCSOFT Corporation 之註冊商標。本站為玩家社群自行營運的伺服器網站，與 NCSOFT 及其代理商無任何關聯。</p>
+      <p>客服、BUG 回報與贊助諮詢，請洽 Discord 管理員。</p>
+      <p>
+        圖示：<a class="text-link" href="https://game-icons.net" target="_blank" rel="noopener">game-icons.net</a>（Lorc、Delapouite、Skoll 等，CC BY 3.0）
+      </p>
+      <p>© {year} {site.name} 營運團隊</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .ft {
+    margin-top: auto;
+    background: #e9ebee;
+    border-top: 1px solid #d9dde1;
+  }
+  .ft__strip {
+    overflow: hidden;
+    background: var(--band-800);
+    border-bottom: 3px solid var(--brand-500);
+  }
+  .ft__icons {
+    display: flex;
+    gap: 22px;
+    width: max-content;
+    padding: 12px 0;
+    margin-left: -14px;
+    color: #8f767b;
+  }
+  .ft__icons :global(svg) {
+    width: 30px;
+    height: 30px;
+    flex: none;
+  }
+  .ft__icons :global(svg:nth-child(3n + 1)) {
+    color: #c9a74a;
+  }
+  .ft__icons :global(svg:nth-child(5n + 2)) {
+    color: #c4495a;
+  }
+  .ft__main {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 1.4fr);
+    gap: 28px 40px;
+    padding-block: 36px 40px;
+    font-size: 0.9rem;
+    color: var(--ink-2);
+  }
+  .ft__logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--ink-strong);
+  }
+  .ft__tag {
+    margin-top: 8px;
+  }
+  .ft__clock {
+    margin-top: 14px;
+  }
+  .ft__clock b {
+    color: var(--ink-strong);
+    font-size: 1rem;
+  }
+  .ft__small {
+    font-size: 0.85rem;
+    color: var(--ink-3);
+  }
+  .ft__nav ul {
+    display: grid;
+    grid-template-columns: repeat(2, max-content);
+    gap: 6px 28px;
+  }
+  .ft__nav a {
+    font-weight: 700;
+    color: var(--link);
+  }
+  .ft__nav a:hover {
+    color: var(--link-hover);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .ft__legal {
+    display: grid;
+    gap: 6px;
+    font-size: 0.85rem;
+    line-height: 1.7;
+  }
+  @media (max-width: 960px) {
+    .ft__main {
+      grid-template-columns: 1fr 1fr;
+    }
+    .ft__legal {
+      grid-column: 1 / -1;
+    }
+  }
+  @media (max-width: 560px) {
+    .ft__main {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

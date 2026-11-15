@@ -1,0 +1,215 @@
+---
+/**
+ * 頁首：深色帶、品牌、主要導覽、下載按鈕；窄螢幕改成下拉選單
+ */
+import { site } from '../data/site';
+import { url, isActive } from '../lib/url';
+import Emblem from './Emblem.astro';
+import Icon from './Icon.astro';
+
+const path = Astro.url.pathname;
+---
+
+<header class="hd">
+  <div class="container hd__bar">
+    <a href={url('/')} class="hd__brand" aria-label={`${site.name} ${site.edition} 首頁`}>
+      <Emblem size={32} />
+      <span class="hd__name">{site.name}</span>
+      <span class="hd__ed">{site.edition}</span>
+    </a>
+
+    <nav class="hd__nav" aria-label="主要導覽">
+      {
+        site.nav.map((item) => (
+          <a href={url(item.href)} class="hd__link" aria-current={isActive(path, item.href) ? 'page' : undefined}>
+            {item.label}
+          </a>
+        ))
+      }
+      <a href={site.links.discord} class="hd__link" target="_blank" rel="noopener">
+        Discord<span class="sr-only">（另開新視窗）</span>
+      </a>
+    </nav>
+
+    <a href={url('/download/')} class="btn btn--primary btn--sm hd__cta" aria-current={isActive(path, '/download/') ? 'page' : undefined}>
+      <Icon name="down" />下載遊戲
+    </a>
+
+    <button class="hd__toggle" type="button" aria-expanded="false" aria-controls="hd-drawer" data-nav-toggle>
+      <Icon name="menu" class="hd__ico hd__ico--open" />
+      <Icon name="close" class="hd__ico hd__ico--close" />
+      <span class="sr-only" data-nav-label>開啟選單</span>
+    </button>
+  </div>
+
+  <div class="hd__drawer" id="hd-drawer" data-nav-drawer hidden>
+    <nav class="container" aria-label="行動版導覽">
+      <ul class="hd__list">
+        {
+          site.nav.map((item) => (
+            <li>
+              <a href={url(item.href)} aria-current={isActive(path, item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+        <li>
+          <a href={url('/download/')} aria-current={isActive(path, '/download/') ? 'page' : undefined}>下載遊戲</a>
+        </li>
+        <li>
+          <a href={site.links.discord} target="_blank" rel="noopener">官方 Discord<span class="sr-only">（另開新視窗）</span></a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .hd {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    color: var(--band-text);
+    background: var(--band-800);
+    border-bottom: 3px solid var(--brand-500);
+  }
+  .hd__bar {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    height: var(--header-h);
+  }
+  .hd__brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: none;
+  }
+  .hd__name {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #fff;
+  }
+  .hd__ed {
+    padding: 0 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.6;
+    color: var(--gold-300);
+    border: 1px solid rgb(236 202 106 / 0.5);
+  }
+  .hd__nav {
+    display: flex;
+    align-items: stretch;
+    align-self: stretch;
+    gap: 4px;
+    margin-left: auto;
+  }
+  .hd__link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--band-text);
+    transition: color 0.15s;
+  }
+  .hd__link::after {
+    content: '';
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    height: 3px;
+    background: var(--gold-400);
+    transform: scaleX(0);
+    transition: transform 0.15s;
+  }
+  .hd__link:hover {
+    color: var(--gold-300);
+  }
+  .hd__link[aria-current='page'] {
+    color: #fff;
+  }
+  .hd__link[aria-current='page']::after {
+    transform: none;
+  }
+  .hd__cta {
+    flex: none;
+  }
+  .hd__toggle {
+    display: none;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    margin-left: auto;
+    color: #fff;
+    border: 1px solid var(--band-line);
+  }
+  .hd__toggle :global(.hd__ico) {
+    width: 24px;
+    height: 24px;
+  }
+  .hd__toggle :global(.hd__ico--close),
+  :global(.nav-open) .hd__toggle :global(.hd__ico--open) {
+    display: none;
+  }
+  :global(.nav-open) .hd__toggle :global(.hd__ico--close) {
+    display: block;
+  }
+
+  /* 下拉選單 */
+  .hd__drawer {
+    border-top: 1px solid var(--band-line);
+    background: var(--band-900);
+  }
+  .hd__drawer[hidden] {
+    display: none;
+  }
+  .hd__list {
+    display: grid;
+    padding: 8px 0 16px;
+  }
+  .hd__list a {
+    display: block;
+    padding: 12px 4px;
+    font-weight: 700;
+    color: var(--band-text);
+    border-bottom: 1px solid var(--band-line);
+  }
+  .hd__list a[aria-current='page'] {
+    color: var(--gold-300);
+  }
+
+  @media (max-width: 960px) {
+    .hd__nav {
+      display: none;
+    }
+    .hd__cta {
+      margin-left: auto;
+    }
+    .hd__toggle {
+      display: grid;
+      margin-left: 0;
+    }
+  }
+  @media (max-width: 480px) {
+    .hd__bar {
+      gap: 12px;
+    }
+    .hd__cta {
+      display: none;
+    }
+    .hd__toggle {
+      margin-left: auto;
+    }
+  }
+  @media (min-width: 961px) {
+    .hd__drawer {
+      display: none !important;
+    }
+  }
+</style>

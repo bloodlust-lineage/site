@@ -1,0 +1,26 @@
+---
+import Base from '../layouts/Base.astro';
+import Hero from '../components/home/Hero.astro';
+import Features from '../components/home/Features.astro';
+import Rates from '../components/home/Rates.astro';
+import Bosses from '../components/home/Bosses.astro';
+import Classes from '../components/home/Classes.astro';
+import Gear from '../components/home/Gear.astro';
+import StartWeek from '../components/home/StartWeek.astro';
+import Handbook from '../components/home/Handbook.astro';
+import Faq from '../components/Faq.astro';
+import CtaBand from '../components/CtaBand.astro';
+---
+
+<Base>
+  <Hero />
+  <Features />
+  <Rates />
+  <Bosses />
+  <Classes />
+  <Gear />
+  <StartWeek />
+  <Handbook />
+  <Faq limit={5} />
+  <CtaBand />
+</Base>

@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.astro/
+.cache/
+.DS_Store
+Thumbs.db
+*.log
+
+# 本機開發工具設定（含個人路徑）
+.claude/
+
+# 冒險手冊的來源路徑（指向本機的伺服器專案，只留在本機）
+.handbook-source

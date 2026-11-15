@@ -1,0 +1,108 @@
+---
+/**
+ * 首頁「90 級覺醒・七大職業體系」：點選後到特色頁直接打開該體系的技能
+ */
+import { archetypes, awakenClassCount } from '../../data/classes';
+import { url } from '../../lib/url';
+import SectionHead from '../SectionHead.astro';
+import Icon from '../Icon.astro';
+---
+
+<section class="section" id="awaken" aria-labelledby="hc-title">
+  <div class="container">
+    <SectionHead
+      title="90 級覺醒・七大職業體系"
+      id="hc-title"
+      align="center"
+      desc={`${awakenClassCount} 個三轉職業各自獲得 1 個被動、1 個主動技能，移植自覺醒版本並依經典數值縮放。點選職業體系，查看全部技能。`}
+    />
+    <ul class="cl">
+      {
+        archetypes.map((a) => (
+          <li>
+            <a class="cl__item" href={url(`/features/#awaken-${a.id}`)}>
+              <span class="cl__icon" aria-hidden="true">
+                <Icon name={a.icon} />
+              </span>
+              <span class="cl__name">{a.name}</span>
+              <span class="cl__count">{a.classes.length} 個職業</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="cl__note">
+      四種弓手共用<b>多重箭矢</b>、<b>箭雨風暴</b>兩招範圍攻擊；三種匕首職業共用<b>闇影奇襲</b>。90、95、99 級自動學會，只有主職業學得到。
+    </p>
+  </div>
+</section>
+
+<style>
+  .cl {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+  .cl__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 120px;
+    padding: 14px 8px 12px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .cl__item:hover {
+    border-color: var(--brand-200);
+    box-shadow: 0 2px 8px rgb(16 20 24 / 0.08);
+  }
+  .cl__icon {
+    display: grid;
+    place-items: center;
+    width: 58px;
+    height: 58px;
+    color: var(--gold-300);
+    background: var(--band-800);
+    border: 1px solid #000;
+    box-shadow: inset 0 0 0 2px #3a2429;
+    transition: background-color 0.15s;
+  }
+  .cl__icon :global(svg) {
+    width: 38px;
+    height: 38px;
+  }
+  .cl__item:hover .cl__icon {
+    background: var(--brand-600);
+  }
+  .cl__name {
+    margin-top: 6px;
+    font-weight: 700;
+    color: var(--ink-strong);
+  }
+  .cl__item:hover .cl__name {
+    color: var(--link);
+  }
+  .cl__count {
+    font-size: 0.82rem;
+    color: var(--ink-3);
+  }
+  .cl__note {
+    max-width: 44em;
+    margin: 18px auto 0;
+    font-size: 0.92rem;
+    text-align: center;
+    color: var(--ink-2);
+  }
+  .cl__note b {
+    color: var(--ink-strong);
+  }
+  @media (max-width: 560px) {
+    .cl__item {
+      width: calc((100vw - var(--gutter) * 2 - 20px) / 3);
+      min-width: 92px;
+    }
+  }
+</style>

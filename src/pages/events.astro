@@ -1,0 +1,622 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import SectionHead from '../components/SectionHead.astro';
+import WeekCalendar from '../components/WeekCalendar.astro';
+import Icon from '../components/Icon.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { pvpEvents, pvpCommon, instances, attendance } from '../data/events';
+import { epicBosses } from '../data/bosses';
+
+const glory = [
+  {
+    icon: 'laurel' as const,
+    title: '奧林匹亞',
+    when: '週一～週六 22:00～23:00',
+    items: [
+      '70 級以上、完成二轉、使用主職業才能參加。',
+      '每天最多 5 場，不分職業賽，報名滿 20 人開始配對。',
+      '每場勝者得特級 HP 藥水 ×10，敗者 ×1。',
+      '每週一 00:00 結算：各職業積分最高、當週打滿 10 場且至少贏 1 場的人成為英雄。',
+      '英雄只能從奧林匹亞取得，不販售。同一台電腦只能 1 個角色報名。',
+    ],
+  },
+  {
+    icon: 'siege' as const,
+    title: '奇岩城攻城戰',
+    when: '每週日 20:00～21:00',
+    items: [
+      '目前開放奇岩城，每週日 20:00 開打，持續 1 小時。',
+      '每場最多 20 個血盟參加。',
+      '攻城戰中死亡不扣經驗；攻城區域內不能使用布告欄和內掛。',
+      '攻城中的城鎮無法用布告欄傳送進入。',
+    ],
+  },
+  {
+    icon: 'fangs' as const,
+    title: '血盟與盟戰',
+    when: '血盟 Lv.10・同盟最多 3 盟',
+    items: [
+      '血盟最高 10 級，同盟最多 3 個血盟。',
+      '最多同時對 30 個血盟宣戰；被宣戰方反擊殺 5 人後成為互相宣戰。',
+      '互相宣戰中每擊殺 1 名敵對成員，血盟聲望 +1；被敵對血盟殺死只扣 1% 經驗。',
+      '血盟解散與更換盟主在每週六 21:00 生效。',
+    ],
+  },
+];
+---
+
+<Base title="每週戰場" description="嗜血天堂II 經典服每週活動：TvT 團體對抗賽、最後的英雄、週二 PvP 區域、奧林匹亞、奇岩攻城戰，以及史詩首領重生時間、副本與每日出席獎勵。">
+  <PageHero
+    crumb="每週戰場"
+    title="每週戰場"
+    lead="今晚，戰場在哪裡"
+    desc="週一到週六每晚都有 PvP 活動與奧林匹亞，週二開放 PvP 區域，週日奇岩攻城。所有時間皆為伺服器時間（台灣時間 UTC+8）。"
+  />
+
+  <section class="section" aria-labelledby="e-cal">
+    <div class="container">
+      <SectionHead title="每週行事曆" id="e-cal" desc="依台灣時間即時標示今天與下一場活動。每週一、四、六 21:00 例行重啟，重啟前有倒數公告。" />
+      <WeekCalendar />
+    </div>
+  </section>
+
+  <section class="section section--alt" aria-labelledby="e-pvp">
+    <div class="container">
+      <SectionHead title="PvP 活動" id="e-pvp" desc="週一到週六晚上各有一場，報名時會跳出確認視窗。" />
+      <div class="duel">
+        {
+          pvpEvents.map((ev) => (
+            <article class="duel__card">
+              <header class="duel__head">
+                <span class="ibox" aria-hidden="true">
+                  <Icon name={ev.icon} />
+                </span>
+                <div>
+                  <h3 class="duel__name">{ev.name}</h3>
+                  <p class="duel__latin">{ev.latin}</p>
+                </div>
+              </header>
+              <table class="duel__rows">
+                <caption class="sr-only">{ev.name}規則</caption>
+                <tbody>
+                  {ev.rows.map(([k, v]) => (
+                    <tr>
+                      <th scope="row">{k}</th>
+                      <td>{v}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div class="duel__reward">
+                <p class="duel__reward-h">獎勵</p>
+                {ev.reward.map(([k, v]) => (
+                  <p>
+                    <b>{k}</b>
+                    {v}
+                  </p>
+                ))}
+              </div>
+            </article>
+          ))
+        }
+      </div>
+      <ul class="bullets duel__common">
+        {pvpCommon.map((t) => <li>{t}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section--white" aria-labelledby="e-zone">
+    <div class="container">
+      <div class="zone">
+        <div class="zone__date tnum" aria-hidden="true">
+          <span>每週二</span>
+          <b>20:00</b>
+          <i></i>
+          <b>24:00</b>
+        </div>
+        <div>
+          <h2 class="zone__title" id="e-zone">週二 PvP 區域：殺人不會變紅名</h2>
+          <p class="zone__desc">
+            每週二 20:00～24:00，<b>安塔瑞斯洞窟</b>與<b>傲慢之塔 4～11 樓</b>的活動區域變成 PvP 區，在裡面殺人不會變紅名。
+          </p>
+          <ul class="bullets zone__list">
+            <li>活動怪物每隻都會掉 1 個「防具材料禮盒－A 級」或「飾品材料禮盒－A 級」。</li>
+            <li>20:30 與 22:30 各出現 3～4 隻「血的騎士團長」，停留 30 分鐘，打倒掉「防具禮盒－A 級」或「飾品禮盒－A 級」。</li>
+            <li>區域內內掛會自動停止。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="e-glory">
+    <div class="container">
+      <SectionHead title="英雄、城堡與血盟" id="e-glory" />
+      <div class="glory">
+        {
+          glory.map((g) => (
+            <article class="glory__item">
+              <header class="glory__head">
+                <span class="ibox" aria-hidden="true">
+                  <Icon name={g.icon} />
+                </span>
+                <div>
+                  <h3 class="glory__t">{g.title}</h3>
+                  <p class="glory__when">{g.when}</p>
+                </div>
+              </header>
+              <ul class="bullets glory__list">
+                {g.items.map((t) => <li>{t}</li>)}
+              </ul>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--alt" id="bosses" aria-labelledby="e-boss">
+    <div class="container">
+      <SectionHead
+        title="首領重生與副本"
+        id="e-boss"
+        desc="時間皆為伺服器時間，一般怪的重生加速不影響首領。史詩首領都是 96 級：玩家等級最多以 90 計算，87 級以下魔法傷害只剩 1、93 級以下傷害會打折。"
+      />
+      <div class="table-wrap e-table">
+        <table class="table">
+          <caption class="sr-only">史詩首領重生時間</caption>
+          <thead>
+            <tr>
+              <th scope="col">史詩首領</th>
+              <th scope="col">等級</th>
+              <th scope="col">地點</th>
+              <th scope="col">進入條件</th>
+              <th scope="col">重生</th>
+              <th scope="col">代表掉落</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              epicBosses.map((b) => (
+                <tr>
+                  <th scope="row">
+                    <span class="e-boss">
+                      <Icon name={b.icon} />
+                      {b.name}
+                    </span>
+                  </th>
+                  <td class="tnum" data-label="等級">{b.level}</td>
+                  <td class="e-span2" data-label="地點">{b.location}</td>
+                  <td class="e-full" data-label="進入條件">{b.entry}</td>
+                  <td class="e-full" data-label="重生">{b.respawn}</td>
+                  <td class="e-full" data-label="代表掉落">{b.drops.join('、')}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="e-sub">副本一覽<span>每週三 06:30 重置，多數副本打倒首領才會被鎖</span></h3>
+      <div class="table-wrap e-table">
+        <table class="table">
+          <caption class="sr-only">副本一覽</caption>
+          <thead>
+            <tr>
+              <th scope="col">副本</th>
+              <th scope="col">等級</th>
+              <th scope="col">人數</th>
+              <th scope="col">時限</th>
+              <th scope="col">主要獎勵</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              instances.map((x) => (
+                <tr>
+                  <th scope="row">
+                    {x.name}
+                    <span class="e-inst-sub">{x.sub}</span>
+                  </th>
+                  <td class="tnum e-nowrap" data-label="等級">{x.lv}</td>
+                  <td class="e-nowrap" data-label="人數">{x.party}</td>
+                  <td class="e-nowrap" data-label="時限">{x.time}</td>
+                  <td class="e-reward e-full" data-label="主要獎勵">{x.reward}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--white" aria-labelledby="e-att">
+    <div class="container">
+      <SectionHead
+        title="28 天出席獎勵"
+        id="e-att"
+        desc="每天登入可領一次（以帳號計），每天 06:30 重置。一般帳號在線 30 分鐘後可領，高級會員登入就能領。一輪共 600 出席幣，可到布告欄「出席幣兌換所」換道具。"
+      />
+      <div class="att">
+        {
+          attendance.map((week, w) => (
+            <div class="att__week">
+              <p class="att__wk">第 {w + 1} 週</p>
+              <ol class="att__days">
+                {week.map((r, d) => (
+                  <li class:list={['att__day', d === 0 && 'is-coin', d === 6 && 'is-final']}>
+                    <span class="att__n tnum">第 {w * 7 + d + 1} 天</span>
+                    <span class="att__r">{r}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <CtaBand title="戰場已經就位" desc="下載客戶端、加入 Discord，第一時間收到活動與維護公告。" />
+</Base>
+
+<style>
+  .duel {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .duel__card {
+    padding: 18px 20px 20px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-top: 4px solid var(--brand-500);
+  }
+  .duel__head {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .duel__name {
+    font-size: 1.25rem;
+  }
+  .duel__latin {
+    font-size: 0.82rem;
+    color: var(--ink-3);
+  }
+  .duel__rows {
+    margin-top: 14px;
+    font-size: 0.94rem;
+    border-top: 1px solid var(--line);
+  }
+  .duel__rows th,
+  .duel__rows td {
+    padding: 8px 0;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--line);
+  }
+  .duel__rows th {
+    width: 6.5em;
+    font-weight: 700;
+    color: var(--brand-600);
+  }
+  .duel__reward {
+    display: grid;
+    gap: 4px;
+    margin-top: 14px;
+    padding: 12px 14px;
+    font-size: 0.94rem;
+    background: var(--gold-100);
+    border: 1px solid #e2c977;
+  }
+  .duel__reward-h {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--gold-700);
+  }
+  .duel__reward b {
+    display: inline-block;
+    min-width: 6.5em;
+    color: var(--ink-strong);
+  }
+  .duel__common {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px 32px;
+    margin-top: 18px;
+    font-size: 0.93rem;
+    color: var(--ink-2);
+  }
+
+  .zone {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 24px 36px;
+    align-items: center;
+    padding: clamp(20px, 3vw, 32px);
+    background: var(--brand-50);
+    border: 1px solid #ecc9ce;
+    border-left: 5px solid var(--brand-500);
+  }
+  .zone__date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 16px 22px;
+    color: #fff;
+    background: var(--band-800);
+    border: 1px solid #000;
+  }
+  .zone__date span {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--gold-300);
+  }
+  .zone__date b {
+    font-size: 1.8rem;
+    line-height: 1;
+  }
+  .zone__date i {
+    width: 2px;
+    height: 16px;
+    background: var(--brand-400);
+  }
+  .zone__title {
+    font-size: clamp(1.3rem, 1.1rem + 0.8vw, 1.6rem);
+  }
+  .zone__desc {
+    margin-top: 8px;
+  }
+  .zone__desc b {
+    color: var(--brand-700);
+  }
+  .zone__list {
+    margin-top: 10px;
+    font-size: 0.93rem;
+    color: var(--ink-2);
+  }
+
+  .glory {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .glory__item {
+    padding: 16px 18px 18px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+  }
+  .glory__head {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .glory__t {
+    font-size: 1.15rem;
+  }
+  .glory__when {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--brand-600);
+  }
+  .glory__list {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    font-size: 0.92rem;
+    line-height: 1.75;
+    color: var(--ink-2);
+  }
+
+  .e-boss {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .e-boss :global(svg) {
+    width: 22px;
+    height: 22px;
+    color: var(--brand-500);
+  }
+  .e-sub {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 14px;
+    margin: 32px 0 14px;
+    font-size: 1.2rem;
+  }
+  .e-sub span {
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: var(--ink-2);
+  }
+  .e-inst-sub {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 400;
+    color: var(--ink-3);
+  }
+  .e-nowrap {
+    white-space: nowrap;
+    width: 1%; /* 縮到內容寬度，剩下的空間留給「主要獎勵」 */
+  }
+  .e-reward {
+    min-width: 15em;
+  }
+  @media (min-width: 961px) {
+    .e-table tbody th {
+      min-width: 9.5em;
+    }
+    .e-table .e-span2 {
+      min-width: 9em;
+    }
+  }
+
+  /* 窄螢幕：表格改成一列一張卡片，不必左右滑動就能看到每一欄 */
+  @media (max-width: 960px) {
+    .e-table .table {
+      display: block;
+      border: 0;
+      background: none;
+    }
+    .e-table thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+    .e-table tbody {
+      display: grid;
+      gap: 10px;
+    }
+    .e-table tbody tr {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px 14px;
+      padding: 14px 16px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+    }
+    .e-table tbody tr:nth-child(even) {
+      background: var(--surface);
+    }
+    .e-table tbody th,
+    .e-table tbody td {
+      display: block;
+      min-width: 0;
+      width: auto;
+      padding: 0;
+      border: 0;
+    }
+    .e-table tbody th {
+      grid-column: 1 / -1;
+      white-space: normal;
+      font-size: 1.05rem;
+    }
+    .e-table tbody td::before {
+      content: attr(data-label);
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--ink-3);
+    }
+    .e-table .e-nowrap {
+      white-space: normal;
+      word-break: keep-all;
+      overflow-wrap: anywhere;
+    }
+    .e-table .e-span2 {
+      grid-column: span 2;
+    }
+    .e-table .e-full {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .att {
+    display: grid;
+    gap: 10px;
+  }
+  .att__week {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 10px;
+  }
+  .att__wk {
+    display: grid;
+    place-items: center;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #fff;
+    background: var(--band-800);
+  }
+  .att__days {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .att__day {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-height: 96px;
+    padding: 8px 10px 10px;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    background: var(--surface);
+    border: 1px solid var(--line);
+  }
+  .att__n {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--ink-3);
+  }
+  .att__day.is-coin {
+    background: var(--gold-100);
+    border-color: #e2c977;
+  }
+  .att__day.is-coin .att__n {
+    color: var(--gold-700);
+  }
+  .att__day.is-final {
+    background: var(--brand-50);
+    border-color: #ecc9ce;
+  }
+  .att__day.is-final .att__n {
+    color: var(--brand-600);
+  }
+
+  @media (max-width: 1040px) {
+    .glory {
+      grid-template-columns: 1fr;
+    }
+    .att__days {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 860px) {
+    .duel,
+    .duel__common {
+      grid-template-columns: 1fr;
+    }
+    .zone {
+      grid-template-columns: 1fr;
+    }
+    .zone__date {
+      flex-direction: row;
+      justify-self: start;
+      padding: 10px 16px;
+    }
+    .zone__date i {
+      width: 14px;
+      height: 2px;
+    }
+    .zone__date b {
+      font-size: 1.4rem;
+    }
+  }
+  @media (max-width: 600px) {
+    .att__week {
+      grid-template-columns: 1fr;
+    }
+    .att__wk {
+      padding: 4px;
+      justify-items: start;
+      padding-left: 10px;
+    }
+    .att__days {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .att__day {
+      min-height: 0;
+    }
+  }
+</style>

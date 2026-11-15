@@ -1,0 +1,423 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import SectionHead from '../components/SectionHead.astro';
+import Icon from '../components/Icon.astro';
+import Faq from '../components/Faq.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { journey, gifts, levelSpots, commands, firstHours, rules } from '../data/guide';
+import { url } from '../lib/url';
+
+const boardMenu = [
+  ['綜合功能', '伺服器設定說明、掉落搜索、領取天幣、購買高級會員、單體／隊伍迴歸、常用 NPC'],
+  ['商店', '一般裝備（金幣）、守護裝備、L-Coin 商城、出席幣兌換所、精煉系統、出售物品、倉庫'],
+  ['傳送', '全地圖免費傳送：城鎮村莊、練級推薦、高等／高階獵場、傲慢之塔、狩獵首領、史詩首領'],
+  ['輔助魔法', '單項或套餐輔助、自訂 8 組套餐、治癒（補滿 HP／MP／CP）、清除增益'],
+  ['統計排行', 'PK、PvP、等級、金幣、在線時間、奧林匹亞，各前 20 名'],
+  ['職業', '主職業變更、副職業添加與切換、靈魂結晶進度、英雄與奧林匹亞說明'],
+  ['服務', '性向重置、背包倉庫擴充、血盟聲望、名稱與稱號顏色、特殊升級、稀有升級、更名'],
+];
+---
+
+<Base title="新手指南" description="嗜血天堂II 經典服新手指南：下載與建立帳號、新手禮物、前幾個小時怎麼玩、各等級練功地點、社群布告欄與玩家指令一次看懂。">
+  <PageHero
+    crumb="新手指南"
+    title="新手指南"
+    lead="第一次踏上亞丁"
+    desc="從下載客戶端到第一次轉職，這一頁把剛開始最需要知道的事整理在一起。更深入的數值與資料，請翻閱冒險手冊。"
+  >
+    <a href={url('/download/')} class="btn btn--primary"><Icon name="down" />下載遊戲</a>
+    <a href={url('/handbook/')} class="btn"><Icon name="book" />冒險手冊</a>
+  </PageHero>
+
+  <!-- 四步驟 -->
+  <section class="section" aria-labelledby="g-steps">
+    <div class="container">
+      <SectionHead title="四個步驟，進入遊戲" id="g-steps" desc="不用註冊、不用跑任務。下載、登入、甦醒，然後按下 Alt+B。" />
+      <ol class="steps">
+        {
+          journey.map((s, i) => (
+            <li class="step">
+              <span class="num">{i + 1}</span>
+              <div>
+                <h3 class="step__title">{s.title}</h3>
+                <p class="step__desc">{s.desc}</p>
+              </div>
+              <span class="ibox step__icon" aria-hidden="true">
+                <Icon name={s.icon} />
+              </span>
+            </li>
+          ))
+        }
+      </ol>
+      <p class="note g-note">
+        <Icon name="lock" />
+        <span>
+          帳號 4～14 碼、密碼 4～16 碼英文或數字，建議 8 碼以上英數混合，且不要和其他網站共用。進入遊戲後可輸入
+          <span class="cmd">.lock</span> 把帳號綁定到這台電腦。
+        </span>
+      </p>
+    </div>
+  </section>
+
+  <!-- 新手禮物與前幾小時 -->
+  <section class="section section--alt" aria-labelledby="g-gift">
+    <div class="container">
+      <SectionHead
+        title="新手禮物"
+        id="g-gift"
+        desc="建立角色時就已經放在背包裡（部分已穿在身上）。標示「限時 30 日」的道具從建立角色開始倒數，到期自動消失。"
+      />
+      <div class="g-two">
+        <div class="table-wrap">
+          <table class="table">
+            <caption class="sr-only">新手禮物</caption>
+            <thead>
+              <tr>
+                <th scope="col">道具</th>
+                <th scope="col">數量</th>
+                <th scope="col">說明</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                gifts.map((g) => (
+                  <tr>
+                    <th scope="row">{g.name}</th>
+                    <td class="g-qty tnum">{g.qty}</td>
+                    <td>
+                      {g.note}
+                      {!g.lasting && <span class="tag tag--mute g-tag">限時 30 日</span>}
+                    </td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+        <aside class="card g-hours" aria-labelledby="g-hours-title">
+          <h3 class="g-hours__title" id="g-hours-title">前幾個小時建議這樣玩</h3>
+          <ol class="g-hours__list">
+            {
+              firstHours.map((t, i) => (
+                <li>
+                  <span class="num">{i + 1}</span>
+                  <p>{t}</p>
+                </li>
+              ))
+            }
+          </ol>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- 練功地點 -->
+  <section class="section section--white" aria-labelledby="g-spots">
+    <div class="container">
+      <SectionHead
+        title="各等級練功地點"
+        id="g-spots"
+        desc="布告欄「傳送 → 練級推薦」可以免費直接傳送。一般怪物幾乎不掉 B 級以下成品與材料，D、C 級裝備直接用金幣在布告欄購買最快，製作材料請靠回收（Spoil）。"
+      />
+      <ol class="spots">
+        {
+          levelSpots.map(([lv, place]) => (
+            <li>
+              <span class="spots__lv tnum">Lv. {lv}</span>
+              <span class="spots__place">{place}</span>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <!-- 布告欄 -->
+  <section class="section" aria-labelledby="g-board">
+    <div class="container">
+      <SectionHead
+        title="社群布告欄（Alt+B）"
+        id="g-board"
+        desc="遊戲中按 Alt+B 開啟。不限和平區，只要不在戰鬥、紅名、PvP 活動、交易或攻城區中，隨時都能使用。"
+      />
+      <ul class="board">
+        {
+          boardMenu.map(([t, d], i) => (
+            <li class="board__item">
+              <p class="board__t">
+                <span class="num">{i + 1}</span>
+                {t}
+              </p>
+              <p class="board__d">{d}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- 指令 -->
+  <section class="section section--alt" id="commands" aria-labelledby="g-cmd">
+    <div class="container">
+      <SectionHead title="玩家指令" id="g-cmd" desc="在遊戲聊天框輸入。點一下指令就能複製，再貼到遊戲裡使用。" />
+      <ul class="cmds">
+        {
+          commands.map((c) => (
+            <li>
+              <button class="cmds__btn" type="button" data-copy={c.cmd.split(' ')[0]} aria-label={`複製指令 ${c.cmd}`}>
+                <span class="cmd">{c.cmd}</span>
+                <span class="cmds__copy" data-copy-label>複製</span>
+              </button>
+              <p class="cmds__desc">
+                {c.desc}
+                {c.alias && <span class="cmds__alias">（也可用 {c.alias}）</span>}
+              </p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- 規則 -->
+  <section class="section section--white" aria-labelledby="g-rules">
+    <div class="container">
+      <SectionHead title="基本規則" id="g-rules" desc="出發前先知道這些，冒險會更順利。" />
+      <ul class="rules">
+        {
+          rules.map((r) => (
+            <li class="rules__item">
+              <h3 class="rules__t">{r.title}</h3>
+              <p class="rules__d">{r.desc}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <Faq />
+  <CtaBand />
+</Base>
+
+<style>
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .step {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 14px;
+    align-items: start;
+    padding: 16px 18px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+  }
+  .step__title {
+    font-size: 1.08rem;
+    line-height: 1.6;
+  }
+  .step__desc {
+    margin-top: 4px;
+    font-size: 0.93rem;
+    color: var(--ink-2);
+  }
+  .g-note {
+    margin-top: 16px;
+  }
+
+  .g-two {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+  }
+  .g-two .table tbody th {
+    min-width: 9.5em;
+  }
+  .g-qty {
+    font-weight: 700;
+    color: var(--brand-600);
+    white-space: nowrap;
+  }
+  .g-tag {
+    margin-left: 6px;
+  }
+  .g-hours {
+    padding: 18px 20px;
+    border-top: 4px solid var(--gold-400);
+  }
+  .g-hours__title {
+    font-size: 1.1rem;
+  }
+  .g-hours__list {
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .g-hours__list li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px;
+    font-size: 0.93rem;
+    line-height: 1.75;
+  }
+  .g-hours__list .num {
+    width: 24px;
+    height: 24px;
+    font-size: 0.82rem;
+  }
+
+  .spots {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 24px;
+    border-top: 1px solid var(--line);
+  }
+  .spots li {
+    display: grid;
+    grid-template-columns: 6.5em 1fr;
+    gap: 12px;
+    padding: 9px 4px;
+    border-bottom: 1px solid var(--line);
+  }
+  .spots__lv {
+    font-weight: 700;
+    color: var(--brand-600);
+    white-space: nowrap;
+  }
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 12px;
+  }
+  .board__item {
+    padding: 14px 16px 16px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+  }
+  .board__t {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--ink-strong);
+  }
+  .board__t .num {
+    width: 24px;
+    height: 24px;
+    font-size: 0.82rem;
+  }
+  .board__d {
+    margin-top: 8px;
+    font-size: 0.92rem;
+    line-height: 1.75;
+    color: var(--ink-2);
+  }
+
+  .cmds {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 32px;
+  }
+  .cmds li {
+    display: grid;
+    grid-template-columns: 11.5em 1fr;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .cmds__btn {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .cmds__btn .cmd {
+    font-size: 0.95rem;
+  }
+  .cmds__btn:hover .cmd {
+    border-color: var(--brand-400);
+    background: var(--brand-50);
+  }
+  .cmds__copy {
+    font-size: 0.75rem;
+    color: var(--ink-3);
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .cmds__btn:hover .cmds__copy,
+  .cmds__btn:focus-visible .cmds__copy,
+  .cmds__btn:global(.is-copied) .cmds__copy {
+    opacity: 1;
+  }
+  .cmds__btn:global(.is-copied) .cmds__copy {
+    font-weight: 700;
+    color: var(--ok);
+  }
+  .cmds__desc {
+    font-size: 0.93rem;
+    color: var(--ink);
+  }
+  .cmds__alias {
+    color: var(--ink-3);
+  }
+
+  .rules {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .rules__item {
+    padding: 16px 18px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--brand-500);
+  }
+  .rules__t {
+    font-size: 1.05rem;
+  }
+  .rules__d {
+    margin-top: 6px;
+    font-size: 0.93rem;
+    line-height: 1.75;
+    color: var(--ink-2);
+  }
+
+  @media (max-width: 1040px) {
+    .g-two {
+      grid-template-columns: 1fr;
+    }
+    .cmds {
+      grid-template-columns: 1fr;
+    }
+    .rules {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 760px) {
+    .steps,
+    .spots {
+      grid-template-columns: 1fr;
+    }
+    .step {
+      grid-template-columns: auto 1fr;
+    }
+    .step__icon {
+      display: none;
+    }
+    .rules {
+      grid-template-columns: 1fr;
+    }
+    .cmds li {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+  }
+</style>

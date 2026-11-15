@@ -1,0 +1,63 @@
+---
+/**
+ * 頁面底部的行動區：加入 Discord、下載遊戲
+ */
+import { site } from '../data/site';
+import { url } from '../lib/url';
+import Icon from './Icon.astro';
+
+interface Props {
+  title?: string;
+  desc?: string;
+}
+const {
+  title = '加入官方 Discord',
+  desc = '活動公告、臨時維護與補丁更新都會先公告在 Discord，客服與 BUG 回報也在這裡。',
+} = Astro.props;
+---
+
+<section class="cta" aria-labelledby="cta-title">
+  <div class="container cta__inner">
+    <div class="cta__text">
+      <h2 class="cta__title" id="cta-title">{title}</h2>
+      <p class="cta__desc">{desc}</p>
+    </div>
+    <div class="cta__btns">
+      <a href={site.links.discord} class="btn btn--discord" target="_blank" rel="noopener">
+        <Icon name="discord" />加入 Discord<span class="sr-only">（另開新視窗）</span>
+      </a>
+      <a href={url('/download/')} class="btn btn--primary">
+        <Icon name="down" />下載遊戲
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta {
+    color: var(--band-text);
+    background: linear-gradient(90deg, var(--band-900), #3a1219);
+  }
+  .cta__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px 32px;
+    padding-block: 32px;
+  }
+  .cta__title {
+    font-size: 1.4rem;
+    color: #fff;
+  }
+  .cta__desc {
+    margin-top: 4px;
+    max-width: 40em;
+    color: var(--band-muted);
+  }
+  .cta__btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+</style>
