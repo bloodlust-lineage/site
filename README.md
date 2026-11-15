@@ -55,9 +55,13 @@ npm run sync-handbook
 
 ## 部署到 GitHub Pages
 
-1. 在 GitHub 建立 repo（例如 `classic_site`），把這個資料夾推上去（`main` 分支）。
-2. 到 repo 的 **Settings → Pages → Build and deployment → Source** 選 **GitHub Actions**。
-3. 之後每次推送到 `main`，`.github/workflows/deploy.yml` 會自動建置並部署。
+- 儲存庫：<https://github.com/bloodlust-lineage/site>
+- 正式網址：<https://bloodlust-lineage.github.io/site/>
+
+每次推送到 `main` 分支，`.github/workflows/deploy.yml` 會自動建置並部署，大約 1～2 分鐘後生效。
+建置進度可以在儲存庫的 **Actions** 分頁看到。
+
+第一次部署前，要到儲存庫的 **Settings → Pages → Build and deployment → Source** 選 **GitHub Actions**（只要設定一次）。
 
 網址與子路徑會由 GitHub 自動帶入（`https://<帳號>.github.io/<repo>/`），改用自訂網域時也不需要修改設定。
 若要在本機用不同的 repo 名稱預覽，修改 `astro.config.mjs` 的 `BASE_PATH` 備用值。
