@@ -1,0 +1,1551 @@
+/* ============================================================
+   冒險手冊（/handbook/）
+   手冊的內容與程式來自伺服器專案，這裡是官網替它寫的全部樣式：
+   沿用全站的色票、直角卡片、深色標題列與金色標記。
+
+   類別名稱（.nav、.t、.kv…）是手冊程式產生的，所以每一條都包在 .hb 底下，
+   不會影響其他頁面。手冊多了新的類別時，同步腳本會提醒要補在這裡
+   （已處理的清單在 scripts/handbook-parts.mjs）。
+   ============================================================ */
+
+/* 手冊切換頁面、重畫清單時會自己設定捲動位置；這一頁不能用平滑捲動（會變成慢慢滑過去）。
+   捲動時要讓出的高度只算頁首：搜尋框就在頁首正下方，讓太多的話，游標一進搜尋框整頁會被往上推幾個像素 */
+html {
+  scroll-behavior: auto !important;
+  scroll-padding-top: calc(var(--header-h) + 3px) !important;
+}
+
+/* ------------------------------------------------------------
+   主視覺裡的數字
+   ------------------------------------------------------------ */
+/* 每一項左邊都有一條分隔線；整排往左移、再把左邊那一段裁掉，所以每一行的第一項（包含換行之後的）都不會露出分隔線 */
+.hbs {
+  --hbs-gap: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 0;
+  margin-left: calc(-1px - var(--hbs-gap));
+  clip-path: inset(0 0 0 calc(1px + var(--hbs-gap)));
+}
+.hbs li {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-right: var(--hbs-gap);
+  padding-left: var(--hbs-gap);
+  border-left: 1px solid rgb(255 236 228 / 0.22);
+}
+.hbs b {
+  font-size: 1.3rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--gold-300);
+  font-variant-numeric: tabular-nums;
+}
+.hbs span {
+  font-size: 0.9rem;
+  color: var(--band-muted);
+}
+.hbs__date b {
+  font-size: 1rem;
+  color: var(--band-text);
+}
+
+/* ------------------------------------------------------------
+   外框
+   ------------------------------------------------------------ */
+.hb {
+  --hb-max: 1320px;
+  --hb-side: 236px;
+  --hb-gap: 32px;
+  --hb-bar: 58px;
+  /* 頁首的高度（含底下那條紅線） */
+  --hb-stick: calc(var(--header-h) + 3px);
+  /* 裝備等級的代表色，和首頁「裝備之路」一致 */
+  --g-none: #7d8592;
+  --g-d: #3a70c8;
+  --g-c: #2a8f60;
+  --g-b: #b77f12;
+  --g-a: #c64d36;
+  --g-s: #7f4fc9;
+  --g-r: #b3306e;
+  position: relative;
+  /* 下一個區塊（行動區）上緣有森林剪影疊上來，多留一點空間 */
+  padding-bottom: calc(var(--section-y) + 40px);
+}
+.hb [hidden] {
+  display: none !important;
+}
+.hb__wrap {
+  width: 100%;
+  max-width: calc(var(--hb-max) + var(--gutter) * 2);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* ------------------------------------------------------------
+   搜尋列：捲動時貼在頁首下方
+   ------------------------------------------------------------ */
+.hb__bar {
+  position: sticky;
+  top: var(--hb-stick);
+  z-index: 40;
+  background: rgb(255 255 255 / 0.96);
+  border-bottom: 1px solid var(--line);
+  transition: box-shadow 0.3s;
+}
+@supports (backdrop-filter: blur(8px)) {
+  .hb__bar {
+    background: rgb(255 255 255 / 0.88);
+    backdrop-filter: blur(10px) saturate(1.3);
+  }
+}
+.hb__bar.is-stuck {
+  box-shadow: 0 12px 24px -18px rgb(40 22 26 / 0.55);
+}
+.hb__bar-in {
+  display: grid;
+  grid-template-columns: var(--hb-side) minmax(0, 1fr);
+  gap: var(--hb-gap);
+  align-items: center;
+  height: var(--hb-bar);
+}
+
+/* 左邊：回到手冊總覽 */
+.hb__home {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  font-weight: 800;
+  color: var(--ink-strong);
+}
+.hb__home-ico {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  color: var(--gold-300);
+  background: linear-gradient(135deg, #33202a, #150b0f);
+  border: 1px solid #0a0506;
+  box-shadow: inset 0 0 0 2px rgb(236 202 106 / 0.22);
+}
+.hb__home-ico svg {
+  width: 20px;
+  height: 20px;
+}
+.hb__home:hover .hb__home-ico {
+  background: linear-gradient(135deg, var(--brand-400), var(--brand-700));
+}
+.hb__home-t {
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.hb__home:hover .hb__home-t {
+  color: var(--link);
+}
+.hb__home-s {
+  padding-left: 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ink-3);
+  border-left: 1px solid var(--line-2);
+  white-space: nowrap;
+}
+
+/* 手機的目錄按鈕（桌機不顯示） */
+.hb .navbtn {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 12px 1px;
+  font-size: 0.94rem;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--ink-strong);
+  background: linear-gradient(180deg, #fff, #f1ede7);
+  border: 1px solid #a59c92;
+  box-shadow:
+    inset 0 -2px 0 rgb(0 0 0 / 0.06),
+    0 1px 2px rgb(20 10 12 / 0.08);
+}
+.hb .navbtn svg {
+  width: 18px;
+  height: 18px;
+}
+.hb .navbtn[aria-expanded='true'] {
+  color: #fff;
+  background: linear-gradient(180deg, #2b171d, #1a0e13);
+  border-color: #0b0508;
+  box-shadow: none;
+}
+
+/* 搜尋框 */
+.hb .search {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+}
+.hb .search > svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: var(--ink-3);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.hb .search input {
+  width: 100%;
+  height: 38px;
+  padding: 0 42px 0 38px;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-radius: 0;
+  box-shadow: inset 0 1px 2px rgb(40 22 26 / 0.07);
+  outline: none;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.hb .search input::placeholder {
+  color: var(--ink-3);
+}
+.hb .search input:hover {
+  border-color: #a59c92;
+}
+.hb .search input:focus {
+  border-color: var(--brand-500);
+  box-shadow: 0 0 0 3px rgb(176 34 51 / 0.16);
+}
+/* 快速鍵提示：打字或游標在框內時收起來 */
+.hb__key {
+  position: absolute;
+  right: 9px;
+  top: 50%;
+  min-width: 22px;
+  text-align: center;
+  color: var(--ink-3);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.hb .search input:focus ~ .hb__key,
+.hb .search input:not(:placeholder-shown) ~ .hb__key {
+  display: none;
+}
+@media (hover: none) {
+  .hb__key {
+    display: none;
+  }
+}
+
+/* 搜尋建議 */
+.hb .sugg {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 5;
+  max-height: min(70vh, 560px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 4px 0 0;
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-top: 3px solid var(--brand-500);
+  box-shadow: var(--shadow-3);
+}
+.hb .sugg h5 {
+  margin: 10px 14px 3px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  line-height: 1.5;
+  color: var(--gold-700);
+}
+.hb .sugg a {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1px 8px;
+  padding: 6px 14px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.hb .sugg a:hover,
+.hb .sugg a.on {
+  background: var(--brand-50);
+}
+.hb .sugg a > span:not([class]) {
+  min-width: 0;
+  font-weight: 700;
+  color: var(--ink-strong);
+}
+/* 章節的搜尋結果：標題一行，底下一行是命中的那段文字 */
+.hb .sugg a > .small:has(b) {
+  flex-basis: 100%;
+}
+.hb .sugg .more {
+  margin-top: 8px;
+  padding-block: 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--link);
+  background: var(--surface-2);
+  border-top: 1px solid var(--line);
+}
+.hb .sugg .more:hover,
+.hb .sugg .more.on {
+  color: var(--link-hover);
+  background: var(--brand-50);
+}
+.hb .sugg .empty {
+  margin: 0;
+}
+
+/* ------------------------------------------------------------
+   版面：左邊章節欄、右邊內容
+   ------------------------------------------------------------ */
+.hb .shell {
+  display: grid;
+  grid-template-columns: var(--hb-side) minmax(0, 1fr);
+  gap: var(--hb-gap);
+  align-items: start;
+  padding-top: 26px;
+}
+
+/* 章節欄 */
+.hb .nav {
+  position: sticky;
+  top: calc(var(--hb-stick) + var(--hb-bar) + 18px);
+  max-height: calc(100dvh - var(--hb-stick) - var(--hb-bar) - 36px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 2px 0 10px;
+  font-size: 0.94rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-1);
+}
+.hb .nav h6 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 14px 14px 6px 15px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  line-height: 1.5;
+  color: var(--gold-700);
+}
+.hb .nav h6::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+.hb .nav a {
+  display: block;
+  padding: 5px 14px 5px 12px;
+  line-height: 1.5;
+  color: var(--ink);
+  border-left: 3px solid transparent;
+  transition:
+    color 0.15s,
+    background-color 0.15s;
+}
+.hb .nav a:hover {
+  color: var(--link);
+  background: var(--surface-2);
+  border-left-color: var(--brand-200);
+}
+/* 目前所在的章節：深色底、金色標記，和特色頁的目錄一樣 */
+.hb .nav a.on {
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(180deg, #2b171d, #1a0e13);
+  border-left-color: var(--gold-400);
+}
+
+/* ------------------------------------------------------------
+   內容：共用的文字樣式
+   ------------------------------------------------------------ */
+.hb__view {
+  min-width: 0;
+  min-height: 62vh;
+  outline: none;
+}
+.hb__loading,
+.hb__nojs {
+  padding: 40px 0;
+  color: var(--ink-3);
+}
+.no-js .hb__loading {
+  display: none;
+}
+.hb__view a {
+  color: var(--link);
+}
+.hb__view a:hover {
+  color: var(--link-hover);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.hb__view p {
+  margin: 0.55em 0;
+  max-width: 78ch;
+}
+.hb__view strong {
+  font-weight: 700;
+  color: var(--ink-strong);
+}
+/* 說明文字裡的道具名稱會變成連結，粗體字要跟著連結的顏色 */
+.hb__view a strong {
+  color: inherit;
+}
+
+/* 頁面標題：左邊一道血紅＋一條細金線，和全站的區塊標題一樣 */
+.hb__view h2 {
+  position: relative;
+  padding-left: 22px;
+  font-size: clamp(1.45rem, 1.2rem + 0.9vw, 1.8rem);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+}
+.hb__view h2::before,
+.hb .detail-h::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.16em;
+  width: 10px;
+  height: 1em;
+  background: linear-gradient(90deg, var(--brand-500) 0 6px, transparent 6px 8px, var(--gold-400) 8px 10px);
+}
+/* 段落標題：紅色小方塊＋底線 */
+.hb__view h3 {
+  position: relative;
+  margin: 2em 0 0.7em;
+  padding: 0 0 8px 18px;
+  font-size: 1.14rem;
+  font-weight: 800;
+  line-height: 1.4;
+  border-bottom: 1px solid var(--line);
+}
+.hb__view h3::before {
+  content: '';
+  position: absolute;
+  left: 1px;
+  top: 0.48em;
+  width: 8px;
+  height: 8px;
+  background: var(--brand-500);
+}
+/* 小標題：金色短線 */
+.hb__view h4 {
+  position: relative;
+  margin: 1.5em 0 0.5em;
+  padding-left: 18px;
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--ink-strong);
+}
+.hb__view h4::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.68em;
+  width: 10px;
+  height: 2px;
+  background: var(--gold-500);
+}
+
+/* 指令：和新手指南的指令同一個樣子 */
+.hb__view code {
+  display: inline-block;
+  padding: 0 6px;
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  line-height: 1.5;
+  color: #7a1524;
+  background: #f8f1f0;
+  border: 1px solid #e4d1d2;
+}
+
+/* 輔助文字 */
+.hb .small {
+  font-size: 0.86rem;
+}
+.hb .mono,
+.hb .lv {
+  font-variant-numeric: tabular-nums;
+}
+.hb .lv {
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.hb .gold {
+  font-weight: 700;
+  color: var(--gold-600);
+}
+.hb .empty {
+  padding: 10px 0;
+  color: var(--ink-3);
+}
+.hb .count {
+  margin: 6px 0;
+  font-size: 0.86rem;
+  color: var(--ink-3);
+}
+
+/* ------------------------------------------------------------
+   標籤與裝備等級徽章
+   ------------------------------------------------------------ */
+.hb .tag {
+  vertical-align: 1px;
+}
+.hb .chip {
+  display: inline-block;
+  gap: 0;
+  padding: 0 7px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.7;
+  color: var(--ink-2);
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  white-space: nowrap;
+  vertical-align: 1px;
+}
+.hb .chip.hot {
+  color: var(--brand-700);
+  background: var(--brand-50);
+  border-color: #e7bcc2;
+}
+.hb .chip.ok {
+  color: #1f6a3e;
+  background: var(--ok-bg);
+  border-color: #b5d9c3;
+}
+.hb .chip.na {
+  color: var(--ink-3);
+  background: transparent;
+  border-style: dashed;
+}
+/* 等級徽章：有等級的道具是一個上色的方塊；沒有等級的只留一個灰色小方點（位置不變，名稱才會對齊） */
+.hb .gb {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 3px;
+  font-size: 0;
+  font-weight: 800;
+  line-height: 1;
+  color: transparent;
+  border: 1px solid transparent;
+  vertical-align: -4px;
+  font-variant-numeric: tabular-nums;
+}
+.hb .gb::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--line-2);
+}
+.hb .gb.D::after,
+.hb .gb.C::after,
+.hb .gb.B::after,
+.hb .gb.A::after,
+.hb .gb.S::after,
+.hb .gb.S80::after,
+.hb .gb.S84::after,
+.hb .gb.R::after,
+.hb .gb.R95::after,
+.hb .gb.R99::after,
+.hb .gb.R110::after {
+  content: none;
+}
+.hb .gb.D,
+.hb .gb.C,
+.hb .gb.B,
+.hb .gb.A,
+.hb .gb.S,
+.hb .gb.S80,
+.hb .gb.S84,
+.hb .gb.R,
+.hb .gb.R95,
+.hb .gb.R99,
+.hb .gb.R110 {
+  font-size: 11px;
+  color: #fff;
+  border-color: rgb(0 0 0 / 0.3);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.28);
+}
+.hb .gb.D {
+  background: var(--g-d);
+}
+.hb .gb.C {
+  background: var(--g-c);
+}
+.hb .gb.B {
+  background: var(--g-b);
+}
+.hb .gb.A {
+  background: var(--g-a);
+}
+.hb .gb.S,
+.hb .gb.S80,
+.hb .gb.S84 {
+  background: var(--g-s);
+}
+.hb .gb.R,
+.hb .gb.R95,
+.hb .gb.R99,
+.hb .gb.R110 {
+  background: var(--g-r);
+}
+/* 道具連結：徽章＋名稱 */
+.hb .il {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.hb .il .gb {
+  align-self: center;
+}
+.hb .il:hover {
+  text-decoration: none;
+}
+.hb .il:hover > span:not(.gb) {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ------------------------------------------------------------
+   提示框
+   ------------------------------------------------------------ */
+.hb .note,
+.hb .warn,
+.hb .desc {
+  display: block;
+  max-width: 88ch;
+  margin: 1em 0;
+  padding: 11px 16px;
+  font-size: 0.95rem;
+  color: var(--ink-2);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--gold-400);
+  box-shadow: var(--shadow-1);
+}
+.hb .warn {
+  color: var(--ink);
+  border-left-color: var(--brand-500);
+}
+.hb .note::before,
+.hb .warn::before {
+  display: inline-block;
+  margin-right: 0.7em;
+  padding: 0 7px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  line-height: 1.7;
+  vertical-align: 1px;
+}
+.hb .note::before {
+  content: '提示';
+  color: #5d4508;
+  background: var(--gold-100);
+  border: 1px solid #e2c977;
+}
+.hb .warn::before {
+  content: '注意';
+  color: #fff;
+  background: var(--brand-500);
+  border: 1px solid var(--brand-700);
+}
+/* 道具、地點的說明文字：保留原本的換行 */
+.hb .desc {
+  white-space: pre-line;
+}
+
+/* ------------------------------------------------------------
+   表格：深色表頭、紅色底線，和全站的表格一樣
+   ------------------------------------------------------------ */
+.hb .tw {
+  margin: 0.9em 0;
+  overflow-x: auto;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-1);
+}
+/* 資料表一頁常常上百列，列高比其他頁面的表格緊一點，一個畫面才看得到比較多列 */
+.hb table.t {
+  width: 100%;
+  font-size: 0.93rem;
+  line-height: 1.55;
+  border-collapse: collapse;
+}
+.hb .t th,
+.hb .t td {
+  padding: 6px 12px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--line);
+}
+.hb .t thead th {
+  padding-block: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--band-muted);
+  background: var(--band-800);
+  border-bottom: 2px solid var(--brand-500);
+  white-space: nowrap;
+}
+.hb .t tbody tr {
+  transition: background-color 0.15s;
+}
+.hb .t tbody tr:nth-child(even) {
+  background: var(--surface-2);
+}
+.hb .t tbody tr:hover {
+  background: #fdf6f3;
+}
+.hb .t tbody tr:last-child > * {
+  border-bottom: 0;
+}
+.hb .t td.n,
+.hb .t th.n {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.hb .t td.nw {
+  white-space: nowrap;
+}
+.hb .t .sup td {
+  color: var(--ink-3);
+}
+/* 表格裡的次要連結（地點、代表掉落）：平常是一般文字加一條淡淡的底線，主要的那一欄才用紅色，整張表不會一片紅 */
+.hb .t td:not(:first-child) > a[href^='#zone-'],
+.hb .t td.small a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--line-2);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.hb .t td.small a.il {
+  text-decoration: none;
+}
+.hb .t td.small a.il > span:not(.gb) {
+  text-decoration: underline;
+  text-decoration-color: var(--line-2);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.hb .t td:not(:first-child) > a[href^='#zone-']:hover,
+.hb .t td.small a:hover,
+.hb .t td.small a.il:hover > span:not(.gb) {
+  color: var(--link);
+  text-decoration-color: currentColor;
+}
+/* 章節裡欄位多的表格不要擠成一字一行，改在表格框內左右捲動 */
+.hb .guide .t th,
+.hb .guide .t td {
+  min-width: 5em;
+}
+.hb .guide .t th:first-child,
+.hb .guide .t td:first-child {
+  min-width: 7.5em;
+}
+.hb .guide .t td:first-child {
+  color: var(--ink-strong);
+}
+.hb .mats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+}
+.hb .mats.pad {
+  padding: 4px 0 10px;
+}
+
+/* ------------------------------------------------------------
+   展開區塊
+   ------------------------------------------------------------ */
+.hb__view details {
+  margin: 0.9em 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-1);
+}
+.hb__view summary {
+  position: relative;
+  padding: 9px 14px 9px 44px;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--ink-strong);
+  list-style: none;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+.hb__view summary::-webkit-details-marker {
+  display: none;
+}
+.hb__view summary:hover {
+  background: var(--surface-2);
+}
+/* 金色方塊裡的加號，展開後變成減號 */
+.hb__view summary::before {
+  content: '';
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  margin-top: -10px;
+  background:
+    linear-gradient(#241a03, #241a03) center / 10px 2px no-repeat,
+    linear-gradient(#241a03, #241a03) center / 2px 10px no-repeat,
+    linear-gradient(180deg, var(--gold-300), var(--gold-400));
+  border: 1px solid #8a6a12;
+}
+.hb__view details[open] > summary::before {
+  background:
+    linear-gradient(#241a03, #241a03) center / 10px 2px no-repeat,
+    linear-gradient(180deg, var(--gold-300), var(--gold-400));
+}
+.hb__view details[open] > summary {
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+.hb__view details > :not(summary) {
+  margin-left: 14px;
+  margin-right: 14px;
+}
+.hb__view details.small summary {
+  font-weight: 400;
+  color: var(--ink-2);
+}
+
+/* ------------------------------------------------------------
+   總覽
+   ------------------------------------------------------------ */
+/* 標題已經在頁面最上面的主視覺裡 */
+.hb .hero h1 {
+  display: none;
+}
+.hb .hero > p {
+  margin: 0 0 16px;
+  color: var(--ink-2);
+}
+/* 倍率：第一格是酒紅面板，其他是白底，和首頁的倍率卡片一樣 */
+.hb .plates {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-2);
+}
+.hb .plates .plate {
+  position: relative;
+  overflow: visible;
+  padding: 15px 18px 14px;
+  color: var(--ink);
+  background: none;
+  border: 0;
+  border-left: 1px solid var(--line);
+  box-shadow: none;
+}
+.hb .plates .plate:first-child {
+  color: var(--band-text);
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgb(230 90 100 / 0.34), transparent 62%),
+    linear-gradient(160deg, #7a1524 0%, #4a0e17 60%, #2a080e 100%);
+  border-left: 0;
+  box-shadow: inset 0 0 0 1px #1d070b;
+}
+.hb .plates b {
+  display: block;
+  font-size: 1.75rem;
+  font-weight: 900;
+  line-height: 1.15;
+  color: var(--ink-strong);
+  font-variant-numeric: tabular-nums;
+}
+.hb .plates .plate:first-child b {
+  color: var(--gold-300);
+}
+.hb .plates span {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--ink-2);
+}
+.hb .plates .plate:first-child span {
+  color: #e6d3cc;
+}
+
+/* 「我現在幾級，該去哪裡練」 */
+.hb .finder {
+  margin: 20px 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-1);
+}
+.hb .finder > label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  padding: 11px 16px;
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: var(--band-title);
+  background:
+    radial-gradient(80% 140% at 100% 0%, rgb(196 52 68 / 0.5), transparent 62%),
+    linear-gradient(180deg, #1c0e13, #34121c);
+  border-bottom: 3px solid var(--brand-500);
+}
+/* 等級輸入框：金色方塊 */
+.hb .finder input {
+  width: 4.4em;
+  height: 34px;
+  padding: 0 4px 1px 10px;
+  font: inherit;
+  font-weight: 800;
+  text-align: center;
+  color: #241a03;
+  background: linear-gradient(180deg, var(--gold-300), var(--gold-400));
+  border: 1px solid #8a6a12;
+  border-radius: 0;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.45),
+    inset 0 -2px 0 rgb(0 0 0 / 0.12);
+  font-variant-numeric: tabular-nums;
+}
+.hb .finder input:focus-visible {
+  outline: 2px solid var(--gold-100);
+  outline-offset: 2px;
+}
+.hb #finder-out {
+  padding: 14px 16px 16px;
+}
+.hb #finder-out .empty {
+  margin: 0;
+  padding: 0;
+}
+.hb .zgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+.hb .zcard {
+  position: relative;
+  display: grid;
+  gap: 1px;
+  padding: 10px 13px 9px;
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  transition:
+    transform 0.2s var(--ease),
+    box-shadow 0.2s var(--ease),
+    border-color 0.2s,
+    background-color 0.2s;
+}
+.hb .zcard:hover {
+  color: var(--ink);
+  text-decoration: none;
+  background: var(--surface);
+  border-color: var(--brand-200);
+  box-shadow: var(--shadow-2);
+  transform: translateY(-2px);
+}
+.hb .zcard b {
+  font-weight: 700;
+  color: var(--ink-strong);
+  transition: color 0.2s;
+}
+.hb .zcard:hover b {
+  color: var(--link);
+}
+.hb .zcard .lv {
+  font-size: 0.9rem;
+}
+
+/* 章節總表：每一類一張卡片，深色標題列 */
+.hb .chapters {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(232px, 1fr));
+  gap: 14px;
+  margin-top: 26px;
+}
+.hb .chapters > div {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-1);
+}
+.hb .chapters h3 {
+  margin: 0;
+  padding: 9px 14px;
+  font-size: 0.98rem;
+  letter-spacing: 0.04em;
+  color: var(--band-title);
+  background: linear-gradient(180deg, #2b171d, #1a0e13);
+  border-bottom: 2px solid var(--brand-500);
+}
+.hb .chapters h3::before {
+  content: none;
+}
+.hb .chapters ul {
+  padding: 6px 0 8px;
+}
+.hb .chapters li a {
+  position: relative;
+  display: block;
+  padding: 5px 14px 5px 30px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.hb .chapters li a::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 0.92em;
+  width: 6px;
+  height: 6px;
+  background: var(--brand-500);
+}
+.hb .chapters li a:hover {
+  color: var(--link);
+  text-decoration: none;
+  background: var(--surface-2);
+}
+
+/* ------------------------------------------------------------
+   章節
+   ------------------------------------------------------------ */
+.hb .guide {
+  max-width: 1020px;
+}
+.hb .guide h2 {
+  margin-bottom: 0.5em;
+}
+/* 有錨點的段落：跳過去時除了頁首，還要讓出搜尋列的高度 */
+.hb .guide h3[id],
+.hb .guide h2 {
+  scroll-margin-top: calc(var(--hb-bar) + 18px);
+}
+.hb .guide ul,
+.hb .guide ol {
+  display: grid;
+  gap: 5px;
+  max-width: 82ch;
+  margin: 0.7em 0;
+}
+.hb .guide ul > li {
+  position: relative;
+  padding-left: 18px;
+}
+.hb .guide ul > li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0.72em;
+  width: 7px;
+  height: 7px;
+  background: var(--brand-500);
+}
+/* 第二層清單：空心方塊 */
+.hb .guide li > ul {
+  margin: 5px 0 2px;
+}
+.hb .guide li > ul > li::before {
+  width: 6px;
+  height: 6px;
+  background: none;
+  border: 1px solid var(--brand-500);
+}
+.hb .guide ol {
+  padding-left: 1.6em;
+  list-style: decimal;
+}
+.hb .guide ol > li {
+  padding-left: 4px;
+}
+.hb .guide ol > li::marker {
+  font-weight: 800;
+  color: var(--brand-600);
+}
+/* 清單裡的表格要能用到整個寬度 */
+.hb .guide li > .tw {
+  max-width: none;
+}
+
+/* 本章段落 */
+.hb .toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0 24px;
+}
+.hb .toc a {
+  padding: 3px 11px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  transition:
+    color 0.15s,
+    border-color 0.15s;
+}
+.hb .toc a:hover {
+  color: var(--link);
+  text-decoration: none;
+  border-color: var(--brand-200);
+}
+
+/* 上一章、下一章 */
+.hb .pager {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 40px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.hb .pager span {
+  display: flex;
+  max-width: 48%;
+}
+.hb .pager a,
+.hb .morebtn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 7px 16px 8px;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--ink-strong);
+  background: linear-gradient(180deg, #fff, #f1ede7);
+  border: 1px solid #a59c92;
+  box-shadow:
+    inset 0 -2px 0 rgb(0 0 0 / 0.06),
+    0 1px 2px rgb(20 10 12 / 0.08);
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    transform 0.15s var(--ease),
+    box-shadow 0.15s;
+}
+.hb .pager a:hover,
+.hb .morebtn:hover {
+  color: var(--link);
+  text-decoration: none;
+  background: linear-gradient(180deg, #fff, #e9e4dc);
+  box-shadow:
+    inset 0 -2px 0 rgb(0 0 0 / 0.06),
+    0 6px 14px -8px rgb(20 10 12 / 0.3);
+  transform: translateY(-1px);
+}
+.hb .morebtn {
+  display: flex;
+  margin: 18px auto 0;
+}
+
+/* ------------------------------------------------------------
+   資料庫：標題、篩選列
+   ------------------------------------------------------------ */
+.hb .dbhead {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.hb .dbhead p {
+  margin: 0;
+  color: var(--ink-2);
+}
+.hb .filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+  margin: 14px 0;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--brand-500);
+  box-shadow: var(--shadow-1);
+}
+.hb .filters label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.hb .filters input[type='text'],
+.hb .filters input[type='number'],
+.hb .filters select {
+  min-width: 0;
+  height: 34px;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 0.93rem;
+  font-weight: 400;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-radius: 0;
+  box-shadow: inset 0 1px 2px rgb(40 22 26 / 0.06);
+  outline: none;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+.hb .filters input[type='text'] {
+  width: 14em;
+}
+.hb .filters input[type='number'] {
+  width: 5.2em;
+  font-variant-numeric: tabular-nums;
+}
+.hb .filters select {
+  max-width: 16em;
+  padding-right: 4px;
+  cursor: pointer;
+}
+.hb .filters input[type='text']:hover,
+.hb .filters input[type='number']:hover,
+.hb .filters select:hover {
+  border-color: #a59c92;
+}
+.hb .filters input[type='text']:focus,
+.hb .filters input[type='number']:focus,
+.hb .filters select:focus {
+  border-color: var(--brand-500);
+  box-shadow: 0 0 0 3px rgb(176 34 51 / 0.16);
+}
+.hb .filters input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--brand-500);
+  cursor: pointer;
+}
+/* 分段按鈕：選中的那一格是紅色 */
+.hb .seg {
+  display: inline-flex;
+  border: 1px solid #a59c92;
+  box-shadow: 0 1px 2px rgb(20 10 12 / 0.08);
+}
+.hb .seg button {
+  height: 32px;
+  padding: 0 13px 1px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--ink);
+  background: linear-gradient(180deg, #fff, #f1ede7);
+  transition: color 0.15s;
+}
+.hb .seg button + button {
+  border-left: 1px solid var(--line-2);
+}
+.hb .seg button:hover {
+  color: var(--link);
+}
+.hb .seg button.on {
+  color: #fff;
+  background: linear-gradient(180deg, #c93045, #a01c2e);
+  box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.22);
+}
+
+/* ------------------------------------------------------------
+   詳細頁（道具、怪物、地點、商店）
+   ------------------------------------------------------------ */
+.hb .detail-h {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding-left: 22px;
+}
+.hb .detail-h::before {
+  top: 0.62em;
+  height: 1.75em;
+  margin-top: -0.4em;
+}
+.hb .detail-h h2 {
+  padding-left: 0;
+}
+.hb .detail-h h2::before {
+  content: none;
+}
+.hb .detail-h .gb {
+  min-width: 30px;
+  height: 30px;
+  font-size: 15px;
+}
+/* 沒有等級的道具，標題前面不放方點 */
+.hb .detail-h .gb[title='無等級'] {
+  display: none;
+}
+/* 怪物等級：金色方塊 */
+.hb .detail-h .lv {
+  padding: 3px 9px 4px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.3;
+  color: #241a03;
+  background: linear-gradient(180deg, var(--gold-300), var(--gold-400));
+  border: 1px solid #8a6a12;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.45),
+    inset 0 -2px 0 rgb(0 0 0 / 0.12);
+}
+.hb .kv {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+  margin: 16px 0;
+}
+.hb .kv div {
+  min-width: 0;
+  padding: 9px 13px 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-1);
+}
+.hb .kv span {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+}
+.hb .kv b {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--ink-strong);
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+/* 段落標題＋右邊的小說明 */
+.hb .sec-h {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin: 30px 0 4px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+.hb .sec-h h3 {
+  margin: 0;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+/* 搜尋結果 */
+.hb .sugg-list {
+  display: grid;
+  margin: 0.9em 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-1);
+}
+.hb .sugg-list a {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  padding: 8px 14px;
+  line-height: 1.5;
+  color: var(--ink);
+  border-bottom: 1px solid var(--line);
+  transition: background-color 0.15s;
+}
+.hb .sugg-list a:last-child {
+  border-bottom: 0;
+}
+.hb .sugg-list a:hover {
+  color: var(--ink);
+  text-decoration: none;
+  background: #fdf6f3;
+}
+.hb .sugg-list a > span:not([class]) {
+  font-weight: 700;
+  color: var(--ink-strong);
+}
+.hb .sugg-list a:hover > span:not([class]) {
+  color: var(--link);
+}
+.hb .sugg-list b,
+.hb .sugg b {
+  color: var(--brand-600);
+}
+
+/* 每一頁最下面的資料說明 */
+.hb .foot {
+  margin-top: 48px;
+  padding-top: 14px;
+  font-size: 0.84rem;
+  color: var(--ink-3);
+  border-top: 1px solid var(--line);
+}
+
+/* ------------------------------------------------------------
+   窄螢幕
+   ------------------------------------------------------------ */
+@media (max-width: 1180px) {
+  .hb {
+    --hb-side: 212px;
+    --hb-gap: 24px;
+  }
+  .hb .plates b {
+    font-size: 1.5rem;
+  }
+}
+/* 章節欄收進「目錄」按鈕 */
+@media (max-width: 960px) {
+  .hb .shell {
+    grid-template-columns: minmax(0, 1fr);
+    padding-top: 20px;
+  }
+  .hb__bar-in {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px;
+  }
+  .hb__home {
+    display: none;
+  }
+  .hb .navbtn {
+    display: inline-flex;
+  }
+  .hb .search {
+    max-width: none;
+  }
+  /* 搜尋建議：和整個搜尋列一樣寬（靠右對齊，往左延伸到目錄按鈕底下） */
+  .hb .sugg {
+    left: auto;
+    width: calc(100vw - var(--gutter) * 2);
+  }
+  .hb .nav {
+    display: none;
+  }
+  .hb .nav.open {
+    display: block;
+    position: fixed;
+    top: calc(var(--hb-stick) + var(--hb-bar) + 1px);
+    bottom: 0;
+    left: 0;
+    z-index: 45;
+    width: min(310px, 86vw);
+    max-height: none;
+    padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px));
+    border: 0;
+    border-right: 1px solid var(--line-2);
+    box-shadow: var(--shadow-3);
+  }
+  /* 目錄打開時，後面的內容變暗 */
+  .hb:has(.nav.open)::after {
+    content: '';
+    position: fixed;
+    inset: calc(var(--hb-stick) + var(--hb-bar) + 1px) 0 0;
+    z-index: 44;
+    background: rgb(20 10 12 / 0.45);
+  }
+}
+@media (max-width: 720px) {
+  .hb .plates {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .hb .plates .plate:nth-child(4) {
+    border-left: 0;
+  }
+  .hb .plates .plate:nth-child(n + 4) {
+    border-top: 1px solid var(--line);
+  }
+  .hb .plates .plate {
+    padding: 12px 14px 11px;
+  }
+  .hbs {
+    --hbs-gap: 12px;
+  }
+  .hbs b {
+    font-size: 1.12rem;
+  }
+}
+@media (max-width: 560px) {
+  .hb {
+    --hb-bar: 54px;
+  }
+  .hb table.t {
+    font-size: 0.88rem;
+  }
+  .hb .t th,
+  .hb .t td {
+    padding-inline: 9px;
+  }
+  .hb .filters {
+    gap: 10px 12px;
+    padding: 10px 12px;
+  }
+  .hb .filters label.grow {
+    flex: 1 1 100%;
+  }
+  .hb .filters label.grow input[type='text'] {
+    width: 100%;
+  }
+  .hb .filters select {
+    max-width: 11em;
+  }
+  .hb .seg button {
+    padding-inline: 10px;
+  }
+  .hb .kv {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .hb .pager {
+    flex-direction: column;
+  }
+  .hb .pager span {
+    max-width: none;
+  }
+  .hb .pager span:empty {
+    display: none;
+  }
+  .hb .zgrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .hb__view h3 {
+    font-size: 1.08rem;
+  }
+}

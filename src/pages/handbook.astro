@@ -1,0 +1,186 @@
+---
+/**
+ * 冒險手冊
+ * ------------------------------------------------------------------
+ * 手冊的資料、章節內容與程式來自伺服器專案（npm run sync-handbook 複製到 src/handbook/wiki.html），
+ * 這一頁只取出那三塊，放進官網自己的版面：頁首、主視覺、搜尋列、章節欄、頁尾都是官網的，
+ * 樣式全部寫在 src/styles/handbook.css。
+ *
+ * 手冊的程式用網址的 # 切換頁面（例如 /handbook/#srv-bbs），會找下面這幾個元素：
+ *   #navbtn（手機的目錄按鈕）、#q（搜尋框）、#sugg（搜尋建議）、#nav（章節欄）、#view（內容）
+ * 它們的 id 與 class 不能改。
+ */
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Icon from '../components/Icon.astro';
+import source from '../handbook/wiki.html?raw';
+import { splitHandbook } from '../../scripts/handbook-parts.mjs';
+import '../styles/handbook.css';
+
+const hb = splitHandbook(source);
+if (hb.problems.length) {
+  throw new Error(
+    `冒險手冊的來源檔（src/handbook/wiki.html）和官網的冒險手冊頁面對不上：\n- ${hb.problems.join('\n- ')}\n` +
+      '請依照訊息調整 src/pages/handbook.astro，或把來源檔換回上一個版本。',
+  );
+}
+const m = hb.meta;
+const fmt = (n: number) => n.toLocaleString('zh-TW');
+---
+
+<Base
+  title="冒險手冊"
+  description="嗜血天堂II 經典服冒險手冊：練功地圖、怪物與首領圖鑑、道具、商店、製作配方、強化與副本規則，資料由伺服器設定自動整理。"
+>
+  <PageHero
+    crumb="冒險手冊"
+    title="冒險手冊"
+    lead="伺服器資料，隨手查"
+    desc="怪物掉落、商店價格、製作配方、強化機率、副本規則，全部由伺服器設定自動整理；伺服器改了什麼，手冊就跟著更新。"
+  >
+    <ul class="hbs" aria-label="手冊收錄的資料">
+      <li><b>{fmt(m.items)}</b><span>件道具</span></li>
+      <li><b>{fmt(m.monsters)}</b><span>種怪物</span></li>
+      <li><b>{fmt(m.bosses)}</b><span>隻首領</span></li>
+      <li><b>{m.guides}</b><span>篇說明</span></li>
+      {
+        m.date && (
+          <li class="hbs__date">
+            <span>資料日期</span>
+            <b>{m.date}</b>
+          </li>
+        )
+      }
+    </ul>
+  </PageHero>
+
+  <div class="hb" data-hb>
+    <!-- 搜尋列：捲動時貼在頁首下方 -->
+    <div class="hb__bar" data-hb-bar>
+      <div class="hb__wrap hb__bar-in">
+        <button class="navbtn" id="navbtn" type="button" aria-expanded="false" aria-controls="nav">
+          <Icon name="menu" />目錄
+        </button>
+        <a class="hb__home" href="#home">
+          <span class="hb__home-ico" aria-hidden="true"><Icon name="book" /></span>
+          <span class="hb__home-t">冒險手冊</span>
+          <span class="hb__home-s">總覽</span>
+        </a>
+        <div class="search" role="search">
+          <svg viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="m20 20-4-4"></path>
+          </svg>
+          <input id="q" type="search" placeholder="搜尋道具、怪物、首領、地點或章節" autocomplete="off" aria-label="搜尋冒險手冊" />
+          <kbd class="hb__key" aria-hidden="true">/</kbd>
+          <div class="sugg" id="sugg" hidden></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hb__wrap shell">
+      <nav class="nav" id="nav" aria-label="章節"></nav>
+      <div class="hb__view" id="view" tabindex="-1">
+        <p class="hb__loading">手冊資料載入中…</p>
+        <noscript><p class="hb__nojs">冒險手冊需要開啟瀏覽器的 JavaScript 才能顯示。</p></noscript>
+      </div>
+    </div>
+  </div>
+
+  <CtaBand />
+
+  <!-- 手冊的資料、章節內容與程式（原樣輸出） -->
+  <Fragment set:html={hb.dataTag} />
+  <Fragment set:html={hb.guidesTag} />
+  <script is:inline set:html={hb.app} />
+
+  <!-- 官網這邊補上的互動；要排在手冊的程式後面 -->
+  <script is:inline>
+    (function () {
+      var hb = document.querySelector('[data-hb]');
+      var bar = document.querySelector('[data-hb-bar]');
+      var nav = document.getElementById('nav');
+      var navbtn = document.getElementById('navbtn');
+      var q = document.getElementById('q');
+      var view = document.getElementById('view');
+      if (!hb || !bar || !nav || !navbtn || !q || !view) return;
+
+      var stick = function () {
+        return parseFloat(getComputedStyle(bar).top) || 0;
+      };
+      /* 手冊區塊的起點：捲到這裡，搜尋列剛好貼在頁首下方 */
+      var appTop = function () {
+        return Math.max(0, Math.round(hb.getBoundingClientRect().top + window.scrollY - stick()));
+      };
+      var toApp = function () {
+        var t = appTop();
+        if (window.scrollY < t) window.scrollTo(0, t);
+      };
+      var route = function () {
+        try {
+          return decodeURIComponent(location.hash.slice(1));
+        } catch (e) {
+          return location.hash.slice(1);
+        }
+      };
+
+      /* 手冊切換頁面後會捲回整頁最上面。除了總覽以外，改成從手冊區塊開始看，不必每次都捲過主視覺 */
+      var settle = function () {
+        var h = route();
+        if (h && h !== 'home') toApp();
+      };
+      window.addEventListener('hashchange', settle);
+      requestAnimationFrame(settle);
+
+      /* 點搜尋框時，如果主視覺還在畫面上，先把搜尋列靠到頁首下方，搜尋建議才有足夠的空間 */
+      q.addEventListener('focus', function () {
+        var t = appTop();
+        if (window.scrollY >= t) return;
+        var calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        window.scrollTo({ top: t, behavior: calm ? 'auto' : 'smooth' });
+      });
+
+      /* 搜尋列貼住頁首時加上陰影 */
+      var onScroll = function () {
+        bar.classList.toggle('is-stuck', window.scrollY > 0 && bar.getBoundingClientRect().top <= stick() + 0.5);
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll);
+      onScroll();
+
+      /* 手機的章節目錄固定在搜尋列下方：打開時先捲到手冊區塊；點目錄以外的地方或按 Esc 會關閉 */
+      var closeNav = function () {
+        if (nav.classList.contains('open')) navbtn.click();
+      };
+      navbtn.addEventListener('click', function () {
+        if (nav.classList.contains('open')) toApp();
+      });
+      document.addEventListener('click', function (e) {
+        if (nav.classList.contains('open') && !e.target.closest('#nav, #navbtn')) closeNav();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeNav();
+        /* 按 / 直接跳到搜尋框 */
+        var a = document.activeElement;
+        var typing = a && (/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) || a.isContentEditable);
+        if (e.key === '/' && !typing && !e.ctrlKey && !e.metaKey && !e.altKey) {
+          e.preventDefault();
+          toApp();
+          q.focus();
+          q.select();
+        }
+      });
+
+      /* 「跳到主要內容」：手冊用網址的 # 切換頁面，這個連結不能改到網址，改成直接把焦點移到內容 */
+      var skip = document.querySelector('.skip-link');
+      if (skip) {
+        skip.addEventListener('click', function (e) {
+          e.preventDefault();
+          toApp();
+          view.focus({ preventScroll: true });
+        });
+      }
+    })();
+  </script>
+</Base>
