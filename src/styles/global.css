@@ -190,6 +190,73 @@ h4 {
 }
 
 /* ------------------------------------------------------------
+   捲軸
+   整頁的捲軸和頁首同一個深色，滑塊是品牌紅、上下兩端各一道金邊；
+   區塊內部的捲軸（左右捲動的表格）用不搶眼的細捲軸。
+   只在用滑鼠操作的裝置套用：手機與平板維持系統原本會自動隱藏的捲軸，
+   Windows 高對比模式也交還給系統繪製。
+   ------------------------------------------------------------ */
+@media (hover: hover) and (pointer: fine) and (forced-colors: none) {
+  /* 區塊內部 */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    border: 3px solid transparent;
+    background: var(--line-2) padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--ink-3) padding-box;
+  }
+
+  /* 整頁。Chrome、Edge、Safari 會先看 body 的捲軸樣式，其次才是 html，所以兩個都要寫 */
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    width: 14px;
+  }
+  html::-webkit-scrollbar-track,
+  body::-webkit-scrollbar-track {
+    background: linear-gradient(90deg, #0d0609, #1b0e13 50%, var(--band-900));
+    box-shadow: inset 1px 0 0 rgb(255 236 228 / 0.08);
+  }
+  html::-webkit-scrollbar-thumb,
+  body::-webkit-scrollbar-thumb {
+    min-height: 64px;
+    border: 3px solid transparent;
+    background:
+      linear-gradient(180deg, var(--gold-300) 0 2px, transparent 2px calc(100% - 2px), var(--gold-500) calc(100% - 2px)) padding-box,
+      linear-gradient(90deg, var(--brand-400), #9a1b2c 55%, var(--brand-700)) padding-box;
+  }
+  html::-webkit-scrollbar-thumb:hover,
+  body::-webkit-scrollbar-thumb:hover {
+    background:
+      linear-gradient(180deg, var(--gold-100) 0 2px, transparent 2px calc(100% - 2px), var(--gold-300) calc(100% - 2px)) padding-box,
+      linear-gradient(90deg, #ea5a6c, var(--brand-500) 55%, var(--brand-600)) padding-box;
+  }
+  html::-webkit-scrollbar-thumb:active,
+  body::-webkit-scrollbar-thumb:active {
+    background:
+      linear-gradient(180deg, var(--gold-100) 0 2px, transparent 2px calc(100% - 2px), var(--gold-300) calc(100% - 2px)) padding-box,
+      linear-gradient(90deg, #f06a7b, var(--brand-400) 55%, var(--brand-500)) padding-box;
+  }
+
+  /* Firefox 沒有上面那組寫法，只能指定兩個顏色（滑塊、軌道）；html 的設定用在整頁，body 的給區塊內部繼承 */
+  @supports not selector(::-webkit-scrollbar) {
+    html {
+      scrollbar-color: var(--brand-600) var(--band-900);
+    }
+    body {
+      scrollbar-color: var(--line-2) transparent;
+    }
+  }
+}
+
+/* ------------------------------------------------------------
    Layout
    ------------------------------------------------------------ */
 .container {
