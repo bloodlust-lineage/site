@@ -1,6 +1,7 @@
 ---
 /**
- * 頁面底部的行動區：加入 Discord、下載遊戲
+ * 頁面底部的行動區：夜空、血月與森林剪影，左邊是標題與按鈕
+ * （下緣的森林是頁尾疊上來的，所以底部留白比較多）
  */
 import { site } from '../data/site';
 import { url } from '../lib/url';
@@ -17,11 +18,17 @@ const {
 ---
 
 <section class="cta" aria-labelledby="cta-title">
+  <svg class="edge edge--trees" viewBox="0 0 2400 96" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <use href="#g-trees"></use>
+  </svg>
+  <div class="cta__sky" aria-hidden="true">
+    <svg class="cta__moon" viewBox="-200 -200 400 400">
+      <use href="#g-moon"></use>
+    </svg>
+  </div>
   <div class="container cta__inner">
-    <div class="cta__text">
-      <h2 class="cta__title" id="cta-title">{title}</h2>
-      <p class="cta__desc">{desc}</p>
-    </div>
+    <h2 class="cta__title" id="cta-title">{title}</h2>
+    <p class="cta__desc">{desc}</p>
     <div class="cta__btns">
       <a href={site.links.discord} class="btn btn--discord" target="_blank" rel="noopener">
         <Icon name="discord" />加入 Discord<span class="sr-only">（另開新視窗）</span>
@@ -35,29 +42,70 @@ const {
 
 <style>
   .cta {
+    --edge: #170b10;
+    position: relative;
     color: var(--band-text);
-    background: linear-gradient(90deg, var(--band-900), #3a1219);
+    background:
+      radial-gradient(1.5px 1.5px at 8% 22%, rgb(255 232 222 / 0.55), transparent 60%),
+      radial-gradient(1.5px 1.5px at 21% 58%, rgb(255 232 222 / 0.35), transparent 60%),
+      radial-gradient(2px 2px at 36% 16%, rgb(255 232 222 / 0.5), transparent 60%),
+      radial-gradient(1.5px 1.5px at 52% 40%, rgb(255 232 222 / 0.4), transparent 60%),
+      radial-gradient(1.5px 1.5px at 63% 12%, rgb(255 232 222 / 0.5), transparent 60%),
+      radial-gradient(2px 2px at 93% 30%, rgb(255 232 222 / 0.4), transparent 60%),
+      radial-gradient(60% 120% at 82% 30%, rgb(176 44 60 / 0.5), transparent 62%),
+      linear-gradient(180deg, #170b10 0%, #34101b 60%, #571624 100%);
+  }
+  .cta__sky {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  /* 和主視覺同一顆血月（共用圖形 #g-moon），外面再加一圈柔和的光暈 */
+  .cta__moon {
+    position: absolute;
+    right: max(4%, calc((100% - var(--container)) / 2 + 10px));
+    top: 50%;
+    width: clamp(190px, 25vw, 290px);
+    height: auto;
+    aspect-ratio: 1;
+    max-width: none;
+    overflow: visible;
+    transform: translateY(-60%);
+    filter: drop-shadow(0 0 60px rgb(226 70 82 / 0.35));
   }
   .cta__inner {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 18px 32px;
-    padding-block: 32px;
+    position: relative;
+    padding-block: 64px 132px;
   }
   .cta__title {
-    font-size: 1.4rem;
-    color: #fff;
+    font-size: clamp(1.6rem, 1.3rem + 1.4vw, 2.2rem);
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    color: var(--band-title);
+    text-shadow: 0 2px 16px rgb(0 0 0 / 0.5);
   }
   .cta__desc {
-    margin-top: 4px;
-    max-width: 40em;
-    color: var(--band-muted);
+    margin-top: 8px;
+    max-width: 34em;
+    color: #dccdc6;
   }
   .cta__btns {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
+    margin-top: 24px;
+  }
+  @media (max-width: 640px) {
+    /* 手機：月亮縮到右上角、調淡一點，不要搶到文字 */
+    .cta__moon {
+      right: -78px;
+      top: 0;
+      transform: translateY(-22%);
+      opacity: 0.62;
+    }
+    .cta__inner {
+      padding-block: 52px 116px;
+    }
   }
 </style>

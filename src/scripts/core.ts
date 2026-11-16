@@ -1,7 +1,42 @@
 /**
- * 全站共用互動：行動版選單、複製指令、伺服器時鐘
+ * 全站共用互動：行動版選單、頁首陰影、進場效果、複製指令、伺服器時鐘
  */
 const root = document.documentElement;
+
+/* ------------------------------------------------------------
+   頁首：離開頁面頂端後加上陰影
+   ------------------------------------------------------------ */
+const header = document.querySelector<HTMLElement>('.hd');
+if (header) {
+  const onScroll = () => header.classList.toggle('is-stuck', window.scrollY > 8);
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+}
+
+/* ------------------------------------------------------------
+   進場效果：各區塊裡的內容捲到才浮現。
+   載入時已經在畫面內的不處理，所以不會閃一下；沒有 JavaScript 時內容照常顯示。
+   ------------------------------------------------------------ */
+if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
+  const blocks = document.querySelectorAll<HTMLElement>('main > section:not(.hero):not(.ph) > .container > *');
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        entry.target.classList.add('is-in');
+        io.unobserve(entry.target);
+      }
+    },
+    { rootMargin: '0px 0px -10% 0px' },
+  );
+  const limit = window.innerHeight * 0.92;
+  blocks.forEach((el) => {
+    if (el.getBoundingClientRect().top > limit) {
+      el.setAttribute('data-reveal', '');
+      io.observe(el);
+    }
+  });
+}
 
 /* ------------------------------------------------------------
    行動版下拉選單

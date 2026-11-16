@@ -8,6 +8,18 @@ import CtaBand from '../components/CtaBand.astro';
 import { featureGroups, rateBook } from '../data/features';
 import { awakenClassCount } from '../data/classes';
 import { site } from '../data/site';
+import FeatureArt from '../components/FeatureArt.astro';
+
+/** 每一章封面下半部的示意圖 */
+type ArtKind = 'board' | 'auto' | 'awaken' | 'balance' | 'growth' | 'battle' | 'boss';
+const chapterArt: Record<string, ArtKind> = {
+  growth: 'growth',
+  board: 'board',
+  auto: 'auto',
+  classes: 'balance',
+  battle: 'battle',
+  bosses: 'boss',
+};
 
 const toc = [
   ...featureGroups.map((g) => ({ id: g.id, label: g.title })),
@@ -24,7 +36,8 @@ const toc = [
     desc="保留天堂II經典版的節奏與職業體系，再加上隨身布告欄、免費內掛與 90 級覺醒技能。以下每一項，都來自伺服器實際設定。"
   />
 
-  <nav class="toc" aria-label="本頁目錄">
+  <!-- 本頁目錄：黏在頁首下方，捲動時標出目前所在的章節 -->
+  <nav class="toc" aria-label="本頁目錄" data-toc>
     <div class="container">
       <ul class="toc__list">
         {
@@ -41,42 +54,65 @@ const toc = [
     </div>
   </nav>
 
-  {
-    featureGroups.map((g, gi) => (
-      <section class:list={['section', gi % 2 === 1 && 'section--alt']} id={g.id} aria-labelledby={`fg-${g.id}`}>
-        <div class="container">
-          <SectionHead title={g.title} id={`fg-${g.id}`} desc={g.lede} />
-          <ul class="fg">
-            {g.items.map((f) => (
-              <li class="fcard">
-                <div class="fcard__top">
+  <!-- 六個章節：左邊是酒紅色的章節封面，右邊是該章的特色 -->
+  <section class="section" aria-label="伺服器特色一覽">
+    <div class="container chaps">
+      {
+        featureGroups.map((g, gi) => (
+          <section class:list={['chap', g.id === 'board' && 'chap--note']} id={g.id} aria-labelledby={`fg-${g.id}`}>
+            <header class="chap__lead plate plate--frame">
+              <p class="chap__no" aria-hidden="true">
+                <span class="gem gem--gold">
+                  <b>{gi + 1}</b>
+                </span>
+                <span class="chap__latin">{g.latin}</span>
+              </p>
+              <h2 class="chap__title" id={`fg-${g.id}`}>
+                {g.title}
+              </h2>
+              <p class="chap__lede">{g.lede}</p>
+              {chapterArt[g.id] && (
+                <div class="chap__art" aria-hidden="true">
+                  <FeatureArt kind={chapterArt[g.id]} align="start" />
+                </div>
+              )}
+            </header>
+
+            <ul class="fg">
+              {g.items.map((f) => (
+                <li class="fcard">
                   <span class="ibox" aria-hidden="true">
                     <Icon name={f.icon} />
                   </span>
-                  {f.tag && <span class="tag">{f.tag}</span>}
-                </div>
-                <h3 class="fcard__title">{f.title}</h3>
-                <p class="fcard__desc">{f.desc}</p>
-                {f.cmd && (
-                  <button class="fcard__cmd" type="button" data-copy={f.cmd} aria-label={`複製指令 ${f.cmd}`}>
-                    <span class="cmd">{f.cmd}</span>
-                    <Icon name="copy" />
-                    <span data-copy-label>複製</span>
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
-          {gi === 1 && (
-            <p class="note fg__note">
-              <Icon name="shield" />
-              <span>死亡、戰鬥中、紫名或紅名、PvP 活動與奧林匹亞中、交易或擺攤中、攻城區域與監獄內，無法使用布告欄的商店、輔助、傳送與服務。</span>
-            </p>
-          )}
-        </div>
-      </section>
-    ))
-  }
+                  <div class="fcard__body">
+                    <h3 class="fcard__title">
+                      {f.title}
+                      {f.tag && <span class:list={['tag', f.tag === '免費' && 'tag--gold']}>{f.tag}</span>}
+                    </h3>
+                    <p class="fcard__desc">{f.desc}</p>
+                    {f.cmd && (
+                      <button class="fcard__cmd" type="button" data-copy={f.cmd} aria-label={`複製指令 ${f.cmd}`}>
+                        <span class="cmd">{f.cmd}</span>
+                        <Icon name="copy" />
+                        <span data-copy-label>複製</span>
+                      </button>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            {g.id === 'board' && (
+              <p class="note chap__note">
+                <Icon name="shield" />
+                <span>死亡、戰鬥中、紫名或紅名、PvP 活動與奧林匹亞中、交易或擺攤中、攻城區域與監獄內，無法使用布告欄的商店、輔助、傳送與服務。</span>
+              </p>
+            )}
+          </section>
+        ))
+      }
+    </div>
+  </section>
 
   <section class="section section--white" id="awaken" aria-labelledby="awaken-title">
     <div class="container">
@@ -105,7 +141,7 @@ const toc = [
                 </tr>
               </thead>
               <tbody>
-                <tr>
+                <tr class="spec__hero">
                   <th scope="row">{rateBook.hero.label}</th>
                   <td class="spec__v tnum">×{rateBook.hero.value}</td>
                   <td>{rateBook.hero.note}</td>
@@ -152,16 +188,86 @@ const toc = [
   <CtaBand />
 </Base>
 
+<script>
+  /* 本頁目錄：標出目前捲到哪一章；目錄一列放不下時，把目前那一項捲進可見範圍 */
+  const toc = document.querySelector<HTMLElement>('[data-toc]');
+  if (toc) {
+    const list = toc.querySelector<HTMLElement>('.toc__list');
+    const links = [...toc.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')];
+    const targets = links.map((a) => document.getElementById(decodeURIComponent(a.hash.slice(1))));
+    let current = -2;
+    let queued = false;
+
+    const update = () => {
+      queued = false;
+      const stickTop = parseFloat(getComputedStyle(toc).top) || 0;
+      toc.classList.toggle('is-stuck', toc.getBoundingClientRect().top <= stickTop + 0.5);
+
+      // 章節的上緣捲過目錄下方就算「目前這一章」
+      const line = stickTop + toc.offsetHeight + 26;
+      let idx = -1;
+      targets.forEach((el, i) => {
+        if (el && el.getBoundingClientRect().top <= line) idx = i;
+      });
+      if (idx === current) return;
+      current = idx;
+      links.forEach((a, i) => {
+        if (i === idx) a.setAttribute('aria-current', 'true');
+        else a.removeAttribute('aria-current');
+      });
+
+      const a = links[idx];
+      if (a && list && list.scrollWidth > list.clientWidth) {
+        const lr = list.getBoundingClientRect();
+        const ar = a.getBoundingClientRect();
+        if (ar.left < lr.left + 8 || ar.right > lr.right - 40) {
+          list.scrollTo({ left: list.scrollLeft + ar.left - lr.left - 16, behavior: 'smooth' });
+        }
+      }
+    };
+    const onScroll = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(update);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    update();
+  }
+</script>
+
 <style>
+  /* ---------- 本頁目錄 ---------- */
   .toc {
-    background: var(--surface);
+    position: sticky;
+    top: calc(var(--header-h) + 3px);
+    z-index: 40;
+    background: rgb(255 255 255 / 0.95);
     border-bottom: 1px solid var(--line);
+    transition: box-shadow 0.3s;
+  }
+  @supports (backdrop-filter: blur(8px)) {
+    .toc {
+      background: rgb(255 255 255 / 0.86);
+      backdrop-filter: blur(10px) saturate(1.3);
+    }
+  }
+  .toc:global(.is-stuck) {
+    box-shadow: 0 12px 24px -18px rgb(40 22 26 / 0.55);
   }
   .toc__list {
     display: flex;
-    flex-wrap: wrap;
     gap: 6px;
-    padding-block: 12px;
+    padding-block: 10px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .toc__list::-webkit-scrollbar {
+    display: none;
+  }
+  .toc__list li {
+    flex: none;
   }
   .toc__list a {
     display: inline-flex;
@@ -170,10 +276,14 @@ const toc = [
     padding: 4px 12px 4px 4px;
     font-size: 0.92rem;
     font-weight: 700;
+    white-space: nowrap;
     color: var(--ink);
     background: var(--surface-2);
     border: 1px solid var(--line);
-    transition: border-color 0.15s, color 0.15s;
+    transition:
+      border-color 0.2s,
+      color 0.2s,
+      background-color 0.2s;
   }
   .toc__list a:hover {
     color: var(--link);
@@ -187,48 +297,150 @@ const toc = [
     font-size: 0.78rem;
     color: #fff;
     background: var(--brand-500);
+    transition:
+      color 0.2s,
+      background-color 0.2s;
+  }
+  /* 目前所在的章節 */
+  .toc__list a[aria-current] {
+    color: #fff;
+    background: linear-gradient(180deg, #2b171d, #1a0e13);
+    border-color: #0b0508;
+  }
+  .toc__list a[aria-current] .toc__no {
+    color: #241a03;
+    background: var(--gold-400);
   }
 
+  /* ---------- 章節 ---------- */
+  .chaps {
+    display: grid;
+    gap: clamp(22px, 3vw, 34px);
+  }
+  .chap {
+    display: grid;
+    grid-template-columns: 284px minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  /* 卡片下面還有一行提示的章節：封面往下延伸到提示那一列 */
+  .chap--note {
+    grid-template-rows: 1fr auto;
+  }
+  .chap--note .chap__lead {
+    grid-row: 1 / span 2;
+  }
+
+  /* 章節封面 */
+  .chap__lead {
+    display: flex;
+    flex-direction: column;
+    padding: 28px 26px 24px;
+  }
+  .chap__no {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .chap__no .gem {
+    --gem: 32px;
+    margin: 7px 0 7px 7px;
+  }
+  .chap__latin {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgb(236 202 106 / 0.85);
+  }
+  .chap__title {
+    margin-top: 18px;
+    font-size: 1.75rem;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    line-height: 1.25;
+    color: var(--band-title);
+    text-shadow: 0 2px 14px rgb(0 0 0 / 0.35);
+  }
+  .chap__lede {
+    margin-top: 10px;
+    font-size: 0.93rem;
+    line-height: 1.85;
+    color: #e6d3cc;
+  }
+  /* 封面下半部的示意圖：貼著底部，上面一條虛線 */
+  .chap__art {
+    margin-top: auto;
+    padding-top: 26px;
+  }
+  .chap__art::before {
+    content: '';
+    display: block;
+    margin-bottom: 22px;
+    border-top: 1px dashed rgb(255 236 228 / 0.22);
+  }
+
+  /* 特色卡片：圖示在左、文字在右（封面比較高的時候，卡片會平均拉高來對齊） */
   .fg {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
   }
   .fcard {
-    display: flex;
-    flex-direction: column;
-    padding: 16px 18px 18px;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 14px;
+    align-items: start;
+    padding: 16px 18px 17px;
     background: var(--surface);
     border: 1px solid var(--line);
+    box-shadow: var(--shadow-1);
+    transition:
+      border-color 0.25s,
+      box-shadow 0.25s var(--ease);
   }
-  .fcard__top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 12px;
+  .fcard:hover {
+    border-color: var(--line-2);
+    box-shadow: var(--shadow-2);
+  }
+  .fcard :global(.ibox) {
+    transition:
+      color 0.25s,
+      background-color 0.25s,
+      border-color 0.25s;
+  }
+  .fcard:hover :global(.ibox) {
+    color: #fff;
+    background: linear-gradient(180deg, var(--brand-400), var(--brand-600));
+    border-color: var(--brand-700);
   }
   .fcard__title {
-    margin-top: 12px;
-    font-size: 1.08rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    font-size: 1.06rem;
+    line-height: 1.5;
   }
   .fcard__desc {
-    margin-top: 4px;
-    font-size: 0.93rem;
-    line-height: 1.75;
+    margin-top: 3px;
+    font-size: 0.92rem;
+    line-height: 1.72;
     color: var(--ink-2);
   }
   .fcard__cmd {
-    align-self: flex-start;
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    margin-top: 12px;
+    margin-top: 10px;
     padding: 3px 10px 3px 3px;
     font-size: 0.82rem;
     color: var(--ink-2);
     background: var(--surface-2);
     border: 1px solid var(--line);
-    transition: border-color 0.15s, color 0.15s;
+    transition:
+      border-color 0.15s,
+      color 0.15s;
   }
   .fcard__cmd :global(svg) {
     width: 14px;
@@ -243,10 +455,11 @@ const toc = [
     border-color: #9fd3b4;
     background: var(--ok-bg);
   }
-  .fg__note {
-    margin-top: 16px;
+  .chap__note {
+    grid-column: 2;
   }
 
+  /* ---------- 倍率與規格 ---------- */
   .spec {
     display: grid;
     grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
@@ -258,23 +471,79 @@ const toc = [
     color: var(--brand-600);
     white-space: nowrap;
   }
+  .spec__hero .spec__v {
+    font-size: 1.15rem;
+    font-weight: 900;
+    line-height: 1.35;
+  }
   .spec__k {
     white-space: nowrap;
   }
   .spec__premium {
     margin-top: 12px;
   }
+
   @media (max-width: 1040px) {
-    .fg {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+    .toc__list {
+      padding-right: 40px;
+      -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent);
+      mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent);
     }
     .spec {
       grid-template-columns: 1fr;
     }
   }
-  @media (max-width: 600px) {
+  /* 中等寬度：封面改成橫的，放在卡片上方 */
+  @media (max-width: 980px) {
+    .chap,
+    .chap--note {
+      grid-template-columns: 1fr;
+      grid-template-rows: none;
+    }
+    .chap__lead,
+    .chap--note .chap__lead {
+      grid-row: auto;
+      padding: 22px 22px 20px;
+    }
+    .chap__title {
+      margin-top: 12px;
+      font-size: 1.55rem;
+    }
+    /* 文字在左、示意圖在右 */
+    .chap__lead {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-rows: auto auto 1fr;
+      column-gap: 28px;
+      align-items: start;
+    }
+    .chap__lede {
+      max-width: 40em;
+    }
+    .chap__art {
+      grid-column: 2;
+      grid-row: 1 / -1;
+      align-self: center;
+      margin: 0 8px 0 0;
+      padding-top: 0;
+    }
+    .chap__art::before {
+      display: none;
+    }
+    .chap__note {
+      grid-column: auto;
+    }
+  }
+  @media (max-width: 640px) {
     .fg {
       grid-template-columns: 1fr;
+    }
+    /* 手機：封面只留標題與說明 */
+    .chap__lead {
+      display: flex;
+    }
+    .chap__art {
+      display: none;
     }
   }
 </style>

@@ -3,11 +3,12 @@
  * 血月場景：分層疊出景深（由後往前）
  *   天空 → 星空 → 月暈與血月 → 雲帶 → 遠山 → 霧 → 中景山脈 → 岩峰上的城堡 → 飛鳥 → 霧 → 前景森林
  * 全部是建置時產生的原創 SVG 與 CSS 漸層，不載入圖片。
+ * 山脈與森林的路徑在 SceneDefs 元件（版型已經放好），這裡用 <use> 引用。
  *
  * 版面用兩個 CSS 變數控制「主景」（月亮＋城堡）的位置與大小：
  *   --fx：主景中心的水平位置　--ph：主景高度　--pb：主景底部位移
  */
-import { citadel, range, treeline, starfield, streak } from '../lib/scene';
+import { citadel, starfield, streak } from '../lib/scene';
 
 interface Props {
   /** home＝首頁主視覺；page＝子頁面標頭（主景放大、只露出尖塔與月亮） */
@@ -16,9 +17,6 @@ interface Props {
 const { variant = 'home' } = Astro.props;
 
 const c = citadel();
-const far = range(11, 2400, 200, { peaks: 15, low: 0.34, high: 0.96 });
-const mid = range(29, 2400, 160, { peaks: 10, low: 0.3, high: 0.88, rough: 1.2 });
-const trees = treeline(5, 2400, 96, { count: 190, minH: 12, maxH: 48, ground: 20 });
 const stars = starfield(3, 190, 1600, 420);
 
 /** 雲帶：[路徑, 不透明度] */
@@ -68,54 +66,7 @@ const pct = (n: number, total: number) => `${((n / total) * 100).toFixed(2)}%`;
   <div class="scene__piece scene__piece--moon">
     <div class="scene__halo"></div>
     <svg class="scene__moon" viewBox={`0 0 ${c.w} ${c.h}`}>
-      <defs>
-        <radialGradient id="m-base" cx="0.4" cy="0.35" r="0.76">
-          <stop offset="0" stop-color="#ffe2cd" />
-          <stop offset="0.24" stop-color="#ffb096" />
-          <stop offset="0.54" stop-color="#ee625e" />
-          <stop offset="0.84" stop-color="#b3213a" />
-          <stop offset="1" stop-color="#7a1026" />
-        </radialGradient>
-        <radialGradient id="m-limb">
-          <stop offset="0.7" stop-color="#4a0616" stop-opacity="0" />
-          <stop offset="1" stop-color="#4a0616" stop-opacity="0.62" />
-        </radialGradient>
-        <filter id="m-bloom" x="-0.3" y="-0.3" width="1.6" height="1.6" color-interpolation-filters="sRGB">
-          <feGaussianBlur stdDeviation="16" />
-        </filter>
-        <!-- 月海：低頻雜訊取出大塊暗斑 -->
-        <filter id="m-mare" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
-          <feTurbulence type="fractalNoise" baseFrequency="0.011 0.013" numOctaves="4" seed="11" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.42  0 0 0 0 0.03  0 0 0 0 0.12  2.6 0 0 0 -1.18" />
-          <feGaussianBlur stdDeviation="1.4" />
-        </filter>
-        <!-- 表面顆粒 -->
-        <filter id="m-grain" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
-          <feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="2" seed="4" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.3  0 0 0 0 0.02  0 0 0 0 0.08  1.5 0 0 0 -0.62" />
-        </filter>
-        <clipPath id="m-clip"><circle cx="330" cy="215" r="160" /></clipPath>
-      </defs>
-      <circle cx="330" cy="215" r="165" fill="#ff8f7c" opacity="0.55" filter="url(#m-bloom)" />
-      <circle cx="330" cy="215" r="160" fill="url(#m-base)" />
-      <g clip-path="url(#m-clip)">
-        <rect x="170" y="55" width="320" height="320" filter="url(#m-mare)" opacity="0.46" />
-        <rect x="170" y="55" width="320" height="320" filter="url(#m-grain)" opacity="0.2" />
-        <g fill="#8a1a30" opacity="0.2">
-          <circle cx="262" cy="150" r="13" />
-          <circle cx="398" cy="262" r="19" />
-          <circle cx="296" cy="300" r="9" />
-          <circle cx="412" cy="140" r="7" />
-          <circle cx="236" cy="246" r="6" />
-        </g>
-        <g fill="none" stroke="#ffe3d2" stroke-opacity="0.22" stroke-width="1">
-          <path d="M253 158a13 13 0 0 0 20 2" />
-          <path d="M385 275a19 19 0 0 0 28 4" />
-          <path d="M290 306a9 9 0 0 0 14 1" />
-        </g>
-      </g>
-      <circle cx="330" cy="215" r="160" fill="url(#m-limb)" />
-      <circle cx="330" cy="215" r="159.5" fill="none" stroke="#ffd9c9" stroke-opacity="0.3" />
+      <use href="#g-moon" transform="translate(330 215)" />
     </svg>
 
     <svg class="scene__clouds" viewBox={`0 0 ${c.w} ${c.h}`}>
@@ -157,8 +108,8 @@ const pct = (n: number, total: number) => `${((n / total) * 100).toFixed(2)}%`;
         <stop offset="0.75" stop-color="#ffa08f" stop-opacity="0" />
       </linearGradient>
     </defs>
-    <path d={far.body} fill="url(#s-far)" />
-    <path d={far.lit} fill="url(#s-lit)" />
+    <use href="#g-far-body" fill="url(#s-far)" />
+    <use href="#g-far-lit" fill="url(#s-lit)" />
   </svg>
   <div class="scene__haze scene__haze--far"></div>
 
@@ -174,8 +125,8 @@ const pct = (n: number, total: number) => `${((n / total) * 100).toFixed(2)}%`;
         <stop offset="0.8" stop-color="#ff8f84" stop-opacity="0" />
       </linearGradient>
     </defs>
-    <path d={mid.body} fill="url(#s-mid)" />
-    <path d={mid.lit} fill="url(#s-lit2)" />
+    <use href="#g-mid-body" fill="url(#s-mid)" />
+    <use href="#g-mid-lit" fill="url(#s-lit2)" />
   </svg>
 
   <!-- 岩峰上的城堡 -->
@@ -197,7 +148,7 @@ const pct = (n: number, total: number) => `${((n / total) * 100).toFixed(2)}%`;
 
   <!-- 前景森林 -->
   <svg class="scene__trees" viewBox="0 0 2400 96" preserveAspectRatio="xMidYMax slice">
-    <path d={trees} />
+    <use href="#g-trees" />
   </svg>
 
   <div class="scene__scrim"></div>

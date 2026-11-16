@@ -1,6 +1,7 @@
 ---
 /**
- * 首頁「冒險手冊」：章節磁磚，點了直接打開冒險手冊的該章節（手冊支援 #章節代號）
+ * 首頁「冒險手冊」：左邊是書封樣式的面板，右邊是章節磁磚。
+ * 點磁磚會直接打開冒險手冊的該章節（手冊支援 #章節代號）。
  */
 import { url } from '../../lib/url';
 import SectionHead from '../SectionHead.astro';
@@ -25,76 +26,197 @@ const topics: { id: string; label: string; icon: IconName }[] = [
 
 <section class="section" id="handbook" aria-labelledby="hh-title">
   <div class="container">
-    <SectionHead
-      title="冒險手冊"
-      id="hh-title"
-      desc="怪物掉落、商店價格、製作配方、強化機率、副本規則……由程式直接讀取伺服器資料產生，伺服器改了什麼，手冊就跟著更新。"
-    >
-      <a class="btn btn--primary" href={url('/handbook/')}><Icon name="book" />翻開冒險手冊</a>
-    </SectionHead>
-    <ul class="hbk">
-      {
-        topics.map((t) => (
-          <li>
-            <a class="hbk__item" href={url(`/handbook/#${t.id}`)}>
-              <span class="hbk__icon" aria-hidden="true">
-                <Icon name={t.icon} />
-              </span>
-              {t.label}
-            </a>
-          </li>
-        ))
-      }
-    </ul>
+    <SectionHead title="冒險手冊" id="hh-title" desc="想查什麼，直接翻到那一章。" />
+
+    <div class="hbk">
+      <!-- 書封 -->
+      <a class="hbk__cover" href={url('/handbook/')}>
+        <Icon name="book" class="hbk__ghost" />
+        <span class="hbk__frame" aria-hidden="true"></span>
+        <span class="hbk__kicker">資料直接取自伺服器</span>
+        <span class="hbk__title">冒險手冊</span>
+        <span class="hbk__desc">怪物掉落、商店價格、製作配方、強化機率、副本規則……伺服器改了什麼，手冊就跟著更新。</span>
+        <span class="btn btn--gold hbk__btn"><Icon name="book" />翻開冒險手冊</span>
+      </a>
+
+      <!-- 章節 -->
+      <ul class="hbk__grid">
+        {
+          topics.map((t) => (
+            <li>
+              <a class="hbk__item" href={url(`/handbook/#${t.id}`)}>
+                <span class="hbk__icon" aria-hidden="true">
+                  <Icon name={t.icon} />
+                </span>
+                <span class="hbk__label">{t.label}</span>
+                <Icon name="arrow" class="hbk__arrow" />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
   </div>
 </section>
 
 <style>
   .hbk {
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 8px;
+    grid-template-columns: minmax(260px, 0.36fr) 1fr;
+    gap: 16px;
+  }
+
+  /* 書封：深酒紅底、一圈金色細框 */
+  .hbk__cover {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 30px 28px 28px;
+    color: var(--band-text);
+    background:
+      radial-gradient(90% 70% at 100% 0%, rgb(230 90 100 / 0.32), transparent 62%),
+      linear-gradient(160deg, #7a1524 0%, #4a0e17 55%, #2a080e 100%);
+    border: 1px solid #1d070b;
+    box-shadow: var(--shadow-2);
+    transition:
+      transform 0.25s var(--ease),
+      box-shadow 0.25s var(--ease);
+  }
+  .hbk__cover:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-3);
+  }
+  .hbk__frame {
+    position: absolute;
+    inset: 9px;
+    border: 1px solid rgb(236 202 106 / 0.42);
+    pointer-events: none;
+  }
+  .hbk__cover :global(.hbk__ghost) {
+    position: absolute;
+    right: -30px;
+    bottom: -34px;
+    width: 190px;
+    height: 190px;
+    color: rgb(255 236 228 / 0.07);
+    transition: transform 0.5s var(--ease);
+  }
+  .hbk__cover:hover :global(.hbk__ghost) {
+    transform: rotate(-6deg) scale(1.06);
+  }
+  .hbk__kicker {
+    position: relative;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    color: var(--gold-300);
+  }
+  .hbk__title {
+    position: relative;
+    margin-top: 6px;
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    line-height: 1.2;
+    color: var(--band-title);
+  }
+  .hbk__desc {
+    position: relative;
+    margin-top: 10px;
+    font-size: 0.93rem;
+    line-height: 1.75;
+    color: #e6d3cc;
+  }
+  .hbk__btn {
+    position: relative;
+    margin-top: auto;
+  }
+  .hbk__desc + .hbk__btn {
+    margin-top: 22px;
+  }
+
+  .hbk__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
   }
   .hbk__item {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     height: 100%;
-    padding: 8px 10px;
-    font-weight: 700;
-    line-height: 1.4;
-    color: var(--link);
+    padding: 11px 12px;
     background: var(--surface);
     border: 1px solid var(--line);
-    transition: border-color 0.15s, background-color 0.15s;
+    box-shadow: var(--shadow-1);
+    transition:
+      transform 0.2s var(--ease),
+      box-shadow 0.2s var(--ease),
+      border-color 0.2s;
   }
   .hbk__item:hover {
-    color: var(--link-hover);
-    background: var(--brand-50);
+    transform: translateX(3px);
     border-color: var(--brand-200);
+    box-shadow: var(--shadow-2);
   }
   .hbk__icon {
     display: grid;
     place-items: center;
-    width: 34px;
-    height: 34px;
+    width: 38px;
+    height: 38px;
     flex: none;
     color: var(--gold-300);
-    background: var(--band-800);
-    border: 1px solid #000;
+    background: linear-gradient(135deg, #33202a, #150b0f);
+    border: 1px solid #0a0506;
+    box-shadow: inset 0 0 0 2px rgb(236 202 106 / 0.22);
+    transition: background-color 0.2s;
+  }
+  .hbk__item:hover .hbk__icon {
+    background: linear-gradient(135deg, var(--brand-400), var(--brand-700));
   }
   .hbk__icon :global(svg) {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
   }
-  @media (max-width: 1040px) {
+  .hbk__label {
+    flex: 1;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--ink-strong);
+    transition: color 0.2s;
+  }
+  .hbk__item:hover .hbk__label {
+    color: var(--link);
+  }
+  .hbk__item :global(.hbk__arrow) {
+    width: 16px;
+    height: 16px;
+    flex: none;
+    color: var(--line-2);
+    transition: color 0.2s, transform 0.2s var(--ease);
+  }
+  .hbk__item:hover :global(.hbk__arrow) {
+    color: var(--brand-500);
+    transform: translateX(2px);
+  }
+
+  @media (max-width: 900px) {
     .hbk {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: 1fr;
+    }
+    .hbk__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
-  @media (max-width: 560px) {
-    .hbk {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+  @media (max-width: 420px) {
+    .hbk__item {
+      padding: 9px 10px;
+      gap: 9px;
+    }
+    .hbk__item :global(.hbk__arrow) {
+      display: none;
     }
   }
 </style>

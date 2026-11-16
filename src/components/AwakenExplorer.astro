@@ -21,9 +21,11 @@ import Icon from './Icon.astro';
           tabindex={i === 0 ? 0 : -1}
           data-ax-tab={a.id}
         >
-          <Icon name={a.icon} />
+          <span class="gem" aria-hidden="true">
+            <Icon name={a.icon} />
+          </span>
           <span class="ax__tab-name">{a.name}</span>
-          <span class="ax__tab-count tnum">{a.classes.length}</span>
+          <span class="ax__tab-count">{a.classes.length} 個職業</span>
         </button>
       ))
     }
@@ -32,8 +34,8 @@ import Icon from './Icon.astro';
   {
     archetypes.map((a, i) => (
       <section class="ax__panel" role="tabpanel" id={`ax-panel-${a.id}`} aria-labelledby={`ax-tab-${a.id}`} data-ax-panel hidden={i !== 0}>
-        <header class="ax__head">
-          <span class="ibox" aria-hidden="true">
+        <header class="ax__head bar">
+          <span class="gem gem--red" aria-hidden="true">
             <Icon name={a.icon} />
           </span>
           <div>
@@ -44,6 +46,8 @@ import Icon from './Icon.astro';
             <p class="ax__blurb">{a.blurb}</p>
           </div>
         </header>
+
+        <div class="ax__body">
 
         {a.shared && (
           <div class="ax__shared">
@@ -83,6 +87,7 @@ import Icon from './Icon.astro';
             </li>
           ))}
         </ul>
+        </div>
       </section>
     ))
   }
@@ -92,13 +97,19 @@ import Icon from './Icon.astro';
   document.querySelectorAll<HTMLElement>('[data-ax]').forEach((root) => {
     const tabs = [...root.querySelectorAll<HTMLButtonElement>('[data-ax-tab]')];
     const panels = [...root.querySelectorAll<HTMLElement>('[data-ax-panel]')];
+    const strip = root.querySelector<HTMLElement>('.ax__tabs');
     const select = (i: number, focus = false) => {
       tabs.forEach((t, k) => {
         t.setAttribute('aria-selected', String(k === i));
         t.tabIndex = k === i ? 0 : -1;
       });
       panels.forEach((p, k) => (p.hidden = k !== i));
-      if (focus) tabs[i].focus();
+      if (focus) tabs[i].focus({ preventScroll: true });
+      // 窄螢幕的分頁列可以左右捲動：把選到的那一個捲到中間
+      if (strip && strip.scrollWidth > strip.clientWidth) {
+        const t = tabs[i];
+        strip.scrollTo({ left: t.offsetLeft - (strip.clientWidth - t.offsetWidth) / 2, behavior: 'smooth' });
+      }
     };
     tabs.forEach((t, i) => {
       t.addEventListener('click', () => select(i));
@@ -127,56 +138,91 @@ import Icon from './Icon.astro';
 </script>
 
 <style>
+  /* 分頁：和首頁「七大職業體系」同一組菱形徽記；選到的那一個變成酒紅色，下面有個小尖角指向面板 */
   .ax__tabs {
+    position: relative;
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 6px;
+    gap: 8px;
   }
   .ax__tab {
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
-    padding: 12px 6px 10px;
-    font-weight: 700;
-    color: var(--ink);
+    padding: 24px 6px 12px;
     background: var(--surface);
     border: 1px solid var(--line);
-    border-bottom-width: 3px;
-    transition: background-color 0.15s, border-color 0.15s;
+    box-shadow: var(--shadow-1);
+    transition:
+      transform 0.25s var(--ease),
+      box-shadow 0.25s var(--ease),
+      border-color 0.25s;
   }
-  .ax__tab :global(svg) {
-    width: 34px;
-    height: 34px;
+  .ax__tab :global(.gem) {
+    --gem: 38px;
+    margin-bottom: 20px;
+    transition:
+      box-shadow 0.25s,
+      transform 0.35s var(--ease);
+  }
+  .ax__tab-name {
+    font-weight: 700;
+    line-height: 1.5;
+    color: var(--ink-strong);
+  }
+  .ax__tab-count {
+    font-size: 0.78rem;
     color: var(--ink-3);
   }
   .ax__tab:hover {
-    background: var(--surface-2);
+    transform: translateY(-2px);
+    border-color: var(--line-2);
+    box-shadow: var(--shadow-2);
   }
-  .ax__tab-count {
-    position: absolute;
-    top: 4px;
-    right: 6px;
-    font-size: 0.72rem;
-    font-weight: 400;
-    color: var(--ink-3);
+  .ax__tab:hover :global(.gem) {
+    transform: rotate(45deg) scale(1.06);
   }
   .ax__tab[aria-selected='true'] {
-    background: var(--brand-50);
-    border-color: #e3b3ba;
-    border-bottom-color: var(--brand-500);
-    color: var(--brand-700);
+    background:
+      radial-gradient(90% 70% at 100% 0%, rgb(230 90 100 / 0.32), transparent 62%),
+      linear-gradient(160deg, #7a1524 0%, #4a0e17 55%, #2a080e 100%);
+    border-color: #1d070b;
+    box-shadow: var(--shadow-2);
   }
-  .ax__tab[aria-selected='true'] :global(svg) {
-    color: var(--brand-500);
+  .ax__tab[aria-selected='true']::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -7px;
+    width: 12px;
+    height: 12px;
+    background: #3a0c14;
+    border-right: 1px solid #1d070b;
+    border-bottom: 1px solid #1d070b;
+    transform: translateX(-50%) rotate(45deg);
+  }
+  .ax__tab[aria-selected='true'] :global(.gem) {
+    color: #fff;
+    background: linear-gradient(135deg, var(--brand-400), var(--brand-700));
+    border-color: #3d0a12;
+    box-shadow:
+      inset 0 0 0 2px rgb(255 220 200 / 0.38),
+      0 0 20px rgb(240 90 102 / 0.55);
+  }
+  .ax__tab[aria-selected='true'] .ax__tab-name {
+    color: var(--band-title);
+  }
+  .ax__tab[aria-selected='true'] .ax__tab-count {
+    color: rgb(236 202 106 / 0.85);
   }
 
+  /* 面板：深色標題列＋白底內容 */
   .ax__panel {
-    margin-top: 12px;
-    padding: clamp(18px, 2.6vw, 28px);
+    margin-top: 16px;
     background: var(--surface);
     border: 1px solid var(--line);
+    box-shadow: var(--shadow-2);
   }
   .ax__panel[hidden] {
     display: none;
@@ -186,8 +232,13 @@ import Icon from './Icon.astro';
   }
   .ax__head {
     display: flex;
-    gap: 14px;
-    align-items: flex-start;
+    gap: 20px;
+    align-items: center;
+    padding: 16px clamp(18px, 2.6vw, 28px);
+  }
+  .ax__head :global(.gem) {
+    --gem: 36px;
+    margin: 8px;
   }
   .ax__name {
     display: flex;
@@ -195,34 +246,39 @@ import Icon from './Icon.astro';
     align-items: baseline;
     gap: 4px 10px;
     font-size: 1.3rem;
+    color: var(--band-title);
   }
   .ax__count {
     font-size: 0.85rem;
     font-weight: 400;
-    color: var(--ink-3);
+    color: var(--band-muted);
   }
   .ax__blurb {
-    margin-top: 4px;
-    color: var(--ink-2);
+    margin-top: 2px;
+    font-size: 0.95rem;
+    color: #dccdc6;
+  }
+  .ax__body {
+    padding: 4px clamp(18px, 2.6vw, 28px) clamp(18px, 2.6vw, 26px);
   }
   .ax__shared {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 10px;
-    margin-top: 18px;
+    margin-top: 16px;
   }
   .ax__shared-item {
     padding: 12px 14px;
     background: var(--brand-50);
     border: 1px solid #ecc9ce;
+    border-left: 3px solid var(--brand-500);
   }
-  .ax__list {
-    margin-top: 18px;
-    border-top: 1px solid var(--line);
+  .ax__shared + .ax__list {
+    margin-top: 6px;
   }
   .ax__cls {
     display: grid;
-    grid-template-columns: 150px minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: 158px minmax(0, 1fr) minmax(0, 1fr);
     gap: 10px 24px;
     padding: 16px 0;
     border-bottom: 1px solid var(--line);
@@ -232,9 +288,21 @@ import Icon from './Icon.astro';
     padding-bottom: 0;
   }
   .ax__cls-name {
+    position: relative;
+    padding-left: 16px;
     font-size: 1.05rem;
     font-weight: 700;
     color: var(--brand-700);
+  }
+  .ax__cls-name::before {
+    content: '';
+    position: absolute;
+    left: 1px;
+    top: 0.62em;
+    width: 7px;
+    height: 7px;
+    background: var(--brand-500);
+    transform: rotate(45deg);
   }
   .ax__sk-name {
     display: flex;
@@ -256,16 +324,34 @@ import Icon from './Icon.astro';
     color: var(--ink-2);
   }
   @media (max-width: 900px) {
-    .ax__tabs {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
     .ax__cls {
       grid-template-columns: 1fr;
     }
   }
-  @media (max-width: 480px) {
+  /* 窄螢幕：分頁排成一列，可以左右滑 */
+  @media (max-width: 760px) {
     .ax__tabs {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: none;
+      grid-auto-flow: column;
+      grid-auto-columns: 94px;
+      margin-inline: calc(var(--gutter) * -1);
+      padding: 4px var(--gutter) 10px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      overscroll-behavior-x: contain;
+    }
+    .ax__tabs::-webkit-scrollbar {
+      display: none;
+    }
+    .ax__tab {
+      padding: 22px 4px 10px;
+    }
+    .ax__panel {
+      margin-top: 6px;
+    }
+    .ax__head {
+      gap: 14px;
+      align-items: flex-start;
     }
   }
 </style>

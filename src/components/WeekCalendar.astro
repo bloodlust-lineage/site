@@ -67,14 +67,39 @@ const kinds = Object.keys(kindLabel) as EventKind[];
     grid-template-areas: 'next grid' 'legend legend';
     gap: 16px 20px;
   }
+  /* 「下一場」倒數：深色面板，角落一圈月暈 */
   .wk__next {
     grid-area: next;
+    position: relative;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    padding: 20px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-top: 4px solid var(--brand-500);
+    padding: 22px 22px 20px;
+    color: var(--band-text);
+    background:
+      radial-gradient(90% 60% at 100% 0%, rgb(196 52 68 / 0.55), transparent 62%),
+      linear-gradient(180deg, #1c0e13 0%, #34121c 100%);
+    border: 1px solid #0b0508;
+    border-bottom: 3px solid var(--brand-500);
+    box-shadow: var(--shadow-2);
+  }
+  .wk__next::after {
+    content: '';
+    position: absolute;
+    right: -70px;
+    bottom: -84px;
+    width: 220px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 1px solid rgb(255 220 200 / 0.2);
+    box-shadow:
+      0 0 0 18px rgb(255 220 200 / 0.04),
+      0 0 0 42px rgb(255 220 200 / 0.025);
+    pointer-events: none;
+  }
+  .wk__next > * {
+    position: relative;
+    z-index: 1;
   }
   .wk__next-head {
     display: flex;
@@ -85,35 +110,42 @@ const kinds = Object.keys(kindLabel) as EventKind[];
   }
   .wk__clock {
     font-size: 0.85rem;
-    color: var(--ink-3);
+    color: var(--band-muted);
   }
   .wk__clock b {
-    color: var(--ink-strong);
+    color: #fff;
   }
   .wk__title {
-    margin-top: 14px;
-    font-size: 1.35rem;
-    font-weight: 700;
+    margin-top: 16px;
+    font-size: 1.4rem;
+    font-weight: 800;
     line-height: 1.35;
-    color: var(--ink-strong);
+    color: #fff;
   }
   .wk__when {
     margin-top: 2px;
     font-weight: 700;
-    color: var(--brand-600);
+    color: var(--gold-300);
   }
   .wk__count {
-    margin-top: 12px;
-    font-size: 2.1rem;
-    font-weight: 700;
+    margin-top: 14px;
+    font-size: 2.3rem;
+    font-weight: 800;
     line-height: 1.1;
-    color: var(--ink-strong);
+    color: var(--gold-300);
+    text-shadow: 0 2px 16px rgb(0 0 0 / 0.5);
   }
   .wk__desc {
     margin-top: auto;
-    padding-top: 14px;
+    padding-top: 16px;
     font-size: 0.88rem;
-    color: var(--ink-2);
+    color: #cdbcb5;
+  }
+  .wk__desc::before {
+    content: '';
+    display: block;
+    margin-bottom: 12px;
+    border-top: 1px dashed rgb(255 236 228 / 0.2);
   }
 
   .wk__grid {
@@ -122,6 +154,7 @@ const kinds = Object.keys(kindLabel) as EventKind[];
     grid-template-columns: repeat(7, minmax(0, 1fr));
     background: var(--surface);
     border: 1px solid var(--line);
+    box-shadow: var(--shadow-1);
   }
   .wk__day {
     position: relative;
@@ -135,16 +168,20 @@ const kinds = Object.keys(kindLabel) as EventKind[];
     padding: 8px 6px;
     font-weight: 700;
     text-align: center;
-    color: var(--ink-strong);
-    background: var(--surface-2);
-    border-bottom: 1px solid var(--line);
+    color: var(--band-muted);
+    background: var(--band-800);
+    border-bottom: 2px solid var(--brand-500);
+  }
+  /* 欄與欄之間的淺色分隔線不要畫進深色的星期列 */
+  .wk__day + .wk__day .wk__dh {
+    margin-left: -1px;
   }
   .wk__day.is-today {
     background: #fffaf0;
   }
   .wk__day.is-today .wk__dh {
     color: #fff;
-    background: var(--brand-500);
+    background: linear-gradient(180deg, #c93045, #a01c2e);
     border-bottom-color: var(--brand-700);
   }
   .wk__day.is-today .wk__dh::after {
@@ -255,7 +292,10 @@ const kinds = Object.keys(kindLabel) as EventKind[];
       display: grid;
       place-items: center;
       border-bottom: 0;
-      border-right: 1px solid var(--line);
+      border-right: 2px solid var(--brand-500);
+    }
+    .wk__day + .wk__day .wk__dh {
+      margin-left: 0;
     }
     .wk__day.is-today .wk__dh {
       border-right-color: var(--brand-700);

@@ -1,6 +1,7 @@
 ---
 /**
- * 首頁「七位史詩首領」
+ * 首頁「七位史詩首領」：深色區塊。
+ * 上緣是森林剪影（疊到前一個區塊），下緣是下一個區塊顏色的山脈切邊。
  */
 import { epicBosses } from '../../data/bosses';
 import { instances } from '../../data/events';
@@ -11,8 +12,13 @@ import Icon from '../Icon.astro';
 const instanceNames = [...new Set(instances.map((x) => x.name))];
 ---
 
-<section class="section section--white" id="bosses" aria-labelledby="hb-title">
-  <div class="container">
+<section class="section section--dark bosses" id="bosses" aria-labelledby="hb-title">
+  <svg class="edge edge--trees" viewBox="0 0 2400 96" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <use href="#g-trees"></use>
+  </svg>
+  <div class="bosses__stars" aria-hidden="true"></div>
+
+  <div class="container bosses__inner">
     <SectionHead title="七位史詩首領" id="hb-title" desc="全部提升到 96 級。出現與被擊敗時都會全服公告，並寫下最後一擊的勇士與血盟。">
       <a class="link" href={url('/events/#bosses')}>首領與副本時程<Icon name="arrow" /></a>
     </SectionHead>
@@ -22,27 +28,28 @@ const instanceNames = [...new Set(instances.map((x) => x.name))];
         epicBosses.map((b) => (
           <li class="bc">
             <div class="bc__head">
-              <span class="bc__icon" aria-hidden="true">
+              <span class="bc__medal" aria-hidden="true">
                 <Icon name={b.icon} />
               </span>
               <div>
                 <h3 class="bc__name">{b.name}</h3>
                 <p class="bc__lv">
-                  Lv.{b.level}・{b.latin}
+                  <span class="bc__badge tnum">Lv.{b.level}</span>
+                  {b.latin}
                 </p>
               </div>
             </div>
             <dl class="bc__facts">
               <div>
-                <dt>地點</dt>
+                <dt><Icon name="pin" />地點</dt>
                 <dd>{b.location}</dd>
               </div>
               <div>
-                <dt>重生</dt>
+                <dt><Icon name="clock" />重生</dt>
                 <dd>{b.respawn}</dd>
               </div>
               <div>
-                <dt>掉落</dt>
+                <dt><Icon name="gems" />掉落</dt>
                 <dd>{b.drops.join('、')}</dd>
               </div>
             </dl>
@@ -51,7 +58,7 @@ const instanceNames = [...new Set(instances.map((x) => x.name))];
       }
       <li class="bc bc--more">
         <a href={url('/events/#bosses')}>
-          <span class="bc__icon" aria-hidden="true"><Icon name="portal" /></span>
+          <span class="bc__medal" aria-hidden="true"><Icon name="portal" /></span>
           <span class="bc__more-t">副本一覽</span>
           <span class="bc__more-d">{instanceNames.join('、')}的等級、人數與獎勵</span>
           <span class="link">看副本規則<Icon name="arrow" /></span>
@@ -59,73 +66,149 @@ const instanceNames = [...new Set(instances.map((x) => x.name))];
       </li>
     </ul>
 
-    <p class="bc__note muted">史詩首領的掉落一律落在地上，5 分鐘內只有歸屬隊伍能撿。所有首領同時掉落狩獵硬幣、嗜血結晶等本服製作材料。</p>
+    <p class="bc__note">史詩首領的掉落一律落在地上，5 分鐘內只有歸屬隊伍能撿。所有首領同時掉落狩獵硬幣、嗜血結晶等本服製作材料。</p>
   </div>
+
+  <svg class="edge edge--range" viewBox="0 0 2400 160" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <use href="#g-mid-body"></use>
+  </svg>
 </section>
 
 <style>
+  .bosses {
+    --edge: #160b10;
+    padding-bottom: calc(var(--section-y) + max(6.67vw, 64px));
+  }
+  .bosses__stars {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(1.5px 1.5px at 6% 12%, rgb(255 232 222 / 0.5), transparent 60%),
+      radial-gradient(1.5px 1.5px at 18% 34%, rgb(255 232 222 / 0.3), transparent 60%),
+      radial-gradient(2px 2px at 29% 8%, rgb(255 232 222 / 0.45), transparent 60%),
+      radial-gradient(1.5px 1.5px at 44% 20%, rgb(255 232 222 / 0.35), transparent 60%),
+      radial-gradient(1.5px 1.5px at 58% 6%, rgb(255 232 222 / 0.5), transparent 60%),
+      radial-gradient(2px 2px at 71% 16%, rgb(255 232 222 / 0.35), transparent 60%),
+      radial-gradient(1.5px 1.5px at 86% 9%, rgb(255 232 222 / 0.5), transparent 60%),
+      radial-gradient(1.5px 1.5px at 95% 28%, rgb(255 232 222 / 0.3), transparent 60%);
+  }
+  .bosses__inner {
+    position: relative;
+  }
+  /* 這裡的山脈切邊用下一個區塊（淺色）的底色 */
+  .bosses > .edge--range {
+    --edge: var(--bg);
+  }
+
   .bc-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 12px;
+    gap: 14px;
   }
   .bc {
-    padding: 14px 16px 16px;
-    background: var(--surface);
-    border: 1px solid var(--line);
+    position: relative;
+    padding: 18px 18px 18px;
+    background: linear-gradient(180deg, rgb(255 236 228 / 0.075), rgb(255 236 228 / 0.025));
+    border: 1px solid rgb(255 236 228 / 0.16);
+    box-shadow: 0 16px 34px -20px rgb(0 0 0 / 0.8);
+    transition:
+      transform 0.25s var(--ease),
+      border-color 0.25s,
+      background-color 0.25s;
+  }
+  .bc:hover {
+    transform: translateY(-3px);
+    border-color: rgb(236 202 106 / 0.5);
+    background-color: rgb(255 236 228 / 0.03);
   }
   .bc__head {
     display: flex;
-    gap: 12px;
+    gap: 14px;
     align-items: center;
   }
-  .bc__icon {
+  /* 首領徽章：血紅圓盤＋金色細圈，滑過時光暈變強 */
+  .bc__medal {
     display: grid;
     place-items: center;
-    width: 52px;
-    height: 52px;
+    width: 58px;
+    height: 58px;
     flex: none;
+    border-radius: 50%;
     color: var(--gold-300);
-    background: var(--band-800);
-    border: 1px solid #000;
-    box-shadow: inset 0 0 0 2px #3a2429;
+    background: radial-gradient(circle at 50% 32%, #a81f33 0%, #5a1019 62%, #2a080e 100%);
+    box-shadow:
+      inset 0 0 0 1px rgb(236 202 106 / 0.6),
+      inset 0 0 0 4px rgb(0 0 0 / 0.28),
+      0 0 22px rgb(207 58 76 / 0.35);
+    transition: box-shadow 0.3s;
   }
-  .bc__icon :global(svg) {
+  .bc:hover .bc__medal {
+    box-shadow:
+      inset 0 0 0 1px rgb(236 202 106 / 0.9),
+      inset 0 0 0 4px rgb(0 0 0 / 0.28),
+      0 0 34px rgb(240 90 102 / 0.7);
+  }
+  .bc__medal :global(svg) {
     width: 34px;
     height: 34px;
   }
   .bc__name {
-    font-size: 1.05rem;
+    font-size: 1.12rem;
+    line-height: 1.35;
   }
   .bc__lv {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    margin-top: 3px;
     font-size: 0.8rem;
     color: var(--ink-3);
   }
+  .bc__badge {
+    padding: 0 6px;
+    font-weight: 700;
+    line-height: 1.6;
+    color: #241a03;
+    background: var(--gold-400);
+  }
   .bc__facts {
     display: grid;
-    gap: 4px;
-    margin-top: 12px;
-    padding-top: 10px;
+    gap: 6px;
+    margin-top: 14px;
+    padding-top: 12px;
     border-top: 1px solid var(--line);
-    font-size: 0.88rem;
+    font-size: 0.89rem;
   }
   .bc__facts div {
     display: grid;
-    grid-template-columns: 2.6em 1fr;
+    grid-template-columns: 4.1em 1fr;
     gap: 6px;
   }
   .bc__facts dt {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    align-self: start;
     font-weight: 700;
-    color: var(--brand-600);
+    line-height: 1.7;
+    color: var(--gold-300);
+  }
+  .bc__facts dt :global(svg) {
+    width: 14px;
+    height: 14px;
+    flex: none;
+    opacity: 0.85;
   }
   .bc__facts dd {
     color: var(--ink);
   }
+
   .bc--more {
     padding: 0;
-    background: var(--surface-2);
-    border-style: dashed;
-    border-color: var(--line-2);
+    background: rgb(236 202 106 / 0.06);
+    border: 1px dashed rgb(236 202 106 / 0.45);
   }
   .bc--more a {
     display: flex;
@@ -133,36 +216,35 @@ const instanceNames = [...new Set(instances.map((x) => x.name))];
     align-items: flex-start;
     gap: 6px;
     height: 100%;
-    padding: 14px 16px 16px;
+    padding: 18px;
   }
-  .bc--more .bc__icon {
-    color: #fff;
-    background: var(--brand-500);
-    box-shadow: none;
-    border-color: var(--brand-700);
+  .bc--more .bc__medal {
+    color: #241a03;
+    background: radial-gradient(circle at 50% 32%, var(--gold-300), var(--gold-500));
+    box-shadow:
+      inset 0 0 0 4px rgb(0 0 0 / 0.12),
+      0 0 22px rgb(236 202 106 / 0.35);
   }
   .bc__more-t {
-    margin-top: 4px;
-    font-size: 1.05rem;
+    margin-top: 6px;
+    font-size: 1.12rem;
     font-weight: 700;
     color: var(--ink-strong);
   }
   .bc__more-d {
-    font-size: 0.88rem;
+    font-size: 0.89rem;
     color: var(--ink-2);
   }
   .bc--more .link {
     margin-top: auto;
-  }
-  .bc--more a:hover .link {
-    color: var(--link-hover);
-    text-decoration: underline;
-    text-underline-offset: 3px;
+    padding-top: 8px;
   }
   .bc__note {
-    margin-top: 16px;
+    margin-top: 18px;
     font-size: 0.9rem;
+    color: var(--ink-2);
   }
+
   @media (max-width: 1040px) {
     .bc-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));

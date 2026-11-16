@@ -20,8 +20,8 @@ import Icon from '../Icon.astro';
       {
         archetypes.map((a) => (
           <li>
-            <a class="cl__item" href={url(`/features/#awaken-${a.id}`)}>
-              <span class="cl__icon" aria-hidden="true">
+            <a class="cl__item card lift" href={url(`/features/#awaken-${a.id}`)}>
+              <span class="cl__gem" aria-hidden="true">
                 <Icon name={a.icon} />
               </span>
               <span class="cl__name">{a.name}</span>
@@ -42,67 +42,77 @@ import Icon from '../Icon.astro';
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 10px;
+    gap: 12px;
   }
   .cl__item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
-    width: 120px;
-    padding: 14px 8px 12px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    transition: border-color 0.15s, box-shadow 0.15s;
+    width: 136px;
+    padding: 32px 8px 14px;
   }
-  .cl__item:hover {
-    border-color: var(--brand-200);
-    box-shadow: 0 2px 8px rgb(16 20 24 / 0.08);
-  }
-  .cl__icon {
+  /* 菱形徽記：深色底、金色圖示，滑過時轉成血紅並發光 */
+  .cl__gem {
     display: grid;
     place-items: center;
-    width: 58px;
-    height: 58px;
+    width: 52px;
+    height: 52px;
+    margin-bottom: 24px;
     color: var(--gold-300);
-    background: var(--band-800);
-    border: 1px solid #000;
-    box-shadow: inset 0 0 0 2px #3a2429;
-    transition: background-color 0.15s;
+    background: linear-gradient(135deg, #33202a, #150b0f);
+    border: 1px solid #0a0506;
+    box-shadow:
+      inset 0 0 0 2px rgb(236 202 106 / 0.3),
+      0 8px 16px -8px rgb(40 22 26 / 0.6);
+    transform: rotate(45deg);
+    transition:
+      background-color 0.25s,
+      box-shadow 0.25s,
+      transform 0.35s var(--ease);
   }
-  .cl__icon :global(svg) {
-    width: 38px;
-    height: 38px;
+  .cl__gem :global(svg) {
+    width: 34px;
+    height: 34px;
+    transform: rotate(-45deg);
   }
-  .cl__item:hover .cl__icon {
-    background: var(--brand-600);
+  .cl__item:hover .cl__gem {
+    background: linear-gradient(135deg, var(--brand-400), var(--brand-700));
+    box-shadow:
+      inset 0 0 0 2px rgb(255 220 200 / 0.4),
+      0 0 24px rgb(207 58 76 / 0.55);
+    transform: rotate(45deg) scale(1.06);
   }
   .cl__name {
-    margin-top: 6px;
+    font-size: 1.05rem;
     font-weight: 700;
     color: var(--ink-strong);
+    transition: color 0.2s;
   }
   .cl__item:hover .cl__name {
     color: var(--link);
   }
   .cl__count {
-    font-size: 0.82rem;
+    font-size: 0.84rem;
     color: var(--ink-3);
   }
   .cl__note {
-    max-width: 44em;
-    margin: 18px auto 0;
-    font-size: 0.92rem;
+    max-width: 46em;
+    margin: 22px auto 0;
+    font-size: 0.93rem;
     text-align: center;
+    text-wrap: balance;
     color: var(--ink-2);
   }
   .cl__note b {
     color: var(--ink-strong);
   }
   @media (max-width: 560px) {
+    .cl {
+      gap: 8px;
+    }
     .cl__item {
-      width: calc((100vw - var(--gutter) * 2 - 20px) / 3);
-      min-width: 92px;
+      width: calc((100vw - var(--gutter) * 2 - 16px) / 3);
+      min-width: 96px;
     }
   }
 </style>

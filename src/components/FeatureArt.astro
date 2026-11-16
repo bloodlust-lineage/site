@@ -1,0 +1,422 @@
+---
+/**
+ * 遊戲介面示意圖：放在深色底上的小插圖（純 HTML＋CSS，不是真的截圖）。
+ * 首頁「伺服器特色」的卡片和特色頁每一章的封面共用。
+ *   board　 隨身布告欄：Alt+B 鍵帽＋分頁
+ *   auto　　內掛：小視窗＋勾選清單
+ *   awaken　覺醒：90／95／99 三個等級節點
+ *   balance 職業平衡：調整前後的長條
+ *   growth　成長：20／40／76 三次轉職
+ *   battle　戰場：一週七天，週一到週六 PvP、週日攻城
+ *   boss　　首領：七位 96 級史詩首領的徽章
+ */
+import { epicBosses } from '../data/bosses';
+import Icon from './Icon.astro';
+
+interface Props {
+  kind: 'board' | 'auto' | 'awaken' | 'balance' | 'growth' | 'battle' | 'boss';
+  /** 靠左或置中（預設置中） */
+  align?: 'center' | 'start';
+}
+const { kind, align = 'center' } = Astro.props;
+const cls = ['fa', align === 'start' && 'fa--start'];
+---
+
+{
+  kind === 'board' && (
+    <div class:list={[...cls, 'a-board']}>
+      <p class="a-keys">
+        <kbd>Alt</kbd>
+        <i>+</i>
+        <kbd>B</kbd>
+      </p>
+      <p class="a-tabs">
+        <span class="is-on">傳送</span>
+        <span>輔助</span>
+        <span>商店</span>
+        <span>倉庫</span>
+      </p>
+    </div>
+  )
+}
+{
+  kind === 'auto' && (
+    <div class:list={[...cls, 'a-win']}>
+      <p class="a-win__bar">
+        <span>自動狩獵</span>
+        <span class="a-win__cmd">.內掛</span>
+      </p>
+      <ul class="a-win__list">
+        <li>自動找怪</li>
+        <li>自動回收</li>
+        <li>自動喝水</li>
+      </ul>
+      <p class="a-win__run">
+        <i></i>
+        狩獵中
+      </p>
+    </div>
+  )
+}
+{
+  kind === 'awaken' && (
+    <div class:list={[...cls, 'a-aw']}>
+      <ol class="a-lv">
+        <li>Lv.90</li>
+        <li>Lv.95</li>
+        <li class="is-max">Lv.99</li>
+      </ol>
+      <p class="a-cap">被動＋主動，到等級自動學會</p>
+    </div>
+  )
+}
+{
+  kind === 'balance' && (
+    <div class:list={[...cls, 'a-bal']}>
+      <p class="a-bal__name">
+        爆射箭<span>威力</span>
+      </p>
+      <p class="a-bar a-bar--old">
+        <span class="tnum">1,326</span>
+      </p>
+      <p class="a-bar a-bar--new">
+        <span class="tnum">3,000</span>
+      </p>
+    </div>
+  )
+}
+{
+  kind === 'growth' && (
+    <div class:list={[...cls, 'a-aw']}>
+      <ol class="a-lv">
+        <li>20 級</li>
+        <li>40 級</li>
+        <li class="is-max">76 級</li>
+      </ol>
+      <p class="a-cap">三次轉職，都不用解任務</p>
+    </div>
+  )
+}
+{
+  kind === 'battle' && (
+    <div class:list={[...cls, 'a-aw']}>
+      <ol class="a-week">
+        {['一', '二', '三', '四', '五', '六'].map((d) => (
+          <li>{d}</li>
+        ))}
+        <li class="is-siege">日</li>
+      </ol>
+      <p class="a-cap">
+        <i class="a-dot"></i>
+        PvP 活動
+        <i class="a-dot a-dot--gold"></i>
+        攻城戰
+      </p>
+    </div>
+  )
+}
+{
+  kind === 'boss' && (
+    <div class:list={[...cls, 'a-aw']}>
+      <ul class="a-medals">
+        {epicBosses.map((b) => (
+          <li>
+            <Icon name={b.icon} />
+          </li>
+        ))}
+      </ul>
+      <p class="a-cap">
+        <b class="a-lvtag tnum">Lv.96</b>
+        {epicBosses.length} 位史詩首領
+      </p>
+    </div>
+  )
+}
+
+<style>
+  .fa {
+    position: relative;
+  }
+
+  /* 布告欄（鍵帽＋分頁） */
+  .a-board {
+    display: grid;
+    justify-items: center;
+    gap: 16px;
+  }
+  .a-keys {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .a-keys i {
+    font-style: normal;
+    font-weight: 700;
+    color: var(--band-muted);
+  }
+  .a-keys kbd {
+    min-width: 54px;
+    padding: 7px 12px 8px;
+    font-size: 1.2rem;
+    font-weight: 800;
+    text-align: center;
+    color: var(--gold-300);
+    background: linear-gradient(180deg, #43313a, #241820);
+    border: 1px solid rgb(255 236 228 / 0.26);
+    border-bottom: 4px solid #0c0608;
+    box-shadow: 0 8px 18px rgb(0 0 0 / 0.45);
+  }
+  .a-tabs {
+    display: flex;
+    font-size: 0.82rem;
+    background: rgb(10 5 7 / 0.5);
+    border: 1px solid rgb(255 236 228 / 0.2);
+  }
+  .a-tabs span {
+    padding: 3px 10px;
+    color: var(--band-muted);
+  }
+  .a-tabs span + span {
+    border-left: 1px solid rgb(255 236 228 / 0.14);
+  }
+  .a-tabs .is-on {
+    font-weight: 700;
+    color: #fff;
+    background: var(--brand-500);
+  }
+
+  /* 內掛（小視窗） */
+  .a-win {
+    width: min(200px, 100%);
+    font-size: 0.82rem;
+    background: rgb(10 5 7 / 0.62);
+    border: 1px solid rgb(255 236 228 / 0.22);
+    box-shadow: 0 10px 22px rgb(0 0 0 / 0.4);
+  }
+  .a-win__bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 9px;
+    font-weight: 700;
+    color: var(--gold-300);
+    border-bottom: 1px solid rgb(255 236 228 / 0.16);
+    background: rgb(255 236 228 / 0.06);
+  }
+  .a-win__cmd {
+    padding: 0 6px;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: #ffd9d2;
+    border: 1px solid rgb(255 160 150 / 0.4);
+    background: rgb(176 34 51 / 0.35);
+  }
+  .a-win__list {
+    display: grid;
+    gap: 3px;
+    padding: 7px 9px 4px;
+  }
+  .a-win__list li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .a-win__list li::before {
+    content: '✓';
+    display: grid;
+    place-items: center;
+    width: 14px;
+    height: 14px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    line-height: 1;
+    color: #241a03;
+    background: var(--gold-400);
+  }
+  .a-win__run {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 4px 9px 8px;
+    padding-top: 5px;
+    font-size: 0.78rem;
+    color: #9fe2b6;
+    border-top: 1px dashed rgb(255 236 228 / 0.16);
+  }
+  .a-win__run i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #6fd695;
+    box-shadow: 0 0 8px #6fd695;
+    animation: fa-pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes fa-pulse {
+    50% {
+      opacity: 0.35;
+    }
+  }
+
+  /* 上面一排圖形、下面一行說明（覺醒、成長、戰場、首領共用） */
+  .a-aw {
+    display: grid;
+    justify-items: center;
+    gap: 14px;
+  }
+  .a-cap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 6px;
+    font-size: 0.8rem;
+    color: var(--band-muted);
+  }
+
+  /* 等級節點 */
+  .a-lv {
+    position: relative;
+    display: flex;
+    gap: 20px;
+  }
+  .a-lv::before {
+    content: '';
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    top: 50%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold-500), var(--brand-400));
+  }
+  .a-lv li {
+    position: relative;
+    padding: 5px 9px;
+    font-size: 0.86rem;
+    font-weight: 800;
+    white-space: nowrap;
+    color: var(--gold-300);
+    background: #24161c;
+    border: 1px solid var(--gold-500);
+  }
+  .a-lv .is-max {
+    color: #fff;
+    background: var(--brand-500);
+    border-color: #ffb3a8;
+    box-shadow:
+      0 0 0 4px rgb(207 58 76 / 0.25),
+      0 0 26px rgb(240 90 102 / 0.75);
+  }
+
+  /* 一週七天 */
+  .a-week {
+    display: flex;
+    gap: 5px;
+  }
+  .a-week li {
+    display: grid;
+    place-items: center;
+    width: 27px;
+    height: 30px;
+    font-size: 0.84rem;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(180deg, var(--brand-400), var(--brand-600));
+    border: 1px solid rgb(255 200 190 / 0.5);
+    box-shadow: 0 0 14px rgb(220 60 76 / 0.35);
+  }
+  .a-week .is-siege {
+    color: #241a03;
+    background: linear-gradient(180deg, var(--gold-300), var(--gold-500));
+    border-color: #fff3c4;
+    box-shadow: 0 0 16px rgb(236 202 106 / 0.5);
+  }
+  .a-dot {
+    width: 9px;
+    height: 9px;
+    background: var(--brand-400);
+    border: 1px solid rgb(255 200 190 / 0.5);
+  }
+  .a-dot--gold {
+    margin-left: 8px;
+    background: var(--gold-400);
+    border-color: #fff3c4;
+  }
+
+  /* 首領徽章 */
+  .a-medals {
+    display: flex;
+    gap: 5px;
+  }
+  .a-medals li {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    color: var(--gold-300);
+    background: radial-gradient(circle at 50% 32%, #a81f33 0%, #5a1019 62%, #2a080e 100%);
+    box-shadow:
+      inset 0 0 0 1px rgb(236 202 106 / 0.6),
+      0 0 12px rgb(207 58 76 / 0.4);
+  }
+  .a-medals :global(svg) {
+    width: 17px;
+    height: 17px;
+  }
+  .a-lvtag {
+    padding: 0 6px;
+    font-weight: 800;
+    line-height: 1.6;
+    color: #241a03;
+    background: var(--gold-400);
+  }
+
+  /* 職業平衡（調整前後的長條） */
+  .a-bal {
+    display: grid;
+    gap: 7px;
+    width: min(210px, 100%);
+  }
+  .a-bal__name {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-weight: 800;
+    color: #fff;
+  }
+  .a-bal__name span {
+    font-size: 0.78rem;
+    font-weight: 400;
+    color: var(--band-muted);
+  }
+  .a-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    height: 22px;
+    padding: 0 7px;
+    font-size: 0.8rem;
+    font-weight: 800;
+  }
+  .a-bar--old {
+    width: 44%;
+    color: #d9cbc4;
+    background: repeating-linear-gradient(135deg, rgb(255 236 228 / 0.2) 0 4px, rgb(255 236 228 / 0.1) 4px 8px);
+  }
+  .a-bar--new {
+    width: 100%;
+    color: #fff;
+    background: linear-gradient(90deg, var(--brand-600), var(--brand-400) 70%, var(--gold-400));
+    box-shadow: 0 0 18px rgb(220 60 76 / 0.55);
+  }
+
+  /* 靠左排列（特色頁的章節封面）。只套在格線排版的那幾種：
+     小視窗和長條是一般區塊，套了 justify-items 會讓裡面的列縮成內容寬度 */
+  .fa--start.a-board,
+  .fa--start.a-aw {
+    justify-items: start;
+  }
+  .fa--start.a-win,
+  .fa--start.a-bal {
+    width: min(210px, 100%);
+  }
+</style>

@@ -1,12 +1,13 @@
 ---
 /**
- * 首頁「伺服器特色」：四張主打卡片（上方是 CSS 畫的小示意圖）＋更多便利
+ * 首頁「伺服器特色」：四張主打卡片（上方是深色發光的遊戲介面示意圖，見 FeatureArt）＋八項便利功能
  */
 import { homeExtras } from '../../data/features';
 import { awakenClassCount } from '../../data/classes';
 import { url } from '../../lib/url';
 import SectionHead from '../SectionHead.astro';
 import Icon from '../Icon.astro';
+import FeatureArt from '../FeatureArt.astro';
 ---
 
 <section class="section" id="features" aria-labelledby="hf-title">
@@ -19,81 +20,79 @@ import Icon from '../Icon.astro';
 
     <ul class="fc-grid">
       <li>
-        <a class="fc" href={url('/features/#board')}>
+        <a class="fc card lift" href={url('/features/#board')}>
           <div class="fc__art" aria-hidden="true">
-            <div class="a-board">
-              <p class="a-board__keys"><kbd>Alt</kbd><span>+</span><kbd>B</kbd></p>
-              <p class="a-board__tabs"><span class="is-on">傳送</span><span>輔助</span><span>商店</span><span>倉庫</span></p>
-            </div>
+            <Icon name="board" class="fc__ghost" />
+            <FeatureArt kind="board" />
           </div>
           <div class="fc__body">
-            <h3 class="fc__title"><Icon name="board" />隨身布告欄</h3>
+            <h3 class="fc__title">隨身布告欄</h3>
             <p class="fc__desc">按 Alt+B 打開。商店、輔助、傳送、倉庫隨身帶著走，全地圖傳送免費。</p>
+            <span class="link fc__more">了解更多<Icon name="arrow" /></span>
           </div>
         </a>
       </li>
       <li>
-        <a class="fc" href={url('/features/#auto')}>
+        <a class="fc card lift" href={url('/features/#auto')}>
           <div class="fc__art" aria-hidden="true">
-            <div class="a-bot">
-              <p class="a-bot__bar"><span>自動狩獵</span><span class="cmd">.內掛</span></p>
-              <ul class="a-bot__list">
-                <li>自動找怪</li>
-                <li>自動回收</li>
-                <li>自動喝水</li>
-              </ul>
-            </div>
+            <Icon name="bot" class="fc__ghost" />
+            <FeatureArt kind="auto" />
           </div>
           <div class="fc__body">
-            <h3 class="fc__title"><Icon name="bot" />內掛自動狩獵</h3>
+            <h3 class="fc__title">內掛自動狩獵</h3>
             <p class="fc__desc">輸入 .內掛 開啟，免費、所有等級都能用。找怪、技能策略、補血補藍、自動回收。</p>
+            <span class="link fc__more">了解更多<Icon name="arrow" /></span>
           </div>
         </a>
       </li>
       <li>
-        <a class="fc" href={url('/features/#awaken')}>
+        <a class="fc card lift" href={url('/features/#awaken')}>
           <div class="fc__art" aria-hidden="true">
-            <div class="a-aw">
-              <ol class="a-aw__lv"><li>Lv.90</li><li>Lv.95</li><li>Lv.99</li></ol>
-              <p class="a-aw__cap">被動＋主動，到等級自動學會</p>
-            </div>
+            <Icon name="awaken" class="fc__ghost" />
+            <FeatureArt kind="awaken" />
           </div>
           <div class="fc__body">
-            <h3 class="fc__title"><Icon name="awaken" />90 級覺醒技能</h3>
+            <h3 class="fc__title">90 級覺醒技能</h3>
             <p class="fc__desc">{awakenClassCount} 個三轉職業各有 1 個被動、1 個主動技能，不用 SP、不用技能書。</p>
+            <span class="link fc__more">了解更多<Icon name="arrow" /></span>
           </div>
         </a>
       </li>
       <li>
-        <a class="fc" href={url('/features/#classes')}>
+        <a class="fc card lift" href={url('/features/#classes')}>
           <div class="fc__art" aria-hidden="true">
-            <div class="a-bal">
-              <p class="a-bal__name">爆射箭<span>威力</span></p>
-              <p class="a-bal__bar a-bal__bar--old"><span class="tnum">1,326</span></p>
-              <p class="a-bal__bar a-bal__bar--new"><span class="tnum">3,000</span></p>
-            </div>
+            <Icon name="warrior" class="fc__ghost" />
+            <FeatureArt kind="balance" />
           </div>
           <div class="fc__body">
-            <h3 class="fc__title"><Icon name="warrior" />職業再平衡</h3>
+            <h3 class="fc__title">職業再平衡</h3>
             <p class="fc__desc">匕首正面也能背刺，弓手範圍技冷卻從 30 秒縮短為 10 秒，冷門職業也有舞台。</p>
+            <span class="link fc__more">了解更多<Icon name="arrow" /></span>
           </div>
         </a>
       </li>
     </ul>
 
-    <div class="extras">
-      <p class="extras__h">還有：</p>
-      <ul class="extras__list">
+    <div class="ex">
+      <div class="ex__head">
+        <h3 class="ex__h">還有這些，讓冒險更從容</h3>
+        <a class="link" href={url('/features/')}>全部伺服器特色<Icon name="arrow" /></a>
+      </div>
+      <ul class="ex__grid">
         {
           homeExtras.map((f) => (
-            <li class="chip" title={f.desc}>
-              <Icon name={f.icon} />
-              {f.title}
+            <li class="ex__item">
+              <span class="ex__icon" aria-hidden="true">
+                <Icon name={f.icon} />
+              </span>
+              <div>
+                <p class="ex__t">{f.title}</p>
+                <p class="ex__d">{f.desc}</p>
+              </div>
             </li>
           ))
         }
       </ul>
-      <a class="link extras__more" href={url('/features/')}>全部伺服器特色<Icon name="arrow" /></a>
     </div>
   </div>
 </section>
@@ -108,43 +107,49 @@ import Icon from '../Icon.astro';
     display: flex;
     flex-direction: column;
     height: 100%;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    transition: border-color 0.15s, box-shadow 0.15s;
   }
-  .fc:hover {
-    border-color: var(--line-2);
-    box-shadow: 0 2px 8px rgb(16 20 24 / 0.08);
+  /* 示意圖：深色面板，右上有紅光，角落是很淡的大圖示 */
+  .fc__art {
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    height: 172px;
+    padding: 16px;
+    color: var(--band-text);
+    background:
+      radial-gradient(1.5px 1.5px at 14% 22%, rgb(255 232 222 / 0.5), transparent 60%),
+      radial-gradient(1.5px 1.5px at 31% 74%, rgb(255 232 222 / 0.3), transparent 60%),
+      radial-gradient(1.5px 1.5px at 68% 14%, rgb(255 232 222 / 0.45), transparent 60%),
+      radial-gradient(1.5px 1.5px at 88% 62%, rgb(255 232 222 / 0.3), transparent 60%),
+      radial-gradient(110% 90% at 88% -12%, rgb(196 52 68 / 0.55), transparent 62%),
+      linear-gradient(180deg, #1a0d12, #30121c);
+  }
+  .fc__art :global(.fc__ghost) {
+    position: absolute;
+    right: -22px;
+    bottom: -30px;
+    width: 150px;
+    height: 150px;
+    color: rgb(255 236 228 / 0.06);
+    transition: transform 0.5s var(--ease), color 0.5s;
+  }
+  .fc:hover :global(.fc__ghost) {
+    transform: scale(1.08) rotate(-4deg);
+    color: rgb(255 236 228 / 0.1);
+  }
+  .fc__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 16px 18px 16px;
+  }
+  .fc__title {
+    font-size: 1.12rem;
+    transition: color 0.2s;
   }
   .fc:hover .fc__title {
     color: var(--link);
-  }
-  .fc__art {
-    display: grid;
-    place-items: center;
-    height: 150px;
-    padding: 14px;
-    background:
-      linear-gradient(rgb(120 90 70 / 0.06) 1px, transparent 1px) 0 0 / 18px 18px,
-      linear-gradient(90deg, rgb(120 90 70 / 0.06) 1px, transparent 1px) 0 0 / 18px 18px,
-      #f4efe8;
-    border-bottom: 1px solid var(--line);
-  }
-  .fc__body {
-    padding: 14px 16px 16px;
-  }
-  .fc__title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 1.05rem;
-    transition: color 0.15s;
-  }
-  .fc__title :global(svg) {
-    width: 22px;
-    height: 22px;
-    flex: none;
-    color: var(--brand-500);
   }
   .fc__desc {
     margin-top: 6px;
@@ -152,199 +157,83 @@ import Icon from '../Icon.astro';
     line-height: 1.7;
     color: var(--ink-2);
   }
-
-  /* 示意圖：布告欄 */
-  .a-board {
-    display: grid;
-    justify-items: center;
-    gap: 14px;
+  .fc__more {
+    margin-top: auto;
+    padding-top: 12px;
+    font-size: 0.9rem;
   }
-  .a-board__keys {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 700;
-    color: var(--ink-3);
-  }
-  .a-board__keys kbd {
-    min-width: 46px;
-    padding: 4px 10px;
-    font-size: 1.15rem;
-    text-align: center;
-  }
-  .a-board__tabs {
-    display: flex;
-    border: 1px solid var(--line-2);
-    background: #fff;
-    font-size: 0.8rem;
-  }
-  .a-board__tabs span {
-    padding: 3px 9px;
-    color: var(--ink-2);
-  }
-  .a-board__tabs span + span {
-    border-left: 1px solid var(--line);
-  }
-  .a-board__tabs .is-on {
-    color: #fff;
-    background: var(--brand-500);
+  .fc:hover .fc__more :global(svg) {
+    transform: translateX(3px);
   }
 
-  /* 示意圖：內掛 */
-  .a-bot {
-    width: min(190px, 100%);
-    font-size: 0.82rem;
-    background: #fff;
-    border: 1px solid var(--line-2);
+  /* 八項便利功能 */
+  .ex {
+    margin-top: 28px;
   }
-  .a-bot__bar {
+  .ex__head {
     display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
     justify-content: space-between;
-    align-items: center;
-    padding: 4px 8px;
-    font-weight: 700;
-    color: #fff;
-    background: var(--band-800);
+    gap: 6px 20px;
+    margin-bottom: 12px;
   }
-  .a-bot__bar .cmd {
-    font-size: 0.78rem;
+  .ex__h {
+    font-size: 1.08rem;
   }
-  .a-bot__list {
+  .ex__grid {
     display: grid;
-    gap: 2px;
-    padding: 6px 8px 8px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
   }
-  .a-bot__list li {
+  .ex__item {
     display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--ink);
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-1);
   }
-  .a-bot__list li::before {
-    content: '✓';
+  .ex__icon {
     display: grid;
     place-items: center;
-    width: 14px;
-    height: 14px;
-    font-size: 0.7rem;
+    width: 34px;
+    height: 34px;
+    flex: none;
+    color: var(--brand-500);
+    background: var(--brand-50);
+    border: 1px solid #ecc9ce;
+  }
+  .ex__icon :global(svg) {
+    width: 22px;
+    height: 22px;
+  }
+  .ex__t {
     font-weight: 700;
-    line-height: 1;
-    color: #fff;
-    background: var(--brand-500);
-  }
-
-  /* 示意圖：覺醒 */
-  .a-aw {
-    display: grid;
-    justify-items: center;
-    gap: 12px;
-  }
-  .a-aw__lv {
-    position: relative;
-    display: flex;
-    gap: 18px;
-  }
-  .a-aw__lv::before {
-    content: '';
-    position: absolute;
-    left: 10px;
-    right: 10px;
-    top: 50%;
-    height: 2px;
-    background: var(--gold-500);
-  }
-  .a-aw__lv li {
-    position: relative;
-    padding: 4px 8px;
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: #241a03;
-    background: var(--gold-400);
-    border: 1px solid #8a6a12;
-  }
-  .a-aw__lv li:last-child {
-    color: #fff;
-    background: var(--brand-500);
-    border-color: var(--brand-700);
-  }
-  .a-aw__cap {
-    font-size: 0.8rem;
-    color: var(--ink-2);
-  }
-
-  /* 示意圖：平衡 */
-  .a-bal {
-    display: grid;
-    gap: 6px;
-    width: min(200px, 100%);
-  }
-  .a-bal__name {
-    display: flex;
-    align-items: baseline;
-    gap: 6px;
-    font-weight: 700;
+    line-height: 1.4;
     color: var(--ink-strong);
   }
-  .a-bal__name span {
-    font-size: 0.78rem;
-    font-weight: 400;
-    color: var(--ink-3);
-  }
-  .a-bal__bar {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    height: 20px;
-    padding: 0 6px;
-    font-size: 0.78rem;
-    font-weight: 700;
-  }
-  .a-bal__bar--old {
-    width: 44%;
+  .ex__d {
+    margin-top: 2px;
+    font-size: 0.84rem;
+    line-height: 1.55;
     color: var(--ink-2);
-    background: repeating-linear-gradient(135deg, #d6d2cc 0 4px, #e6e2dc 4px 8px);
-  }
-  .a-bal__bar--new {
-    width: 100%;
-    color: #fff;
-    background: var(--brand-500);
-  }
-
-  /* 更多便利 */
-  .extras {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px 10px;
-    margin-top: 20px;
-  }
-  .extras__h {
-    font-weight: 700;
-    color: var(--ink-strong);
-  }
-  .extras__list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .extras__more {
-    margin-left: auto;
   }
 
   @media (max-width: 1040px) {
-    .fc-grid {
+    .fc-grid,
+    .ex__grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
   @media (max-width: 560px) {
-    .fc-grid {
+    .fc-grid,
+    .ex__grid {
       grid-template-columns: 1fr;
     }
     .fc__art {
-      height: 130px;
-    }
-    .extras__more {
-      margin-left: 0;
+      height: 150px;
     }
   }
 </style>

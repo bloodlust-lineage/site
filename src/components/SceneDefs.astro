@@ -1,0 +1,83 @@
+---
+/**
+ * 全站共用的場景圖形（山脈、針葉林），每頁只輸出一次。
+ * 其他元件用 <use href="#g-trees" /> 這種方式引用，不必重複輸出路徑：
+ *   #g-far-body／#g-far-lit　遠山的山體與受光面（座標 2400 × 200）
+ *   #g-mid-body／#g-mid-lit　中景山脈（2400 × 160）
+ *   #g-trees　　　　　　　　 針葉林稜線（2400 × 96）
+ */
+import { range, treeline } from '../lib/scene';
+
+const far = range(11, 2400, 200, { peaks: 15, low: 0.34, high: 0.96 });
+const mid = range(29, 2400, 160, { peaks: 10, low: 0.3, high: 0.88, rough: 1.2 });
+const trees = treeline(5, 2400, 96, { count: 190, minH: 12, maxH: 48, ground: 20 });
+---
+
+<svg class="scene-defs" width="0" height="0" aria-hidden="true" focusable="false">
+  <defs>
+    <path id="g-far-body" d={far.body} />
+    <path id="g-far-lit" d={far.lit} />
+    <path id="g-mid-body" d={mid.body} />
+    <path id="g-mid-lit" d={mid.lit} />
+    <path id="g-trees" d={trees} />
+
+    <!-- 血月（圓心在原點、半徑 160）：#g-moon -->
+    <radialGradient id="m-base" cx="0.4" cy="0.35" r="0.76">
+      <stop offset="0" stop-color="#ffe2cd"></stop>
+      <stop offset="0.24" stop-color="#ffb096"></stop>
+      <stop offset="0.54" stop-color="#ee625e"></stop>
+      <stop offset="0.84" stop-color="#b3213a"></stop>
+      <stop offset="1" stop-color="#7a1026"></stop>
+    </radialGradient>
+    <radialGradient id="m-limb">
+      <stop offset="0.7" stop-color="#4a0616" stop-opacity="0"></stop>
+      <stop offset="1" stop-color="#4a0616" stop-opacity="0.62"></stop>
+    </radialGradient>
+    <filter id="m-bloom" x="-0.3" y="-0.3" width="1.6" height="1.6" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="16"></feGaussianBlur>
+    </filter>
+    <!-- 月海：低頻雜訊取出大塊暗斑 -->
+    <filter id="m-mare" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.011 0.013" numOctaves="4" seed="11"></feTurbulence>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.42  0 0 0 0 0.03  0 0 0 0 0.12  2.6 0 0 0 -1.18"></feColorMatrix>
+      <feGaussianBlur stdDeviation="1.4"></feGaussianBlur>
+    </filter>
+    <!-- 表面顆粒 -->
+    <filter id="m-grain" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="2" seed="4"></feTurbulence>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.3  0 0 0 0 0.02  0 0 0 0 0.08  1.5 0 0 0 -0.62"></feColorMatrix>
+    </filter>
+    <clipPath id="m-clip"><circle r="160"></circle></clipPath>
+    <g id="g-moon">
+      <circle r="165" fill="#ff8f7c" opacity="0.55" filter="url(#m-bloom)"></circle>
+      <circle r="160" fill="url(#m-base)"></circle>
+      <g clip-path="url(#m-clip)">
+        <rect x="-160" y="-160" width="320" height="320" filter="url(#m-mare)" opacity="0.46"></rect>
+        <rect x="-160" y="-160" width="320" height="320" filter="url(#m-grain)" opacity="0.2"></rect>
+        <g fill="#8a1a30" opacity="0.2">
+          <circle cx="-68" cy="-65" r="13"></circle>
+          <circle cx="68" cy="47" r="19"></circle>
+          <circle cx="-34" cy="85" r="9"></circle>
+          <circle cx="82" cy="-75" r="7"></circle>
+          <circle cx="-94" cy="31" r="6"></circle>
+        </g>
+        <g fill="none" stroke="#ffe3d2" stroke-opacity="0.22" stroke-width="1">
+          <path d="M-77 -57a13 13 0 0 0 20 2"></path>
+          <path d="M55 60a19 19 0 0 0 28 4"></path>
+          <path d="M-40 91a9 9 0 0 0 14 1"></path>
+        </g>
+      </g>
+      <circle r="160" fill="url(#m-limb)"></circle>
+      <circle r="159.5" fill="none" stroke="#ffd9c9" stroke-opacity="0.3"></circle>
+    </g>
+  </defs>
+</svg>
+
+<style>
+  .scene-defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+  }
+</style>

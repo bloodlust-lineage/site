@@ -6,6 +6,7 @@ import Icon from '../components/Icon.astro';
 import Faq from '../components/Faq.astro';
 import CtaBand from '../components/CtaBand.astro';
 import { journey, gifts, levelSpots, commands, firstHours, rules } from '../data/guide';
+import { gearTiers, tierForLevel } from '../data/gear';
 import { url } from '../lib/url';
 
 const boardMenu = [
@@ -17,6 +18,9 @@ const boardMenu = [
   ['職業', '主職業變更、副職業添加與切換、靈魂結晶進度、英雄與奧林匹亞說明'],
   ['服務', '性向重置、背包倉庫擴充、血盟聲望、名稱與稱號顏色、特殊升級、稀有升級、更名'],
 ];
+
+/** 練功地點：依起始等級標上那個階段穿的裝備等級 */
+const spots = levelSpots.map(([lv, place]) => ({ lv, place, tier: tierForLevel(parseInt(lv, 10)) }));
 ---
 
 <Base title="新手指南" description="嗜血天堂II 經典服新手指南：下載與建立帳號、新手禮物、前幾個小時怎麼玩、各等級練功地點、社群布告欄與玩家指令一次看懂。">
@@ -30,22 +34,27 @@ const boardMenu = [
     <a href={url('/handbook/')} class="btn"><Icon name="book" />冒險手冊</a>
   </PageHero>
 
-  <!-- 四步驟 -->
+  <!-- 四步驟：金色編號串在一條虛線上 -->
   <section class="section" aria-labelledby="g-steps">
     <div class="container">
       <SectionHead title="四個步驟，進入遊戲" id="g-steps" desc="不用註冊、不用跑任務。下載、登入、甦醒，然後按下 Alt+B。" />
-      <ol class="steps">
+      <ol class="trail">
         {
           journey.map((s, i) => (
-            <li class="step">
-              <span class="num">{i + 1}</span>
-              <div>
-                <h3 class="step__title">{s.title}</h3>
-                <p class="step__desc">{s.desc}</p>
-              </div>
-              <span class="ibox step__icon" aria-hidden="true">
-                <Icon name={s.icon} />
+            <li class="trail__step">
+              <span class="gem gem--gold" aria-hidden="true">
+                <b>{i + 1}</b>
               </span>
+              <div class="trail__card card">
+                <span class="ibox" aria-hidden="true">
+                  <Icon name={s.icon} />
+                </span>
+                <h3 class="trail__t">
+                  <span class="sr-only">步驟 {i + 1}：</span>
+                  {s.title}
+                </h3>
+                <p class="trail__d">{s.desc}</p>
+              </div>
             </li>
           ))
         }
@@ -70,7 +79,7 @@ const boardMenu = [
       />
       <div class="g-two">
         <div class="table-wrap">
-          <table class="table">
+          <table class="table g-gifts">
             <caption class="sr-only">新手禮物</caption>
             <thead>
               <tr>
@@ -96,7 +105,10 @@ const boardMenu = [
           </table>
         </div>
         <aside class="card g-hours" aria-labelledby="g-hours-title">
-          <h3 class="g-hours__title" id="g-hours-title">前幾個小時建議這樣玩</h3>
+          <h3 class="g-hours__title bar" id="g-hours-title">
+            <Icon name="hourglass" />
+            前幾個小時建議這樣玩
+          </h3>
           <ol class="g-hours__list">
             {
               firstHours.map((t, i) => (
@@ -122,18 +134,34 @@ const boardMenu = [
       />
       <ol class="spots">
         {
-          levelSpots.map(([lv, place]) => (
-            <li>
-              <span class="spots__lv tnum">Lv. {lv}</span>
-              <span class="spots__place">{place}</span>
+          spots.map((s) => (
+            <li class="spots__row" style={`--c:${s.tier.c}`}>
+              <span class="spots__lv tnum">Lv. {s.lv}</span>
+              <span class="spots__place">{s.place}</span>
+              <span class="spots__tier">
+                <span class="sr-only">適合的裝備：</span>
+                {s.tier.name}
+              </span>
             </li>
           ))
         }
       </ol>
+      <p class="spots__legend">
+        <span>顏色與右邊的標示，是那個等級適合穿的裝備：</span>
+        {
+          gearTiers.map((t) => (
+            <span class="spots__key" style={`--c:${t.c}`}>
+              <i aria-hidden="true" />
+              {t.name}
+              <small class="tnum">Lv. {t.lv}</small>
+            </span>
+          ))
+        }
+      </p>
     </div>
   </section>
 
-  <!-- 布告欄 -->
+  <!-- 布告欄：做成一個遊戲視窗的樣子 -->
   <section class="section" aria-labelledby="g-board">
     <div class="container">
       <SectionHead
@@ -141,19 +169,40 @@ const boardMenu = [
         id="g-board"
         desc="遊戲中按 Alt+B 開啟。不限和平區，只要不在戰鬥、紅名、PvP 活動、交易或攻城區中，隨時都能使用。"
       />
-      <ul class="board">
-        {
-          boardMenu.map(([t, d], i) => (
-            <li class="board__item">
-              <p class="board__t">
-                <span class="num">{i + 1}</span>
-                {t}
-              </p>
-              <p class="board__d">{d}</p>
-            </li>
-          ))
-        }
-      </ul>
+      <div class="bwin on-dark">
+        <div class="bwin__bar">
+          <p class="bwin__keys" aria-hidden="true">
+            <kbd>Alt</kbd>
+            <i>+</i>
+            <kbd>B</kbd>
+          </p>
+          <p class="bwin__name">社群布告欄</p>
+          <p class="bwin__hint">七個分頁，走到哪裡都能打開</p>
+        </div>
+        <ul class="bwin__grid">
+          {
+            boardMenu.map(([t, d], i) => (
+              <li class="bwin__item">
+                <p class="bwin__t">
+                  <span class="num">{i + 1}</span>
+                  {t}
+                </p>
+                <p class="bwin__d">{d}</p>
+              </li>
+            ))
+          }
+          <li class="bwin__item bwin__item--more">
+            <a href={url('/handbook/#srv-bbs')}>
+              <span class="bwin__more-t">完整功能說明</span>
+              <span class="bwin__d">每個分頁的價格、限制與用法，都寫在冒險手冊裡。</span>
+              <span class="link">
+                布告欄功能
+                <Icon name="arrow" />
+              </span>
+            </a>
+          </li>
+        </ul>
+      </div>
     </div>
   </section>
 
@@ -164,10 +213,13 @@ const boardMenu = [
       <ul class="cmds">
         {
           commands.map((c) => (
-            <li>
+            <li class="cmds__row">
               <button class="cmds__btn" type="button" data-copy={c.cmd.split(' ')[0]} aria-label={`複製指令 ${c.cmd}`}>
                 <span class="cmd">{c.cmd}</span>
-                <span class="cmds__copy" data-copy-label>複製</span>
+                <span class="cmds__copy">
+                  <Icon name="copy" />
+                  <span data-copy-label>複製</span>
+                </span>
               </button>
               <p class="cmds__desc">
                 {c.desc}
@@ -188,8 +240,13 @@ const boardMenu = [
         {
           rules.map((r) => (
             <li class="rules__item">
-              <h3 class="rules__t">{r.title}</h3>
-              <p class="rules__d">{r.desc}</p>
+              <span class="ibox" aria-hidden="true">
+                <Icon name={r.icon} />
+              </span>
+              <div>
+                <h3 class="rules__t">{r.title}</h3>
+                <p class="rules__d">{r.desc}</p>
+              </div>
             </li>
           ))
         }
@@ -202,33 +259,74 @@ const boardMenu = [
 </Base>
 
 <style>
-  .steps {
+  /* ---------- 四步驟 ---------- */
+  .trail {
+    position: relative;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-  }
-  .step {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 14px;
-    align-items: start;
-    padding: 16px 18px;
-    background: var(--surface);
-    border: 1px solid var(--line);
   }
-  .step__title {
-    font-size: 1.08rem;
-    line-height: 1.6;
+  /* 虛線穿過每顆編號的中心 */
+  .trail::before {
+    content: '';
+    position: absolute;
+    left: 12.5%;
+    right: 12.5%;
+    top: 23px;
+    border-top: 2px dashed var(--gold-400);
+    opacity: 0.8;
   }
-  .step__desc {
-    margin-top: 4px;
-    font-size: 0.93rem;
+  .trail__step {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .trail__step :global(.gem) {
+    --gem: 32px;
+    position: relative;
+    z-index: 1;
+    margin: 8px 0 -10px;
+    box-shadow:
+      inset 0 0 0 2px rgb(255 255 255 / 0.36),
+      0 0 0 5px var(--bg),
+      0 8px 14px -4px rgb(60 40 0 / 0.5);
+    transition: transform 0.35s var(--ease);
+  }
+  .trail__step:hover :global(.gem) {
+    transform: rotate(45deg) scale(1.12);
+  }
+  .trail__card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 34px 20px 20px;
+    text-align: center;
+    transition:
+      box-shadow 0.25s var(--ease),
+      border-color 0.25s;
+  }
+  .trail__step:hover .trail__card {
+    border-color: var(--line-2);
+    box-shadow: var(--shadow-2);
+  }
+  .trail__t {
+    margin-top: 12px;
+    font-size: 1.1rem;
+  }
+  .trail__d {
+    margin-top: 6px;
+    font-size: 0.92rem;
+    line-height: 1.75;
     color: var(--ink-2);
   }
   .g-note {
     margin-top: 16px;
   }
 
+  /* ---------- 新手禮物 ---------- */
   .g-two {
     display: grid;
     grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
@@ -246,19 +344,41 @@ const boardMenu = [
   .g-tag {
     margin-left: 6px;
   }
+  /* 前幾個小時：深色標題列＋串在虛線上的步驟 */
   .g-hours {
-    padding: 18px 20px;
-    border-top: 4px solid var(--gold-400);
+    box-shadow: var(--shadow-2);
   }
   .g-hours__title {
-    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    font-size: 1.08rem;
+    color: var(--band-title);
+  }
+  .g-hours__title :global(svg) {
+    width: 22px;
+    height: 22px;
+    flex: none;
+    color: var(--gold-300);
   }
   .g-hours__list {
+    position: relative;
     display: grid;
-    gap: 10px;
-    margin-top: 14px;
+    gap: 12px;
+    padding: 18px 20px 20px;
+  }
+  .g-hours__list::before {
+    content: '';
+    position: absolute;
+    left: 31px;
+    top: 30px;
+    bottom: 34px;
+    border-left: 2px dashed var(--gold-400);
+    opacity: 0.6;
   }
   .g-hours__list li {
+    position: relative;
     display: grid;
     grid-template-columns: auto 1fr;
     gap: 12px;
@@ -271,67 +391,211 @@ const boardMenu = [
     font-size: 0.82rem;
   }
 
+  /* ---------- 練功地點：等級徽章的顏色是那個階段穿的裝備等級 ---------- */
   .spots {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0 24px;
+    gap: 0 28px;
     border-top: 1px solid var(--line);
   }
-  .spots li {
+  .spots__row {
     display: grid;
-    grid-template-columns: 6.5em 1fr;
-    gap: 12px;
-    padding: 9px 4px;
+    grid-template-columns: 6.6em minmax(0, 1fr) auto;
+    gap: 14px;
+    align-items: center;
+    padding: 9px 6px 9px 0;
     border-bottom: 1px solid var(--line);
+    transition: background-color 0.15s;
+  }
+  .spots__row:hover {
+    background: var(--surface-2);
   }
   .spots__lv {
+    padding: 3px 0;
+    font-size: 0.88rem;
     font-weight: 700;
-    color: var(--brand-600);
+    line-height: 1.5;
+    text-align: center;
     white-space: nowrap;
+    color: #fff;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--c) 82%, #fff), var(--c) 60%, color-mix(in srgb, var(--c) 80%, #000));
+    border: 1px solid color-mix(in srgb, var(--c) 60%, #000);
+    text-shadow: 0 1px 1px rgb(0 0 0 / 0.3);
+  }
+  .spots__place {
+    color: var(--ink);
+  }
+  .spots__tier {
+    padding: 0 7px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    line-height: 1.7;
+    white-space: nowrap;
+    color: color-mix(in srgb, var(--c) 78%, #000);
+    background: color-mix(in srgb, var(--c) 9%, #fff);
+    border: 1px solid color-mix(in srgb, var(--c) 38%, #fff);
+  }
+  .spots__legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 16px;
+    margin-top: 16px;
+    font-size: 0.86rem;
+    color: var(--ink-2);
+  }
+  .spots__key {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .spots__key i {
+    width: 10px;
+    height: 10px;
+    background: var(--c);
+    transform: rotate(45deg);
+  }
+  .spots__key small {
+    font-size: 0.9em;
+    font-weight: 400;
+    color: var(--ink-3);
   }
 
-  .board {
+  /* ---------- 布告欄視窗 ---------- */
+  .bwin {
+    background:
+      radial-gradient(70% 90% at 92% -12%, rgb(176 44 60 / 0.42), transparent 62%),
+      linear-gradient(180deg, #1a0d12 0%, #2a111b 100%);
+    border: 1px solid #0b0508;
+    box-shadow: var(--shadow-3);
+  }
+  .bwin__bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    padding: 14px 20px;
+    background: rgb(255 236 228 / 0.045);
+    border-bottom: 1px solid rgb(255 236 228 / 0.14);
+  }
+  .bwin__keys {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .bwin__keys i {
+    font-style: normal;
+    font-weight: 700;
+    color: var(--band-muted);
+  }
+  .bwin__keys kbd {
+    min-width: 44px;
+    padding: 3px 10px 4px;
+    font-size: 1rem;
+    font-weight: 800;
+    text-align: center;
+    color: var(--gold-300);
+    background: linear-gradient(180deg, #43313a, #241820);
+    border: 1px solid rgb(255 236 228 / 0.26);
+    border-bottom: 3px solid #0c0608;
+    box-shadow: 0 6px 14px rgb(0 0 0 / 0.4);
+  }
+  .bwin__name {
+    font-size: 1.18rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: var(--band-title);
+  }
+  .bwin__hint {
+    margin-left: auto;
+    font-size: 0.88rem;
+    color: var(--band-muted);
+  }
+  .bwin__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 12px;
+    padding: 16px 20px 20px;
   }
-  .board__item {
+  .bwin__item {
     padding: 14px 16px 16px;
-    background: var(--surface);
-    border: 1px solid var(--line);
+    background: linear-gradient(180deg, rgb(255 236 228 / 0.075), rgb(255 236 228 / 0.025));
+    border: 1px solid rgb(255 236 228 / 0.16);
+    transition:
+      border-color 0.25s,
+      transform 0.25s var(--ease);
   }
-  .board__t {
+  .bwin__item:hover {
+    border-color: rgb(236 202 106 / 0.5);
+    transform: translateY(-2px);
+  }
+  .bwin__t {
     display: flex;
     align-items: center;
     gap: 10px;
     font-size: 1.05rem;
     font-weight: 700;
-    color: var(--ink-strong);
+    color: var(--band-title);
   }
-  .board__t .num {
+  .bwin__t .num {
     width: 24px;
     height: 24px;
     font-size: 0.82rem;
   }
-  .board__d {
+  .bwin__d {
     margin-top: 8px;
-    font-size: 0.92rem;
+    font-size: 0.9rem;
     line-height: 1.75;
     color: var(--ink-2);
   }
+  .bwin__item--more {
+    padding: 0;
+    background: rgb(236 202 106 / 0.06);
+    border: 1px dashed rgb(236 202 106 / 0.45);
+  }
+  .bwin__item--more a {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    height: 100%;
+    padding: 14px 16px 16px;
+  }
+  .bwin__more-t {
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 24px;
+    color: var(--band-title);
+  }
+  .bwin__item--more .link {
+    margin-top: auto;
+    padding-top: 10px;
+    font-size: 0.92rem;
+  }
 
+  /* ---------- 指令 ---------- */
   .cmds {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0 32px;
+    gap: 8px 12px;
   }
-  .cmds li {
+  .cmds__row {
     display: grid;
-    grid-template-columns: 11.5em 1fr;
+    grid-template-columns: 12.5em minmax(0, 1fr);
     gap: 12px;
     align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--line);
+    padding: 9px 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-1);
+    transition:
+      border-color 0.2s,
+      box-shadow 0.25s var(--ease);
+  }
+  .cmds__row:hover {
+    border-color: var(--brand-200);
+    box-shadow: var(--shadow-2);
   }
   .cmds__btn {
     justify-self: start;
@@ -341,21 +605,28 @@ const boardMenu = [
   }
   .cmds__btn .cmd {
     font-size: 0.95rem;
+    transition:
+      border-color 0.15s,
+      background-color 0.15s;
   }
   .cmds__btn:hover .cmd {
     border-color: var(--brand-400);
     background: var(--brand-50);
   }
   .cmds__copy {
-    font-size: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.76rem;
     color: var(--ink-3);
-    opacity: 0;
-    transition: opacity 0.15s;
+    transition: color 0.15s;
   }
-  .cmds__btn:hover .cmds__copy,
-  .cmds__btn:focus-visible .cmds__copy,
-  .cmds__btn:global(.is-copied) .cmds__copy {
-    opacity: 1;
+  .cmds__copy :global(svg) {
+    width: 14px;
+    height: 14px;
+  }
+  .cmds__btn:hover .cmds__copy {
+    color: var(--link);
   }
   .cmds__btn:global(.is-copied) .cmds__copy {
     font-weight: 700;
@@ -369,30 +640,47 @@ const boardMenu = [
     color: var(--ink-3);
   }
 
+  /* ---------- 規則 ---------- */
   .rules {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 12px;
   }
   .rules__item {
-    padding: 16px 18px;
-    background: var(--surface);
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 14px;
+    align-items: start;
+    padding: 16px 18px 17px;
+    background: var(--surface-2);
     border: 1px solid var(--line);
     border-top: 3px solid var(--brand-500);
+    box-shadow: var(--shadow-1);
   }
   .rules__t {
     font-size: 1.05rem;
+    line-height: 1.5;
   }
   .rules__d {
-    margin-top: 6px;
-    font-size: 0.93rem;
+    margin-top: 4px;
+    font-size: 0.92rem;
     line-height: 1.75;
     color: var(--ink-2);
   }
 
   @media (max-width: 1040px) {
+    .trail {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      row-gap: 18px;
+    }
+    .trail::before {
+      display: none;
+    }
     .g-two {
       grid-template-columns: 1fr;
+    }
+    .bwin__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
     .cmds {
       grid-template-columns: 1fr;
@@ -402,22 +690,119 @@ const boardMenu = [
     }
   }
   @media (max-width: 760px) {
-    .steps,
     .spots {
       grid-template-columns: 1fr;
-    }
-    .step {
-      grid-template-columns: auto 1fr;
-    }
-    .step__icon {
-      display: none;
     }
     .rules {
       grid-template-columns: 1fr;
     }
-    .cmds li {
+    .bwin__hint {
+      margin-left: 0;
+      flex-basis: 100%;
+    }
+  }
+  /* 手機：新手禮物改成一列一格（名稱與數量同一行，說明在下面），說明欄才不會被擠成一條 */
+  @media (max-width: 640px) {
+    .g-gifts,
+    .g-gifts tbody {
+      display: block;
+    }
+    .g-gifts thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+    .g-gifts tbody tr {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 2px 14px;
+      padding: 11px 14px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+    .g-gifts tbody tr:last-child {
+      border-bottom: 0;
+    }
+    .g-gifts tbody th,
+    .g-gifts tbody td {
+      display: block;
+      min-width: 0;
+      padding: 0;
+      border: 0;
+    }
+    .g-gifts tbody td:last-child {
+      grid-column: 1 / -1;
+      font-size: 0.92rem;
+      color: var(--ink-2);
+    }
+  }
+  /* 手機：步驟改成直的時間軸，編號在左、卡片在右 */
+  @media (max-width: 600px) {
+    .trail {
+      grid-template-columns: 1fr;
+      row-gap: 10px;
+    }
+    .trail::before {
+      display: block;
+      left: 23px;
+      right: auto;
+      top: 24px;
+      bottom: 24px;
+      border-top: 0;
+      border-left: 2px dashed var(--gold-400);
+    }
+    .trail__step {
+      flex-direction: row;
+      align-items: center;
+    }
+    .trail__step :global(.gem) {
+      --gem: 28px;
+      margin: 0 20px 0 10px;
+    }
+    .trail__card {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      grid-template-areas: 'icon title' 'icon desc';
+      column-gap: 12px;
+      padding: 12px 14px 13px;
+      text-align: left;
+    }
+    .trail__card :global(.ibox) {
+      grid-area: icon;
+      width: 38px;
+      height: 38px;
+    }
+    .trail__card :global(.ibox svg) {
+      width: 24px;
+      height: 24px;
+    }
+    .trail__t {
+      grid-area: title;
+      margin-top: 0;
+      font-size: 1.02rem;
+    }
+    .trail__d {
+      grid-area: desc;
+      margin-top: 2px;
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+    .bwin__grid {
+      grid-template-columns: 1fr;
+      padding: 12px;
+    }
+    .bwin__bar {
+      padding: 12px 14px;
+    }
+    .cmds__row {
       grid-template-columns: 1fr;
       gap: 4px;
+    }
+    .spots__row {
+      grid-template-columns: 6.2em minmax(0, 1fr) auto;
+      gap: 10px;
     }
   }
 </style>

@@ -1,7 +1,8 @@
 /* ============================================================
    嗜血天堂II 經典服 — 設計系統
-   淺色內容區＋深色頁首與主視覺。系統無襯線字體、直角卡片、細框線，
-   資訊清楚、裝飾克制；品牌色是血紅，編號與重點標記用古金。
+   暖調的淺色內容區＋深色頁首、主視覺與重點區塊。
+   系統無襯線字體、直角卡片、細框線加上層次陰影；
+   品牌色是血紅，編號與重點標記用古金。
    ============================================================ */
 
 /* ------------------------------------------------------------
@@ -28,40 +29,47 @@
   --gold-300: #ecca6a;
   --gold-100: #f7ecc8;
 
-  /* 深色帶：頁首、主視覺、頁尾條 */
-  --band-950: #0f080a;
-  --band-900: #170d10;
-  --band-800: #211418;
-  --band-700: #2f1d22;
+  /* 深色帶：頁首、主視覺、重點區塊、頁尾 */
+  --band-950: #0b0508;
+  --band-900: #150b0f;
+  --band-800: #1f1217;
+  --band-700: #2d1a20;
   --band-line: rgb(255 236 228 / 0.14);
   --band-text: #f4ebe6;
   --band-muted: #c7b6af;
+  --band-title: #fbf0d8;
 
-  /* 內容區 */
-  --bg: #f6f6f6;
-  --bg-alt: #eef0f2;
+  /* 內容區：帶一點暖調的米白 */
+  --bg: #f6f4f1;
+  --bg-alt: #eeebe6;
   --surface: #ffffff;
-  --surface-2: #f8f9fa;
-  --ink: #202122;
-  --ink-strong: #101418;
-  --ink-2: #54595d;
-  --ink-3: #72777d;
-  --line: #d5d9de;
-  --line-2: #b9bfc6;
+  --surface-2: #faf8f5;
+  --ink: #231f20;
+  --ink-strong: #141011;
+  --ink-2: #5b5357;
+  --ink-3: #80777b;
+  --line: #ddd7cf;
+  --line-2: #c4bcb3;
   --link: #a01f2f;
   --link-hover: #6d1420;
   --ok: #2c7a4b;
   --ok-bg: #e6f3eb;
 
+  /* 層次陰影 */
+  --shadow-1: 0 1px 2px rgb(40 22 26 / 0.06), 0 1px 1px rgb(40 22 26 / 0.04);
+  --shadow-2: 0 12px 26px -14px rgb(40 22 26 / 0.26), 0 2px 6px rgb(40 22 26 / 0.06);
+  --shadow-3: 0 28px 56px -24px rgb(40 22 26 / 0.42), 0 6px 14px rgb(40 22 26 / 0.08);
+
   /* 字體：全部使用系統字型，不必下載字型檔 */
   --font-sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Heiti TC", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: ui-monospace, "Cascadia Mono", "SFMono-Regular", Menlo, Consolas, monospace;
 
-  /* 版面 */
+  /* 版面與動態 */
   --container: 1120px;
   --gutter: clamp(16px, 3vw, 28px);
-  --section-y: clamp(48px, 6vw, 72px);
+  --section-y: clamp(56px, 7vw, 88px);
   --header-h: 60px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 /* ------------------------------------------------------------
@@ -77,6 +85,10 @@ html {
   text-size-adjust: 100%;
   background: var(--bg);
   scroll-padding-top: calc(var(--header-h) + 16px);
+}
+/* 有「本頁目錄」的頁面：目錄會黏在頁首下方，錨點要再往下讓出目錄的高度 */
+html:has([data-toc]) {
+  scroll-padding-top: calc(var(--header-h) + 76px);
 }
 body {
   margin: 0;
@@ -145,7 +157,7 @@ h4 {
   line-height: 1.3;
 }
 ::selection {
-  background: rgb(176 34 51 / 0.2);
+  background: rgb(176 34 51 / 0.22);
 }
 :focus-visible {
   outline: 2px solid var(--brand-500);
@@ -190,19 +202,70 @@ h4 {
   max-width: calc(820px + var(--gutter) * 2);
 }
 .section {
+  position: relative;
   padding-block: var(--section-y);
 }
 .section--alt {
   background: var(--bg-alt);
-  border-block: 1px solid #dfe3e7;
+  border-block: 1px solid #e2ddd5;
 }
 .section--white {
   background: var(--surface);
-  border-block: 1px solid #e3e6e9;
+  border-block: 1px solid #e6e1da;
 }
 .section--alt + .section--white,
 .section--white + .section--alt {
   border-top: 0;
+}
+
+/* 深色重點區塊：區塊內的文字、框線顏色一起換成深色版（.on-dark 只換顏色、不加底色，給深色面板用） */
+.section--dark,
+.on-dark {
+  --ink-strong: var(--band-title);
+  --ink: #f1e6e0;
+  --ink-2: #cdbcb5;
+  --ink-3: #a8958e;
+  --line: rgb(255 236 228 / 0.14);
+  --line-2: rgb(255 236 228 / 0.28);
+  --link: var(--gold-300);
+  --link-hover: #fff0c0;
+  color: var(--ink);
+}
+.section--dark {
+  background:
+    radial-gradient(70% 90% at 84% -12%, rgb(176 44 60 / 0.42), transparent 62%),
+    linear-gradient(180deg, #160b10 0%, #26111b 56%, #1b0c13 100%);
+}
+.section--dark :focus-visible,
+.on-dark :focus-visible,
+.plate :focus-visible,
+.bar :focus-visible {
+  outline-color: var(--gold-300);
+}
+/* 深色區塊的上緣是一排森林剪影（往上疊到前一個區塊），所以前一個區塊下方多留一點空間 */
+.section:has(+ .section--dark),
+.section:has(+ .cta),
+main > .section:last-child {
+  padding-bottom: calc(var(--section-y) + 40px);
+}
+.edge {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  max-width: none;
+  pointer-events: none;
+}
+/* 森林剪影：顏色要和它所屬區塊的上緣顏色一致（用 --edge 指定） */
+.edge--trees {
+  bottom: calc(100% - 1px);
+  height: clamp(44px, 6vw, 72px);
+  fill: var(--edge, #160b10);
+}
+/* 山脈切邊：顏色是「下一個區塊」的底色，看起來像淺色的山切進深色區塊 */
+.edge--range {
+  bottom: -1px;
+  height: max(6.67vw, 64px);
+  fill: var(--edge, var(--bg));
 }
 
 /* ------------------------------------------------------------
@@ -225,16 +288,20 @@ h4 {
   width: 16px;
   height: 16px;
   flex: none;
+  transition: transform 0.2s var(--ease);
 }
 .link:hover {
   color: var(--link-hover);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+.link:hover svg {
+  transform: translateX(3px);
+}
 .text-link {
   color: var(--link);
   text-decoration: underline;
-  text-decoration-color: rgb(160 31 47 / 0.35);
+  text-decoration-color: color-mix(in srgb, var(--link) 40%, transparent);
   text-underline-offset: 3px;
 }
 .text-link:hover {
@@ -251,8 +318,8 @@ kbd {
   font-size: 0.9em;
   line-height: 1.5;
   color: #7a1524;
-  background: #f7f1f1;
-  border: 1px solid #e2d0d3;
+  background: #f8f1f0;
+  border: 1px solid #e4d1d2;
   white-space: nowrap;
 }
 kbd {
@@ -265,10 +332,11 @@ kbd {
 }
 
 /* ------------------------------------------------------------
-   按鈕：直角、細黑框，底部一道陰影做出按壓感
+   按鈕：直角、細黑框，上亮下暗的漸層加一道底部陰影
    ------------------------------------------------------------ */
 .btn {
-  --b-bg: #574d51;
+  --b-top: #665c60;
+  --b-bot: #4b4246;
   --b-fg: #fff;
   --b-bd: #1d1517;
   display: inline-flex;
@@ -283,12 +351,13 @@ kbd {
   letter-spacing: 0.02em;
   white-space: nowrap;
   color: var(--b-fg);
-  background: var(--b-bg);
+  background: linear-gradient(180deg, var(--b-top), var(--b-bot));
   border: 1px solid var(--b-bd);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.16),
-    inset 0 -2px 0 rgb(0 0 0 / 0.22);
-  transition: background-color 0.15s, color 0.15s;
+    inset 0 1px 0 rgb(255 255 255 / 0.2),
+    inset 0 -2px 0 rgb(0 0 0 / 0.22),
+    0 1px 2px rgb(20 10 12 / 0.25);
+  transition: filter 0.15s, transform 0.15s var(--ease), box-shadow 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
 .btn svg {
@@ -297,41 +366,56 @@ kbd {
   flex: none;
 }
 .btn:hover {
-  --b-bg: #463d40;
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.2),
+    inset 0 -2px 0 rgb(0 0 0 / 0.22),
+    0 6px 14px -6px rgb(20 10 12 / 0.5);
 }
 .btn:active {
-  box-shadow: inset 0 2px 0 rgb(0 0 0 / 0.22);
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 0 rgb(0 0 0 / 0.25);
 }
 .btn--primary {
-  --b-bg: var(--brand-500);
+  --b-top: #c93045;
+  --b-bot: #a01c2e;
   --b-bd: #4a0d15;
 }
-.btn--primary:hover {
-  --b-bg: var(--brand-600);
-}
 .btn--gold {
-  --b-bg: var(--gold-400);
+  --b-top: #ecca6a;
+  --b-bot: #cfa53a;
   --b-fg: #241a03;
   --b-bd: #4d3a07;
 }
-.btn--gold:hover {
-  --b-bg: var(--gold-500);
-}
 .btn--light {
-  --b-bg: #f4f2ef;
+  --b-top: #ffffff;
+  --b-bot: #f1ede7;
   --b-fg: var(--ink-strong);
-  --b-bd: #9aa0a6;
-  box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.08);
+  --b-bd: #a59c92;
+  box-shadow:
+    inset 0 -2px 0 rgb(0 0 0 / 0.06),
+    0 1px 2px rgb(20 10 12 / 0.08);
 }
 .btn--light:hover {
-  --b-bg: #e8e5e0;
+  filter: none;
+  --b-bot: #e9e4dc;
+  box-shadow:
+    inset 0 -2px 0 rgb(0 0 0 / 0.06),
+    0 6px 14px -8px rgb(20 10 12 / 0.3);
+}
+/* 深色底上的透明按鈕 */
+.btn--ghost {
+  --b-top: rgb(255 236 228 / 0.1);
+  --b-bot: rgb(255 236 228 / 0.04);
+  --b-fg: var(--band-text);
+  --b-bd: rgb(255 236 228 / 0.38);
+  box-shadow: none;
 }
 .btn--discord {
-  --b-bg: #4f5bd5;
+  --b-top: #6470e2;
+  --b-bot: #4855c6;
   --b-bd: #232a6b;
-}
-.btn--discord:hover {
-  --b-bg: #4350c2;
 }
 .btn--sm {
   min-height: 34px;
@@ -349,6 +433,161 @@ kbd {
 .card {
   background: var(--surface);
   border: 1px solid var(--line);
+  box-shadow: var(--shadow-1);
+}
+/* 可以點的卡片：滑過時浮起來，上緣亮一道紅金漸層 */
+.lift {
+  position: relative;
+  transition:
+    transform 0.25s var(--ease),
+    box-shadow 0.25s var(--ease),
+    border-color 0.25s;
+}
+.lift::before {
+  content: "";
+  position: absolute;
+  inset: -1px -1px auto;
+  height: 3px;
+  background: linear-gradient(90deg, var(--brand-500), var(--gold-400));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s var(--ease);
+}
+.lift:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-2);
+  border-color: var(--line-2);
+}
+.lift:hover::before {
+  transform: scaleX(1);
+}
+
+/* 酒紅面板：倍率、冒險手冊封面、子頁面的章節封面都是這個樣子 */
+.plate {
+  position: relative;
+  overflow: hidden;
+  color: var(--band-text);
+  background:
+    radial-gradient(90% 70% at 100% 0%, rgb(230 90 100 / 0.32), transparent 62%),
+    linear-gradient(160deg, #7a1524 0%, #4a0e17 55%, #2a080e 100%);
+  border: 1px solid #1d070b;
+  box-shadow: var(--shadow-2);
+}
+/* 面板裡的內容都疊在浮水印與細框上面 */
+.plate > * {
+  position: relative;
+}
+/* 面板裡的一圈金色細框 */
+.plate--frame::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgb(236 202 106 / 0.36);
+  pointer-events: none;
+}
+/* 面板角落的大圖示浮水印 */
+.plate > .plate__ghost {
+  position: absolute;
+  right: -26px;
+  bottom: -30px;
+  width: 170px;
+  height: 170px;
+  max-width: none;
+  color: rgb(255 236 228 / 0.07);
+  pointer-events: none;
+}
+
+/* 深色標題列：卡片最上面的一條（行事曆、活動、下載項目共用） */
+.bar {
+  position: relative;
+  color: var(--band-text);
+  background:
+    radial-gradient(80% 140% at 100% 0%, rgb(196 52 68 / 0.5), transparent 62%),
+    linear-gradient(180deg, #1c0e13, #34121c);
+  border-bottom: 3px solid var(--brand-500);
+}
+
+/* 菱形徽記：深色底、金色圖示或數字（--gem 是邊長；轉 45 度後會比邊長寬約四成） */
+.gem {
+  --gem: 44px;
+  display: grid;
+  place-items: center;
+  width: var(--gem);
+  height: var(--gem);
+  flex: none;
+  color: var(--gold-300);
+  background: linear-gradient(135deg, #33202a, #150b0f);
+  border: 1px solid #0a0506;
+  box-shadow:
+    inset 0 0 0 2px rgb(236 202 106 / 0.3),
+    0 8px 16px -8px rgb(40 22 26 / 0.6);
+  transform: rotate(45deg);
+}
+.gem > * {
+  transform: rotate(-45deg);
+}
+.gem svg {
+  width: 64%;
+  height: 64%;
+}
+.gem b {
+  font-size: calc(var(--gem) * 0.46);
+  font-weight: 900;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.gem--red {
+  color: #fff;
+  background: linear-gradient(135deg, var(--brand-400), var(--brand-700));
+  border-color: #3d0a12;
+  box-shadow:
+    inset 0 0 0 2px rgb(255 220 200 / 0.38),
+    0 0 20px rgb(207 58 76 / 0.5);
+}
+.gem--gold {
+  color: #241a03;
+  background: linear-gradient(135deg, #f3d77e, var(--gold-500));
+  border-color: #6f5410;
+  box-shadow:
+    inset 0 0 0 2px rgb(255 255 255 / 0.36),
+    0 6px 14px -6px rgb(60 40 0 / 0.7);
+}
+
+/* 圓形徽章：血紅圓盤＋金色細圈（首領、活動） */
+.medal {
+  --medal: 52px;
+  display: grid;
+  place-items: center;
+  width: var(--medal);
+  height: var(--medal);
+  flex: none;
+  border-radius: 50%;
+  color: var(--gold-300);
+  background: radial-gradient(circle at 50% 32%, #a81f33 0%, #5a1019 62%, #2a080e 100%);
+  box-shadow:
+    inset 0 0 0 1px rgb(236 202 106 / 0.6),
+    inset 0 0 0 4px rgb(0 0 0 / 0.28),
+    0 0 20px rgb(207 58 76 / 0.32);
+}
+.medal svg {
+  width: 58%;
+  height: 58%;
+}
+
+/* 星空：鋪在深色區塊上的幾顆星 */
+.starfield {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(1.5px 1.5px at 6% 12%, rgb(255 232 222 / 0.5), transparent 60%),
+    radial-gradient(1.5px 1.5px at 18% 34%, rgb(255 232 222 / 0.3), transparent 60%),
+    radial-gradient(2px 2px at 29% 8%, rgb(255 232 222 / 0.45), transparent 60%),
+    radial-gradient(1.5px 1.5px at 44% 20%, rgb(255 232 222 / 0.35), transparent 60%),
+    radial-gradient(1.5px 1.5px at 58% 6%, rgb(255 232 222 / 0.5), transparent 60%),
+    radial-gradient(2px 2px at 71% 16%, rgb(255 232 222 / 0.35), transparent 60%),
+    radial-gradient(1.5px 1.5px at 86% 9%, rgb(255 232 222 / 0.5), transparent 60%),
+    radial-gradient(1.5px 1.5px at 95% 28%, rgb(255 232 222 / 0.3), transparent 60%);
 }
 
 /* 小標籤 */
@@ -384,7 +623,7 @@ kbd {
   border-color: var(--brand-700);
 }
 
-/* 白底小方塊標籤（特色列表） */
+/* 白底小方塊標籤 */
 .chip {
   display: inline-flex;
   align-items: center;
@@ -412,14 +651,15 @@ kbd {
   height: 28px;
   flex: none;
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1;
   color: #241a03;
-  background: var(--gold-400);
+  background: linear-gradient(180deg, var(--gold-300), var(--gold-400));
   border: 1px solid #8a6a12;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.35),
-    inset 0 -2px 0 rgb(0 0 0 / 0.12);
+    inset 0 1px 0 rgb(255 255 255 / 0.45),
+    inset 0 -2px 0 rgb(0 0 0 / 0.12),
+    0 1px 2px rgb(60 40 0 / 0.2);
   font-variant-numeric: tabular-nums;
 }
 
@@ -427,12 +667,13 @@ kbd {
 .ibox {
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: 46px;
+  height: 46px;
   flex: none;
   color: var(--brand-500);
-  background: var(--brand-50);
+  background: linear-gradient(180deg, #fff, var(--brand-50));
   border: 1px solid #ecc9ce;
+  box-shadow: inset 0 -2px 0 rgb(176 34 51 / 0.08);
 }
 .ibox svg {
   width: 28px;
@@ -457,6 +698,10 @@ kbd {
   height: 7px;
   background: var(--brand-500);
 }
+.section--dark .bullets li::before,
+.on-dark .bullets li::before {
+  background: var(--gold-400);
+}
 
 /* 提示框 */
 .note {
@@ -469,6 +714,7 @@ kbd {
   background: var(--surface);
   border: 1px solid var(--line);
   border-left: 4px solid var(--gold-400);
+  box-shadow: var(--shadow-1);
 }
 .note svg {
   width: 20px;
@@ -488,27 +734,35 @@ kbd {
   font-size: 0.95rem;
   background: var(--surface);
   border: 1px solid var(--line);
+  box-shadow: var(--shadow-1);
 }
 .table th,
 .table td {
-  padding: 10px 14px;
+  padding: 11px 14px;
   text-align: left;
   vertical-align: top;
   border-bottom: 1px solid var(--line);
 }
 .table thead th {
   font-size: 0.85rem;
-  color: var(--ink-2);
-  background: var(--surface-2);
-  border-bottom-color: var(--line-2);
+  letter-spacing: 0.04em;
+  color: var(--band-muted);
+  background: var(--band-800);
+  border-bottom: 2px solid var(--brand-500);
   white-space: nowrap;
 }
 .table tbody th {
   font-weight: 700;
   color: var(--ink-strong);
 }
+.table tbody tr {
+  transition: background-color 0.15s;
+}
 .table tbody tr:nth-child(even) {
-  background: #fafbfc;
+  background: var(--surface-2);
+}
+.table tbody tr:hover {
+  background: #fdf6f3;
 }
 .table tbody tr:last-child > * {
   border-bottom: 0;
@@ -528,17 +782,24 @@ kbd {
 .acc__item {
   background: var(--surface);
   border: 1px solid var(--line);
+  box-shadow: var(--shadow-1);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.acc__item[open] {
+  border-color: var(--line-2);
+  box-shadow: var(--shadow-2);
 }
 .acc__item summary {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 13px 16px;
   font-weight: 700;
   line-height: 1.5;
   color: var(--ink-strong);
   cursor: pointer;
   list-style: none;
+  transition: background-color 0.15s;
 }
 .acc__item summary::-webkit-details-marker {
   display: none;
@@ -551,9 +812,10 @@ kbd {
   width: 22px;
   height: 22px;
   flex: none;
-  background: var(--gold-400);
+  background: linear-gradient(180deg, var(--gold-300), var(--gold-400));
   border: 1px solid #8a6a12;
   box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.12);
+  transition: transform 0.3s var(--ease);
 }
 .acc__mark::before,
 .acc__mark::after {
@@ -565,16 +827,52 @@ kbd {
   height: 2px;
   background: #241a03;
   transform: translate(-50%, -50%);
+  transition: transform 0.3s var(--ease);
 }
 .acc__mark::after {
   transform: translate(-50%, -50%) rotate(90deg);
 }
 .acc__item[open] .acc__mark::after {
-  display: none;
+  transform: translate(-50%, -50%) rotate(0deg);
 }
 .acc__body {
-  padding: 0 16px 14px 50px;
+  padding: 0 16px 15px 50px;
   color: var(--ink-2);
+}
+/* 支援的瀏覽器：展開、收合時高度平滑變化 */
+@supports (interpolate-size: allow-keywords) {
+  :root {
+    interpolate-size: allow-keywords;
+  }
+  .acc__item::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition:
+      block-size 0.3s var(--ease),
+      content-visibility 0.3s allow-discrete;
+  }
+  .acc__item[open]::details-content {
+    block-size: auto;
+  }
+}
+
+/* ------------------------------------------------------------
+   進場效果：捲到才浮現（由 scripts/core.ts 標記，載入時已經在畫面內的不處理）
+   ------------------------------------------------------------ */
+[data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition:
+    opacity 0.7s var(--ease),
+    transform 0.7s var(--ease);
+}
+[data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+}
+/* 本身是錨點目標的區塊（例如特色頁的章節）只淡入、不位移，跳過去時位置才不會差一截 */
+[data-reveal][id] {
+  transform: none;
 }
 
 /* ------------------------------------------------------------
@@ -588,6 +886,11 @@ kbd {
   animation-duration: 0.18s;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -596,6 +899,10 @@ kbd {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+  }
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
   }
   @view-transition {
     navigation: none;

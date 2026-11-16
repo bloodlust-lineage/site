@@ -20,7 +20,6 @@ const facts: [string, string][] = [
   ['帳號', '第一次登入自動建立，免註冊'],
   ['費用', '免費遊玩，贊助完全自願'],
 ];
-const chips = site.heroRates.map((r) => `${r.label} ${r.pre === '×' ? `×${r.value}` : `${r.pre}${r.value}`}${r.post ? ` ${r.post}` : ''}`);
 ---
 
 <section class="hero" aria-labelledby="hero-title">
@@ -64,10 +63,6 @@ const chips = site.heroRates.map((r) => `${r.label} ${r.pre === '×' ? `×${r.va
           <Icon name="discord" />加入 Discord<span class="sr-only">（另開新視窗）</span>
         </a>
       </div>
-
-      <ul class="hero__chips" aria-label="倍率重點">
-        {chips.map((t) => <li>{t}</li>)}
-      </ul>
     </div>
   </div>
 </section>
@@ -107,9 +102,10 @@ const chips = site.heroRates.map((r) => `${r.label} ${r.pre === '×' ? `×${r.va
     position: relative;
     z-index: 1;
   }
+  /* 下方多留空間：倍率卡片會往上壓到主視覺的下緣 */
   .hero__text {
     max-width: min(610px, 54%);
-    padding-block: 56px 92px;
+    padding-block: 60px 150px;
   }
 
   .hero__status {
@@ -210,37 +206,17 @@ const chips = site.heroRates.map((r) => `${r.label} ${r.pre === '×' ? `×${r.va
     gap: 10px;
     margin-top: 22px;
   }
-  .hero__chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px 18px;
-    margin-top: 18px;
-    font-size: 0.9rem;
-    color: #d9cbc4;
-    text-shadow: 0 1px 6px rgb(0 0 0 / 0.7);
-  }
-  .hero__chips li {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .hero__chips li::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    background: var(--gold-400);
-  }
 
   /* 窄螢幕：文字在上，下方留給血月與城堡 */
   @media (max-width: 1000px) {
     .hero__text {
       max-width: none;
-      padding-block: 44px 350px;
+      padding-block: 44px 376px;
     }
   }
   @media (max-width: 480px) {
     .hero__text {
-      padding-block: 36px 304px;
+      padding-block: 36px 330px;
     }
     .hero__btns .btn {
       flex: 1 1 calc(50% - 5px);

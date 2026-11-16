@@ -1,135 +1,220 @@
 ---
 /**
- * 首頁「倍率一覽」
+ * 首頁「倍率一覽」：一張壓在主視覺下緣的大卡片。
+ * 左邊深紅色面板是經驗倍率，右邊是其他倍率，底下一行是高級會員說明。
  */
 import { rateBook } from '../../data/features';
 import { url } from '../../lib/url';
-import SectionHead from '../SectionHead.astro';
 import Icon from '../Icon.astro';
 ---
 
-<section class="section section--alt" id="rates" aria-labelledby="hr-title">
+<section class="rates" id="rates" aria-labelledby="hr-title">
   <div class="container">
-    <SectionHead title="倍率一覽" id="hr-title" desc="所有倍率都取自伺服器實際設定。不追求一夜滿等，也不讓你在同一張地圖耗上一個月。">
-      <a class="link" href={url('/features/#rates')}>完整規格<Icon name="arrow" /></a>
-    </SectionHead>
-
-    <div class="rt">
-      <div class="rt__hero">
-        <p class="rt__label">{rateBook.hero.label}</p>
-        <p class="rt__big tnum"><span aria-hidden="true">×</span><span class="sr-only">倍率</span>{rateBook.hero.value}</p>
-        <p class="rt__note">{rateBook.hero.note}</p>
+    <div class="rates__card">
+      <div class="rates__lead">
+        <h2 class="rates__h" id="hr-title">倍率一覽</h2>
+        <p class="rates__big tnum">
+          <span class="rates__x" aria-hidden="true">×</span>{rateBook.hero.value}<span class="sr-only"> 倍</span>
+        </p>
+        <div>
+          <p class="rates__label">{rateBook.hero.label}</p>
+          <p class="rates__note">{rateBook.hero.note}</p>
+        </div>
       </div>
-      <ul class="rt__list">
+
+      <ul class="rates__grid">
         {
           rateBook.items.map((r) => (
-            <li class="rt__item">
-              <p class="rt__val tnum">
-                <span class="rt__pre">{r.prefix}</span>
+            <li class="rates__item">
+              <p class="rates__val tnum">
+                <span class="rates__pre">{r.prefix}</span>
                 {r.value}
               </p>
-              <p class="rt__name">{r.label}</p>
-              <p class="rt__note">{r.note}</p>
+              <p class="rates__name">{r.label}</p>
+              <p class="rates__sub">{r.note}</p>
             </li>
           ))
         }
       </ul>
-    </div>
 
-    <p class="note rt__premium"><Icon name="crown" /><span>{rateBook.premium}</span></p>
+      <p class="rates__premium">
+        <Icon name="crown" />
+        <span>{rateBook.premium}</span>
+        <a class="link" href={url('/features/#rates')}>完整規格<Icon name="arrow" /></a>
+      </p>
+    </div>
   </div>
 </section>
 
 <style>
-  .rt {
-    display: grid;
-    grid-template-columns: minmax(200px, 0.26fr) 1fr;
-    gap: 12px;
+  .rates {
+    position: relative;
+    z-index: 2;
+    margin-top: -76px;
   }
-  .rt__hero {
+  .rates__card {
+    display: grid;
+    grid-template-columns: minmax(220px, 0.28fr) 1fr;
+    grid-template-areas: 'lead grid' 'prem prem';
+    background: var(--surface);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-3);
+  }
+
+  /* 經驗倍率 */
+  .rates__lead {
+    grid-area: lead;
+    position: relative;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 20px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-top: 4px solid var(--brand-500);
+    gap: 2px;
+    padding: 22px 26px 24px;
+    color: var(--band-text);
+    background:
+      radial-gradient(90% 70% at 88% 6%, rgb(255 150 126 / 0.3), transparent 60%),
+      linear-gradient(160deg, #96192b 0%, #5d1019 58%, #3b0a12 100%);
   }
-  .rt__label {
-    font-size: 1.1rem;
+  /* 角落的月暈圈 */
+  .rates__lead::after {
+    content: '';
+    position: absolute;
+    right: -52px;
+    bottom: -62px;
+    width: 180px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 1px solid rgb(255 220 200 / 0.24);
+    box-shadow:
+      0 0 0 16px rgb(255 220 200 / 0.05),
+      0 0 0 36px rgb(255 220 200 / 0.035);
+    pointer-events: none;
+  }
+  .rates__h {
+    font-size: 0.85rem;
     font-weight: 700;
-    color: var(--ink-strong);
+    letter-spacing: 0.22em;
+    color: var(--gold-300);
   }
-  .rt__big {
-    margin-top: 2px;
-    font-size: 4.5rem;
+  .rates__big {
+    font-size: 5.2rem;
     font-weight: 900;
     line-height: 1;
-    color: var(--brand-500);
+    color: #fff;
+    text-shadow: 0 6px 26px rgb(0 0 0 / 0.38);
   }
-  .rt__big span[aria-hidden] {
-    font-size: 0.5em;
+  .rates__x {
     margin-right: 2px;
+    font-size: 0.48em;
+    color: var(--gold-300);
   }
-  .rt__list {
+  .rates__label {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #fff;
+  }
+  .rates__note {
+    position: relative;
+    z-index: 1;
+    font-size: 0.86rem;
+    color: #ecd6cf;
+  }
+
+  /* 其他倍率 */
+  .rates__grid {
+    grid-area: grid;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 12px;
   }
-  .rt__item {
-    padding: 14px 16px;
-    background: var(--surface);
-    border: 1px solid var(--line);
+  .rates__item {
+    padding: 17px 20px 16px;
+    border-left: 1px solid var(--line);
+    transition: background-color 0.2s;
   }
-  .rt__val {
-    font-size: 1.9rem;
-    font-weight: 700;
+  .rates__item:nth-child(n + 5) {
+    border-top: 1px solid var(--line);
+  }
+  .rates__item:hover {
+    background: var(--surface-2);
+  }
+  .rates__val {
+    font-size: 1.85rem;
+    font-weight: 800;
     line-height: 1.1;
     color: var(--ink-strong);
   }
-  .rt__pre {
+  .rates__pre {
     margin-right: 2px;
-    font-size: 0.55em;
+    font-size: 0.58em;
     color: var(--brand-500);
   }
-  .rt__name {
-    margin-top: 6px;
+  .rates__name {
+    margin-top: 5px;
     font-weight: 700;
     color: var(--ink-strong);
   }
-  .rt__note {
-    margin-top: 2px;
-    font-size: 0.85rem;
-    line-height: 1.6;
+  .rates__sub {
+    font-size: 0.84rem;
+    line-height: 1.55;
+    color: var(--ink-3);
+  }
+
+  /* 高級會員 */
+  .rates__premium {
+    grid-area: prem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 12px;
+    padding: 11px 20px;
+    font-size: 0.89rem;
     color: var(--ink-2);
+    background: var(--surface-2);
+    border-top: 1px solid var(--line);
   }
-  .rt__premium {
-    margin-top: 16px;
+  .rates__premium > :global(svg) {
+    width: 20px;
+    height: 20px;
+    flex: none;
+    color: var(--gold-500);
   }
+  .rates__premium span {
+    flex: 1 1 380px;
+  }
+
   @media (max-width: 900px) {
-    .rt {
-      grid-template-columns: 1fr;
+    .rates {
+      margin-top: -44px;
     }
-    .rt__hero {
+    .rates__card {
+      grid-template-columns: 1fr;
+      grid-template-areas: 'lead' 'grid' 'prem';
+    }
+    .rates__lead {
       display: grid;
       grid-template-columns: auto 1fr;
-      grid-template-areas: 'big label' 'big note';
+      grid-template-areas: 'h h' 'big text';
       align-items: center;
       column-gap: 18px;
+      padding: 18px 20px 20px;
     }
-    .rt__label {
-      grid-area: label;
-      align-self: end;
+    .rates__h {
+      grid-area: h;
     }
-    .rt__big {
+    .rates__big {
       grid-area: big;
+      font-size: 4.2rem;
     }
-    .rt__hero .rt__note {
-      grid-area: note;
-      align-self: start;
-    }
-    .rt__list {
+    .rates__grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .rates__item {
+      padding: 14px 16px;
+      border-top: 1px solid var(--line);
+    }
+    .rates__item:nth-child(odd) {
+      border-left: 0;
     }
   }
 </style>

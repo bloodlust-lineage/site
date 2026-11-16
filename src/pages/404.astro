@@ -1,20 +1,45 @@
 ---
+/**
+ * 找不到頁面：和首頁主視覺同一片血月場景，左邊是 404 與回去的路
+ */
 import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
-import Emblem from '../components/Emblem.astro';
+import Scene from '../components/Scene.astro';
 import { url } from '../lib/url';
+
+const ways = [
+  { href: '/features/', label: '伺服器特色' },
+  { href: '/events/', label: '每週戰場' },
+  { href: '/handbook/', label: '冒險手冊' },
+  { href: '/download/', label: '下載遊戲' },
+];
 ---
 
 <Base title="迷失在霧中" noindex>
-  <section class="section nf">
+  <section class="nf" aria-labelledby="nf-title">
+    <Scene variant="home" />
     <div class="container nf__inner">
-      <Emblem size={64} />
-      <p class="nf__code tnum">404</p>
-      <h1 class="nf__title">你迷失在亞丁的霧中</h1>
-      <p class="nf__desc">這條路通往的地方已經不存在了。也許是傳送卷軸出了差錯，也許它從來就不在地圖上。</p>
-      <div class="nf__btns">
-        <a href={url('/')} class="btn btn--primary">回到首頁</a>
-        <a href={url('/guide/')} class="btn btn--light">新手指南<Icon name="arrow" /></a>
+      <div class="nf__text">
+        <p class="nf__code tnum" aria-hidden="true">404</p>
+        <h1 class="nf__title" id="nf-title">你迷失在亞丁的霧中</h1>
+        <p class="nf__desc">這條路通往的地方已經不存在了。也許是傳送卷軸出了差錯，也許它從來就不在地圖上。</p>
+        <div class="nf__btns">
+          <a href={url('/')} class="btn btn--primary">回到首頁</a>
+          <a href={url('/guide/')} class="btn">
+            <Icon name="book" />新手指南
+          </a>
+        </div>
+        <nav class="nf__ways" aria-label="其他頁面">
+          <span>或是前往</span>
+          {
+            ways.map((w) => (
+              <a href={url(w.href)}>
+                {w.label}
+                <Icon name="arrow" />
+              </a>
+            ))
+          }
+        </nav>
       </div>
     </div>
   </section>
@@ -22,35 +47,103 @@ import { url } from '../lib/url';
 
 <style>
   .nf {
-    padding-block: clamp(64px, 10vw, 120px);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    min-height: min(74vh, 660px);
+    color: var(--band-text);
+    background: #0b0508;
+    border-bottom: 3px solid var(--brand-500);
   }
   .nf__inner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+    position: relative;
+    z-index: 1;
   }
+  .nf__text {
+    max-width: min(600px, 54%);
+    padding-block: 56px 96px;
+  }
+  /* 大數字：由上到下從米白漸層到古金 */
   .nf__code {
-    margin-top: 18px;
-    font-size: 4.5rem;
+    font-size: clamp(5.5rem, 3rem + 11vw, 9.5rem);
     font-weight: 900;
-    line-height: 1;
-    color: var(--brand-500);
+    letter-spacing: 0.04em;
+    line-height: 0.95;
+    color: var(--gold-300);
+    background: linear-gradient(180deg, #fff6e0 0%, var(--gold-300) 46%, #b9871d 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 6px 22px rgb(0 0 0 / 0.5));
   }
   .nf__title {
-    margin-top: 10px;
-    font-size: clamp(1.6rem, 1.3rem + 1.4vw, 2.2rem);
+    margin-top: 14px;
+    font-size: clamp(1.7rem, 1.3rem + 1.6vw, 2.4rem);
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    color: var(--band-title);
+    text-shadow: 0 2px 18px rgb(0 0 0 / 0.55);
   }
   .nf__desc {
     margin-top: 10px;
     max-width: 30em;
-    color: var(--ink-2);
+    color: #d9cbc4;
+    text-shadow: 0 1px 6px rgb(0 0 0 / 0.6);
   }
   .nf__btns {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
     gap: 10px;
     margin-top: 26px;
+  }
+  .nf__ways {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 18px;
+    margin-top: 22px;
+    padding-top: 16px;
+    max-width: 500px;
+    font-size: 0.92rem;
+    color: var(--band-muted);
+    border-top: 1px dashed rgb(255 236 228 / 0.22);
+  }
+  .nf__ways a {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-weight: 700;
+    color: var(--gold-300);
+  }
+  .nf__ways a :global(svg) {
+    width: 15px;
+    height: 15px;
+    transition: transform 0.2s var(--ease);
+  }
+  .nf__ways a:hover {
+    color: #fff0c0;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .nf__ways a:hover :global(svg) {
+    transform: translateX(3px);
+  }
+
+  /* 窄螢幕：文字在上，下方留給血月與城堡 */
+  @media (max-width: 1000px) {
+    .nf {
+      display: block;
+      min-height: 0;
+    }
+    .nf__text {
+      max-width: none;
+      padding-block: 44px 376px;
+    }
+  }
+  @media (max-width: 480px) {
+    .nf__text {
+      padding-block: 36px 330px;
+    }
   }
 </style>

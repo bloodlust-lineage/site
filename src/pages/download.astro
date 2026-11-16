@@ -56,9 +56,12 @@ const trouble = [
       <div class="packs">
         {
           packs.map((p) => (
-            <article class="pack">
-              <header class="pack__head">
-                <span class="num">{p.step}</span>
+            <article class="pack card">
+              <header class="pack__head bar">
+                <Icon name={p.icon} class="pack__ghost" />
+                <span class="gem gem--gold" aria-hidden="true">
+                  <b>{p.step}</b>
+                </span>
                 <div class="pack__name-wrap">
                   <h3 class="pack__name">{p.name}</h3>
                   <p class="pack__note">
@@ -66,10 +69,8 @@ const trouble = [
                     {p.note}
                   </p>
                 </div>
-                <span class="ibox" aria-hidden="true">
-                  <Icon name={p.icon} />
-                </span>
               </header>
+              <div class="pack__body">
               <dl class="pack__meta">
                 <div>
                   <dt>檔案大小</dt>
@@ -112,6 +113,7 @@ const trouble = [
                   ))}
                 </ul>
               )}
+              </div>
             </article>
           ))
         }
@@ -135,25 +137,44 @@ const trouble = [
   <section class="section section--alt" aria-labelledby="dl-install">
     <div class="container">
       <SectionHead title="安裝步驟" id="dl-install" desc="五個步驟完成安裝，第一次登入就會自動建立帳號。" />
-      <ol class="inst">
-        {
-          install.map((s, i) => (
-            <li class="inst__step">
-              <span class="num">{i + 1}</span>
-              <div>
-                <h3 class="inst__t">{s.t}</h3>
-                <p class="inst__d">{s.d}</p>
-              </div>
-            </li>
-          ))
-        }
-      </ol>
-      <div class="card patch-how">
-        <h3 class="patch-how__t"><Icon name="upgrade" />已經安裝過？更新只要換登錄器補丁</h3>
-        <p>
-          登錄器補丁出新版時會公告在 Discord（目前是 <span class="cmd">{patch.version}</span> 版）。下載 system.rar 並解壓縮，把
-          <span class="cmd">system</span> 資料夾整個覆蓋到遊戲資料夾（例如 <span class="cmd">D:\Games\嗜血天堂II\system</span>），出現「取代檔案」時選擇全部取代即可，不用重新下載主程式。
-        </p>
+      <div class="inst-grid">
+        <ol class="inst">
+          {
+            install.map((s, i) => (
+              <li class="inst__step">
+                <span class="num">{i + 1}</span>
+                <div class="inst__card card">
+                  <h3 class="inst__t">{s.t}</h3>
+                  <p class="inst__d">{s.d}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+        <aside class="patch-how plate plate--frame" aria-labelledby="patch-how-title">
+          <Icon name="upgrade" class="plate__ghost" />
+          <p class="patch-how__k">已經安裝過？</p>
+          <h3 class="patch-how__t" id="patch-how-title">更新只要換登錄器補丁</h3>
+          <p class="patch-how__d">
+            登錄器補丁出新版時會公告在 Discord（目前是 <span class="cmd">{patch.version}</span> 版）。下載 system.rar 並解壓縮，把
+            <span class="cmd">system</span> 資料夾整個覆蓋到遊戲資料夾（例如 <span class="cmd">D:\Games\嗜血天堂II\system</span>），出現「取代檔案」時選擇全部取代即可，不用重新下載主程式。
+          </p>
+          {
+            patch.links.length > 0 ? (
+              <a class="btn btn--gold patch-how__btn" href={patch.links[0].url} target="_blank" rel="noopener">
+                <Icon name="down" />
+                下載登錄器補丁
+                <span class="sr-only">（另開新視窗）</span>
+              </a>
+            ) : (
+              <a class="btn btn--gold patch-how__btn" href={site.links.discord} target="_blank" rel="noopener">
+                <Icon name="discord" />
+                前往 Discord 取得
+                <span class="sr-only">（另開新視窗）</span>
+              </a>
+            )
+          }
+        </aside>
       </div>
     </div>
   </section>
@@ -205,6 +226,7 @@ const trouble = [
 </Base>
 
 <style>
+  /* ---------- 下載項目 ---------- */
   .packs {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -213,49 +235,83 @@ const trouble = [
   .pack {
     display: flex;
     flex-direction: column;
-    padding: 20px 22px 22px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-top: 4px solid var(--brand-500);
+    box-shadow: var(--shadow-2);
   }
+  /* 深色標題列：金色步驟編號、名稱，角落是很淡的大圖示 */
   .pack__head {
+    overflow: hidden;
     display: flex;
-    align-items: flex-start;
-    gap: 12px;
+    align-items: center;
+    gap: 20px;
+    padding: 18px 22px 18px 26px;
+  }
+  .pack__head :global(.gem) {
+    --gem: 34px;
+    position: relative;
+  }
+  .pack__head :global(.pack__ghost) {
+    position: absolute;
+    right: -14px;
+    top: 50%;
+    width: 132px;
+    height: 132px;
+    max-width: none;
+    color: rgb(255 236 228 / 0.07);
+    transform: translateY(-50%) rotate(-8deg);
+    pointer-events: none;
   }
   .pack__name-wrap {
+    position: relative;
     flex: 1;
     min-width: 0;
   }
   .pack__name {
-    font-size: 1.35rem;
+    font-size: 1.4rem;
     line-height: 1.25;
+    color: var(--band-title);
   }
   .pack__note {
     margin-top: 2px;
     font-size: 0.9rem;
     font-weight: 700;
-    color: var(--brand-600);
+    color: var(--gold-300);
+  }
+  .pack__body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 22px 22px;
   }
   .pack__meta {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px 16px;
-    margin-top: 16px;
-    padding: 12px 14px;
     background: var(--surface-2);
     border: 1px solid var(--line);
   }
+  .pack__meta > div {
+    padding: 11px 14px 12px;
+  }
+  .pack__meta > div + div {
+    border-left: 1px solid var(--line);
+  }
   .pack__meta dt {
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     color: var(--ink-3);
   }
   .pack__meta dd {
-    font-weight: 700;
+    font-size: 1.12rem;
+    font-weight: 800;
+    line-height: 1.4;
     color: var(--ink-strong);
   }
   .pack__meta .pack__meta-wide {
     grid-column: 1 / -1;
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+  .pack__meta .pack__meta-wide dd {
+    font-size: 1rem;
+    font-weight: 700;
   }
   .pack__btns {
     display: flex;
@@ -264,8 +320,15 @@ const trouble = [
     gap: 10px;
     margin-top: 18px;
   }
+  .pack__btns :global(.btn--primary) {
+    min-height: 46px;
+    padding-inline: 22px;
+    font-size: 1.05rem;
+  }
   .pack__links {
-    margin-top: 14px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--line-2);
     font-size: 0.88rem;
     line-height: 1.7;
     color: var(--ink-2);
@@ -280,18 +343,43 @@ const trouble = [
     margin-top: 16px;
   }
 
-  .inst {
+  /* ---------- 安裝步驟：左邊是串在虛線上的步驟，右邊是「已經安裝過」的說明 ---------- */
+  .inst-grid {
     display: grid;
-    gap: 8px;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+  .inst {
+    position: relative;
+    display: grid;
+    gap: 10px;
+  }
+  .inst::before {
+    content: '';
+    position: absolute;
+    left: 13px;
+    top: 22px;
+    bottom: 22px;
+    border-left: 2px dashed var(--gold-400);
+    opacity: 0.65;
   }
   .inst__step {
+    position: relative;
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: 28px minmax(0, 1fr);
     gap: 14px;
-    align-items: start;
-    padding: 14px 16px;
-    background: var(--surface);
-    border: 1px solid var(--line);
+    align-items: center;
+  }
+  .inst__card {
+    padding: 13px 18px 14px;
+    transition:
+      box-shadow 0.25s var(--ease),
+      border-color 0.25s;
+  }
+  .inst__step:hover .inst__card {
+    border-color: var(--line-2);
+    box-shadow: var(--shadow-2);
   }
   .inst__t {
     font-size: 1.05rem;
@@ -303,24 +391,41 @@ const trouble = [
     color: var(--ink-2);
   }
   .patch-how {
-    margin-top: 16px;
-    padding: 16px 18px;
-    border-left: 4px solid var(--gold-400);
-    color: var(--ink-2);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 30px 28px 28px;
+  }
+  .patch-how__k {
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    color: var(--gold-300);
   }
   .patch-how__t {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 6px;
-    font-size: 1.1rem;
+    margin-top: 6px;
+    font-size: 1.45rem;
+    font-weight: 900;
+    letter-spacing: 0.03em;
+    line-height: 1.3;
+    color: var(--band-title);
   }
-  .patch-how__t :global(svg) {
-    width: 22px;
-    height: 22px;
-    color: var(--brand-500);
+  .patch-how__d {
+    margin-top: 12px;
+    font-size: 0.93rem;
+    line-height: 1.85;
+    color: #e6d3cc;
+  }
+  .patch-how :global(.cmd) {
+    color: #ffe3de;
+    background: rgb(10 5 7 / 0.42);
+    border-color: rgb(255 200 190 / 0.3);
+  }
+  .patch-how__btn {
+    margin-top: 22px;
   }
 
+  /* ---------- 建議配備與疑難排解 ---------- */
   .req-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
@@ -339,8 +444,24 @@ const trouble = [
   @media (max-width: 960px) {
     .packs,
     .dl-notes,
+    .inst-grid,
     .req-grid {
       grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 480px) {
+    .pack__head {
+      gap: 16px;
+      padding: 16px 16px 16px 22px;
+    }
+    .pack__body {
+      padding: 16px 16px 18px;
+    }
+    .pack__name {
+      font-size: 1.25rem;
+    }
+    .patch-how {
+      padding: 26px 22px 24px;
     }
   }
 </style>

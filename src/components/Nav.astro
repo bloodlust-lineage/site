@@ -71,8 +71,19 @@ const path = Astro.url.pathname;
     top: 0;
     z-index: 50;
     color: var(--band-text);
-    background: var(--band-800);
+    background: linear-gradient(180deg, #23141a, #1a0e13);
     border-bottom: 3px solid var(--brand-500);
+    transition: box-shadow 0.3s;
+  }
+  /* 離開頁面頂端後（scripts/core.ts 加上 is-stuck）在下方投一道陰影 */
+  .hd:global(.is-stuck) {
+    box-shadow: 0 10px 28px -14px rgb(0 0 0 / 0.75);
+  }
+  .hd__brand :global(.emblem) {
+    transition: transform 0.4s var(--ease);
+  }
+  .hd__brand:hover :global(.emblem) {
+    transform: rotate(-8deg) scale(1.06);
   }
   .hd__bar {
     display: flex;

@@ -27,43 +27,50 @@ const rows = schedule
           journey.map((s, i) => (
             <li class="sw__step">
               <span class="num">{i + 1}</span>
-              <span class="sw__ico" aria-hidden="true">
-                <Icon name={s.icon} />
-              </span>
-              <div>
-                <p class="sw__t">{s.title}</p>
-                <p class="sw__d">{s.desc}</p>
+              <div class="sw__card">
+                <span class="sw__ico" aria-hidden="true">
+                  <Icon name={s.icon} />
+                </span>
+                <div>
+                  <p class="sw__t">{s.title}</p>
+                  <p class="sw__d">{s.desc}</p>
+                </div>
               </div>
             </li>
           ))
         }
       </ol>
       <div class="sw__btns">
-        <a class="btn btn--primary btn--sm" href={url('/download/')}><Icon name="down" />下載遊戲</a>
-        <a class="btn btn--light btn--sm" href={url('/guide/')}>完整新手指南</a>
+        <a class="btn btn--primary" href={url('/download/')}><Icon name="down" />下載遊戲</a>
+        <a class="btn btn--light" href={url('/guide/')}>完整新手指南<Icon name="arrow" /></a>
       </div>
     </div>
 
-    <div class="sw__col" data-week-mini>
+    <div class="sw__col">
       <SectionHead title="本週戰場" id="hw-title" desc="週一到週六每晚都有活動，週日奇岩攻城。時間皆為伺服器時間（台灣時間）。" />
-      <div class="sw__next" aria-live="polite">
-        <span class="tag tag--next" data-mini-state>下一場</span>
-        <p class="sw__next-t"><b data-mini-title>每週戰場</b><span data-mini-when></span></p>
-        <p class="sw__count tnum" data-mini-count></p>
+      <div class="wkm" data-week-mini>
+        <div class="wkm__next" aria-live="polite">
+          <div class="wkm__next-text">
+            <span class="tag tag--next" data-mini-state>下一場</span>
+            <p class="wkm__title" data-mini-title>每週戰場</p>
+            <p class="wkm__when" data-mini-when></p>
+          </div>
+          <p class="wkm__count tnum" data-mini-count></p>
+        </div>
+        <ol class="wkm__list">
+          {
+            rows.map((r) => (
+              <li class="wkm__ev" data-mini-ev={r.id}>
+                <span class="wkm__mark" aria-hidden="true" />
+                <span class="wkm__time tnum">{r.when}</span>
+                <span class="wkm__name">{r.title}</span>
+                <span class="tag tag--mute" data-mini-chip></span>
+              </li>
+            ))
+          }
+        </ol>
+        <a class="link wkm__more" href={url('/events/')}>完整行事曆與活動規則<Icon name="arrow" /></a>
       </div>
-      <ol class="sw__tl">
-        {
-          rows.map((r) => (
-            <li class="sw__ev" data-mini-ev={r.id}>
-              <span class="sw__mark" aria-hidden="true" />
-              <span class="sw__when tnum">{r.when}</span>
-              <span class="sw__title">{r.title}</span>
-              <span class="tag tag--mute" data-mini-chip></span>
-            </li>
-          ))
-        }
-      </ol>
-      <a class="link sw__more" href={url('/events/')}>完整行事曆與活動規則<Icon name="arrow" /></a>
     </div>
   </div>
 </section>
@@ -76,36 +83,63 @@ const rows = schedule
   .sw {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 32px 48px;
+    gap: 40px 48px;
   }
+
+  /* 步驟：金色編號串在一條虛線上 */
   .sw__steps {
+    position: relative;
     display: grid;
-    gap: 8px;
+    gap: 10px;
+  }
+  .sw__steps::before {
+    content: '';
+    position: absolute;
+    left: 13px;
+    top: 20px;
+    bottom: 20px;
+    border-left: 2px dashed var(--gold-400);
+    opacity: 0.6;
   }
   .sw__step {
+    position: relative;
     display: grid;
-    grid-template-columns: auto auto 1fr;
+    grid-template-columns: 28px 1fr;
+    gap: 14px;
+    align-items: center;
+  }
+  .sw__card {
+    display: grid;
+    grid-template-columns: auto 1fr;
     gap: 12px;
     align-items: start;
-    padding: 12px 14px;
+    padding: 12px 16px 13px;
     background: var(--surface);
     border: 1px solid var(--line);
+    box-shadow: var(--shadow-1);
+    transition:
+      box-shadow 0.25s var(--ease),
+      border-color 0.25s;
+  }
+  .sw__step:hover .sw__card {
+    border-color: var(--line-2);
+    box-shadow: var(--shadow-2);
   }
   .sw__ico {
     display: grid;
     place-items: center;
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
     color: var(--brand-500);
   }
   .sw__ico :global(svg) {
-    width: 26px;
-    height: 26px;
+    width: 28px;
+    height: 28px;
   }
   .sw__t {
     font-weight: 700;
-    color: var(--ink-strong);
     line-height: 1.75;
+    color: var(--ink-strong);
   }
   .sw__d {
     font-size: 0.9rem;
@@ -116,90 +150,114 @@ const rows = schedule
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    margin-top: 16px;
+    margin: 18px 0 0 42px;
   }
 
-  .sw__next {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-    gap: 6px 12px;
-    padding: 12px 14px;
-    background: var(--gold-100);
-    border: 1px solid #e2c977;
+  /* 本週戰場：上面一條深色的「下一場」倒數，下面是時間軸 */
+  .wkm {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-2);
   }
-  .sw__next-t {
+  .wkm__next {
     display: flex;
     flex-wrap: wrap;
-    align-items: baseline;
-    gap: 2px 10px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    padding: 16px 20px;
+    color: var(--band-text);
+    background:
+      radial-gradient(80% 140% at 100% 0%, rgb(196 52 68 / 0.5), transparent 62%),
+      linear-gradient(180deg, #1c0e13, #34121c);
+    border-bottom: 3px solid var(--brand-500);
+  }
+  .wkm__next-text {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    column-gap: 10px;
     min-width: 0;
   }
-  .sw__next-t b {
-    color: var(--ink-strong);
+  .wkm__title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #fff;
   }
-  .sw__next-t span {
+  .wkm__when {
+    grid-column: 1 / -1;
+    margin-top: 2px;
     font-size: 0.88rem;
-    color: var(--ink-2);
+    color: var(--band-muted);
   }
-  .sw__count {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--ink-strong);
-  }
-  .sw__count:empty {
+  .wkm__when:empty {
     display: none;
   }
-
-  .sw__tl {
+  .wkm__count {
+    font-size: 1.9rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--gold-300);
+    text-shadow: 0 2px 14px rgb(0 0 0 / 0.5);
+  }
+  .wkm__count:empty {
+    display: none;
+  }
+  .wkm__list {
     position: relative;
     display: grid;
-    gap: 4px;
-    margin-top: 14px;
+    padding: 8px 20px 4px;
   }
-  .sw__tl::before {
+  .wkm__list::before {
     content: '';
     position: absolute;
-    left: 7px;
-    top: 14px;
-    bottom: 14px;
+    left: 27px;
+    top: 26px;
+    bottom: 22px;
     border-left: 2px dashed var(--line-2);
   }
-  .sw__ev {
+  .wkm__ev {
     position: relative;
     display: grid;
     grid-template-columns: 16px 10.5em 1fr auto;
     align-items: center;
     gap: 12px;
-    padding: 6px 0;
+    padding: 8px 0;
   }
-  .sw__mark {
+  .wkm__ev + .wkm__ev {
+    border-top: 1px solid #efeae4;
+  }
+  .wkm__mark {
     width: 16px;
     height: 16px;
     background: #fff;
     border: 2px solid var(--line-2);
+    transition: transform 0.3s var(--ease);
   }
-  .sw__ev.is-top .sw__mark {
+  .wkm__ev.is-top .wkm__mark {
     background: var(--gold-400);
     border-color: #8a6a12;
+    transform: rotate(45deg);
+    box-shadow: 0 0 0 4px rgb(217 178 71 / 0.25);
   }
-  .sw__when {
+  .wkm__time {
     font-size: 0.9rem;
     font-weight: 700;
     color: var(--ink-strong);
   }
-  .sw__title {
+  .wkm__name {
     color: var(--ink-2);
   }
-  .sw__ev.is-top .sw__title {
+  .wkm__ev.is-top .wkm__name {
     font-weight: 700;
     color: var(--ink-strong);
   }
-  .tag:empty {
+  .wkm :global(.tag:empty) {
     display: none;
   }
-  .sw__more {
-    margin-top: 12px;
+  .wkm__more {
+    margin: 4px 20px 14px;
+    padding-top: 10px;
   }
 
   @media (max-width: 960px) {
@@ -208,28 +266,25 @@ const rows = schedule
     }
   }
   @media (max-width: 480px) {
-    .sw__ev {
+    .wkm__ev {
       grid-template-columns: 16px 1fr auto;
-      grid-template-areas: 'mark when chip' 'mark title chip';
+      grid-template-areas: 'mark time chip' 'mark name chip';
       row-gap: 0;
     }
-    .sw__mark {
+    .wkm__mark {
       grid-area: mark;
     }
-    .sw__when {
-      grid-area: when;
+    .wkm__time {
+      grid-area: time;
     }
-    .sw__title {
-      grid-area: title;
+    .wkm__name {
+      grid-area: name;
     }
-    .sw__ev :global([data-mini-chip]) {
+    .wkm__ev :global([data-mini-chip]) {
       grid-area: chip;
     }
-    .sw__next {
-      grid-template-columns: auto 1fr;
-    }
-    .sw__count {
-      grid-column: 1 / -1;
+    .sw__btns {
+      margin-left: 0;
     }
   }
 </style>

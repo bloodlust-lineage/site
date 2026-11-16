@@ -44,6 +44,13 @@ const glory = [
     ],
   },
 ];
+
+/** PvP 活動卡片：第一列「時間」拉到標題列，其餘留在表格 */
+const duels = pvpEvents.map((ev) => ({
+  ...ev,
+  when: ev.rows.find(([k]) => k === '時間')?.[1] ?? '',
+  rest: ev.rows.filter(([k]) => k !== '時間'),
+}));
 ---
 
 <Base title="每週戰場" description="嗜血天堂II 經典服每週活動：TvT 團體對抗賽、最後的英雄、週二 PvP 區域、奧林匹亞、奇岩攻城戰，以及史詩首領重生時間、副本與每日出席獎勵。">
@@ -66,36 +73,46 @@ const glory = [
       <SectionHead title="PvP 活動" id="e-pvp" desc="週一到週六晚上各有一場，報名時會跳出確認視窗。" />
       <div class="duel">
         {
-          pvpEvents.map((ev) => (
-            <article class="duel__card">
-              <header class="duel__head">
-                <span class="ibox" aria-hidden="true">
+          duels.map((ev) => (
+            <article class="duel__card card">
+              <header class="duel__head bar">
+                <span class="medal" aria-hidden="true">
                   <Icon name={ev.icon} />
                 </span>
-                <div>
+                <div class="duel__names">
                   <h3 class="duel__name">{ev.name}</h3>
                   <p class="duel__latin">{ev.latin}</p>
                 </div>
+                <p class="duel__when">
+                  <Icon name="clock" />
+                  <span class="sr-only">時間：</span>
+                  {ev.when}
+                </p>
               </header>
-              <table class="duel__rows">
-                <caption class="sr-only">{ev.name}規則</caption>
-                <tbody>
-                  {ev.rows.map(([k, v]) => (
-                    <tr>
-                      <th scope="row">{k}</th>
-                      <td>{v}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <div class="duel__reward">
-                <p class="duel__reward-h">獎勵</p>
-                {ev.reward.map(([k, v]) => (
-                  <p>
-                    <b>{k}</b>
-                    {v}
+              <div class="duel__body">
+                <table class="duel__rows">
+                  <caption class="sr-only">{ev.name}規則</caption>
+                  <tbody>
+                    {ev.rest.map(([k, v]) => (
+                      <tr>
+                        <th scope="row">{k}</th>
+                        <td>{v}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div class="duel__reward">
+                  <p class="duel__reward-h">
+                    <Icon name="coins" />
+                    獎勵
                   </p>
-                ))}
+                  {ev.reward.map(([k, v]) => (
+                    <p>
+                      <b>{k}</b>
+                      {v}
+                    </p>
+                  ))}
+                </div>
               </div>
             </article>
           ))
@@ -107,28 +124,52 @@ const glory = [
     </div>
   </section>
 
-  <section class="section section--white" aria-labelledby="e-zone">
-    <div class="container">
-      <div class="zone">
-        <div class="zone__date tnum" aria-hidden="true">
-          <span>每週二</span>
-          <b>20:00</b>
-          <i></i>
-          <b>24:00</b>
-        </div>
-        <div>
-          <h2 class="zone__title" id="e-zone">週二 PvP 區域：殺人不會變紅名</h2>
-          <p class="zone__desc">
-            每週二 20:00～24:00，<b>安塔瑞斯洞窟</b>與<b>傲慢之塔 4～11 樓</b>的活動區域變成 PvP 區，在裡面殺人不會變紅名。
-          </p>
-          <ul class="bullets zone__list">
-            <li>活動怪物每隻都會掉 1 個「防具材料禮盒－A 級」或「飾品材料禮盒－A 級」。</li>
-            <li>20:30 與 22:30 各出現 3～4 隻「血的騎士團長」，停留 30 分鐘，打倒掉「防具禮盒－A 級」或「飾品禮盒－A 級」。</li>
-            <li>區域內內掛會自動停止。</li>
-          </ul>
+  <!-- 週二 PvP 區域：深色夜景區塊，附一條 20:00～24:00 的時間軸 -->
+  <section class="section section--dark zone-band" aria-labelledby="e-zone">
+    <svg class="edge edge--trees" viewBox="0 0 2400 96" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <use href="#g-trees"></use>
+    </svg>
+    <div class="starfield" aria-hidden="true"></div>
+
+    <div class="container zone">
+      <div class="zone__date tnum" aria-hidden="true">
+        <span>每週二</span>
+        <b>20:00</b>
+        <i></i>
+        <b>24:00</b>
+      </div>
+      <div class="zone__text">
+        <h2 class="zone__title" id="e-zone">週二 PvP 區域：殺人不會變紅名</h2>
+        <p class="zone__desc">
+          每週二 20:00～24:00，<b>安塔瑞斯洞窟</b>與<b>傲慢之塔 4～11 樓</b>的活動區域變成 PvP 區，在裡面殺人不會變紅名。
+        </p>
+        <ul class="bullets zone__list">
+          <li>活動怪物每隻都會掉 1 個「防具材料禮盒－A 級」或「飾品材料禮盒－A 級」。</li>
+          <li>20:30 與 22:30 各出現 3～4 隻「血的騎士團長」，停留 30 分鐘，打倒掉「防具禮盒－A 級」或「飾品禮盒－A 級」。</li>
+          <li>區域內內掛會自動停止。</li>
+        </ul>
+
+        <!-- 時間軸：四小時，兩段金色是「血的騎士團長」出現的 30 分鐘 -->
+        <div class="zone__line tnum" aria-hidden="true">
+          <p class="zone__line-cap"><i></i>血的騎士團長出現（各 30 分鐘）</p>
+          <div class="zone__track">
+            <span class="zone__spawn" style="left:12.5%"></span>
+            <span class="zone__spawn" style="left:62.5%"></span>
+          </div>
+          <ol class="zone__ticks">
+            <li style="left:0">20:00</li>
+            <li class="is-hit" style="left:12.5%">20:30</li>
+            <li style="left:50%">22:00</li>
+            <li class="is-hit" style="left:62.5%">22:30</li>
+            <li style="left:100%">24:00</li>
+          </ol>
         </div>
       </div>
     </div>
+
+    <svg class="edge edge--range" viewBox="0 0 2400 160" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <use href="#g-mid-body"></use>
+    </svg>
   </section>
 
   <section class="section" aria-labelledby="e-glory">
@@ -137,9 +178,9 @@ const glory = [
       <div class="glory">
         {
           glory.map((g) => (
-            <article class="glory__item">
+            <article class="glory__item card">
               <header class="glory__head">
-                <span class="ibox" aria-hidden="true">
+                <span class="medal" aria-hidden="true">
                   <Icon name={g.icon} />
                 </span>
                 <div>
@@ -183,11 +224,15 @@ const glory = [
                 <tr>
                   <th scope="row">
                     <span class="e-boss">
-                      <Icon name={b.icon} />
+                      <span class="medal" aria-hidden="true">
+                        <Icon name={b.icon} />
+                      </span>
                       {b.name}
                     </span>
                   </th>
-                  <td class="tnum" data-label="等級">{b.level}</td>
+                  <td class="tnum" data-label="等級">
+                    <span class="e-lv">Lv.{b.level}</span>
+                  </td>
                   <td class="e-span2" data-label="地點">{b.location}</td>
                   <td class="e-full" data-label="進入條件">{b.entry}</td>
                   <td class="e-full" data-label="重生">{b.respawn}</td>
@@ -244,12 +289,18 @@ const glory = [
         {
           attendance.map((week, w) => (
             <div class="att__week">
-              <p class="att__wk">第 {w + 1} 週</p>
+              <p class="att__wk">
+                <span>第</span>
+                <b class="tnum">{w + 1}</b>
+                <span>週</span>
+              </p>
               <ol class="att__days">
                 {week.map((r, d) => (
                   <li class:list={['att__day', d === 0 && 'is-coin', d === 6 && 'is-final']}>
                     <span class="att__n tnum">第 {w * 7 + d + 1} 天</span>
                     <span class="att__r">{r}</span>
+                    {d === 0 && <Icon name="coins" class="att__ico" />}
+                    {d === 6 && <Icon name="chest" class="att__ico" />}
                   </li>
                 ))}
               </ol>
@@ -257,6 +308,10 @@ const glory = [
           ))
         }
       </div>
+      <p class="att__legend">
+        <span class="att__key is-coin"><i aria-hidden="true"></i>每週第 1 天：出席幣</span>
+        <span class="att__key is-final"><i aria-hidden="true"></i>每週第 7 天：特別獎勵</span>
+      </p>
     </div>
   </section>
 
@@ -264,37 +319,66 @@ const glory = [
 </Base>
 
 <style>
+  /* ---------- PvP 活動 ---------- */
   .duel {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
   }
   .duel__card {
-    padding: 18px 20px 20px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-top: 4px solid var(--brand-500);
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-2);
   }
   .duel__head {
     display: flex;
-    gap: 12px;
+    flex-wrap: wrap;
+    gap: 10px 14px;
     align-items: center;
+    padding: 16px 20px;
+  }
+  .duel__names {
+    flex: 1;
+    min-width: 0;
   }
   .duel__name {
-    font-size: 1.25rem;
+    font-size: 1.28rem;
+    color: var(--band-title);
   }
   .duel__latin {
-    font-size: 0.82rem;
-    color: var(--ink-3);
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    color: var(--band-muted);
+  }
+  .duel__when {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px 4px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    white-space: nowrap;
+    color: var(--gold-300);
+    background: rgb(10 5 7 / 0.45);
+    border: 1px solid rgb(236 202 106 / 0.4);
+  }
+  .duel__when :global(svg) {
+    width: 16px;
+    height: 16px;
+    flex: none;
+  }
+  .duel__body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 6px 20px 20px;
   }
   .duel__rows {
-    margin-top: 14px;
     font-size: 0.94rem;
-    border-top: 1px solid var(--line);
   }
   .duel__rows th,
   .duel__rows td {
-    padding: 8px 0;
+    padding: 9px 0;
     text-align: left;
     vertical-align: top;
     border-bottom: 1px solid var(--line);
@@ -307,16 +391,27 @@ const glory = [
   .duel__reward {
     display: grid;
     gap: 4px;
-    margin-top: 14px;
+    margin-top: auto;
     padding: 12px 14px;
     font-size: 0.94rem;
-    background: var(--gold-100);
+    background: linear-gradient(180deg, #fbf3d6, var(--gold-100));
     border: 1px solid #e2c977;
+    border-left: 4px solid var(--gold-400);
+  }
+  .duel__rows + .duel__reward {
+    margin-top: 16px;
   }
   .duel__reward-h {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     font-size: 0.82rem;
     font-weight: 700;
     color: var(--gold-700);
+  }
+  .duel__reward-h :global(svg) {
+    width: 16px;
+    height: 16px;
   }
   .duel__reward b {
     display: inline-block;
@@ -331,97 +426,201 @@ const glory = [
     color: var(--ink-2);
   }
 
-  .zone {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 24px 36px;
-    align-items: center;
-    padding: clamp(20px, 3vw, 32px);
-    background: var(--brand-50);
-    border: 1px solid #ecc9ce;
-    border-left: 5px solid var(--brand-500);
+  /* ---------- 週二 PvP 區域 ---------- */
+  .zone-band {
+    padding-bottom: calc(var(--section-y) + max(6.67vw, 64px));
   }
+  .zone {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 24px clamp(24px, 4vw, 48px);
+    align-items: center;
+  }
+  /* 日期牌：酒紅底、金色細框 */
   .zone__date {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
-    padding: 16px 22px;
+    gap: 8px;
+    padding: 24px 30px 26px;
     color: #fff;
-    background: var(--band-800);
-    border: 1px solid #000;
+    background:
+      radial-gradient(90% 70% at 100% 0%, rgb(230 90 100 / 0.36), transparent 62%),
+      linear-gradient(160deg, #8a1828 0%, #4a0e17 60%, #2a080e 100%);
+    border: 1px solid #0b0508;
+    box-shadow:
+      0 0 0 1px rgb(236 202 106 / 0.35),
+      0 24px 46px -22px rgb(0 0 0 / 0.9),
+      0 0 60px rgb(207 58 76 / 0.22);
   }
   .zone__date span {
+    padding: 0 10px;
     font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--gold-300);
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    line-height: 1.7;
+    color: #241a03;
+    background: var(--gold-400);
   }
   .zone__date b {
-    font-size: 1.8rem;
+    font-size: 2.3rem;
+    font-weight: 900;
     line-height: 1;
+    text-shadow: 0 4px 18px rgb(0 0 0 / 0.5);
   }
   .zone__date i {
     width: 2px;
-    height: 16px;
-    background: var(--brand-400);
+    height: 18px;
+    background: var(--gold-400);
   }
   .zone__title {
-    font-size: clamp(1.3rem, 1.1rem + 0.8vw, 1.6rem);
+    font-size: clamp(1.4rem, 1.15rem + 1vw, 1.85rem);
+    font-weight: 800;
+    letter-spacing: 0.02em;
   }
   .zone__desc {
     margin-top: 8px;
+    max-width: 46em;
   }
   .zone__desc b {
-    color: var(--brand-700);
+    color: var(--gold-300);
   }
   .zone__list {
-    margin-top: 10px;
+    margin-top: 12px;
+    max-width: 52em;
     font-size: 0.93rem;
     color: var(--ink-2);
   }
 
+  /* 時間軸 */
+  .zone__line {
+    max-width: 640px;
+    margin-top: 22px;
+    padding-inline: 20px;
+  }
+  .zone__line-cap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 -20px 10px;
+    font-size: 0.82rem;
+    color: var(--ink-3);
+  }
+  .zone__line-cap i {
+    width: 18px;
+    height: 8px;
+    background: linear-gradient(180deg, var(--gold-300), var(--gold-500));
+    box-shadow: 0 0 10px rgb(236 202 106 / 0.6);
+  }
+  .zone__track {
+    position: relative;
+    height: 10px;
+    background: linear-gradient(90deg, var(--brand-700), var(--brand-400) 50%, var(--brand-700));
+    border: 1px solid rgb(255 200 190 / 0.35);
+    box-shadow: 0 0 22px rgb(220 60 76 / 0.45);
+  }
+  .zone__spawn {
+    position: absolute;
+    top: -4px;
+    bottom: -4px;
+    width: 12.5%;
+    background: linear-gradient(180deg, var(--gold-300), var(--gold-500));
+    border: 1px solid #fff3c4;
+    box-shadow: 0 0 16px rgb(236 202 106 / 0.75);
+  }
+  .zone__ticks {
+    position: relative;
+    height: 2.1em;
+    margin-top: 8px;
+    font-size: 0.8rem;
+    color: var(--ink-3);
+  }
+  .zone__ticks li {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+  .zone__ticks li::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: -7px;
+    height: 5px;
+    border-left: 1px solid rgb(255 236 228 / 0.35);
+  }
+  .zone__ticks .is-hit {
+    font-weight: 700;
+    color: var(--gold-300);
+  }
+
+  /* ---------- 英雄、城堡與血盟 ---------- */
   .glory {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
+    gap: 14px;
   }
   .glory__item {
-    padding: 16px 18px 18px;
-    background: var(--surface);
-    border: 1px solid var(--line);
+    position: relative;
+    padding: 20px 20px 20px;
+    border-top: 3px solid var(--brand-500);
+    transition:
+      box-shadow 0.25s var(--ease),
+      border-color 0.25s;
+  }
+  .glory__item:hover {
+    box-shadow: var(--shadow-2);
   }
   .glory__head {
     display: flex;
-    gap: 12px;
+    gap: 14px;
     align-items: center;
   }
+  .glory__head :global(.medal) {
+    --medal: 50px;
+  }
   .glory__t {
-    font-size: 1.15rem;
+    font-size: 1.18rem;
   }
   .glory__when {
-    font-size: 0.85rem;
+    font-size: 0.86rem;
     font-weight: 700;
     color: var(--brand-600);
   }
   .glory__list {
-    margin-top: 14px;
-    padding-top: 12px;
+    margin-top: 16px;
+    padding-top: 14px;
     border-top: 1px solid var(--line);
     font-size: 0.92rem;
     line-height: 1.75;
     color: var(--ink-2);
   }
 
+  /* ---------- 首領與副本 ---------- */
   .e-boss {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     white-space: nowrap;
   }
-  .e-boss :global(svg) {
-    width: 22px;
-    height: 22px;
-    color: var(--brand-500);
+  .e-boss :global(.medal) {
+    --medal: 30px;
+    box-shadow: inset 0 0 0 1px rgb(236 202 106 / 0.6);
+  }
+  .e-lv {
+    padding: 0 6px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    line-height: 1.7;
+    white-space: nowrap;
+    color: #241a03;
+    background: var(--gold-400);
+  }
+  .e-table :global(.table td),
+  .e-table :global(.table tbody th) {
+    vertical-align: middle;
   }
   .e-sub {
     display: flex;
@@ -454,7 +653,7 @@ const glory = [
       min-width: 9.5em;
     }
     .e-table .e-span2 {
-      min-width: 9em;
+      min-width: 11.5em;
     }
   }
 
@@ -464,6 +663,7 @@ const glory = [
       display: block;
       border: 0;
       background: none;
+      box-shadow: none;
     }
     .e-table thead {
       position: absolute;
@@ -484,6 +684,7 @@ const glory = [
       padding: 14px 16px;
       background: var(--surface);
       border: 1px solid var(--line);
+      box-shadow: var(--shadow-1);
     }
     .e-table tbody tr:nth-child(even) {
       background: var(--surface);
@@ -521,22 +722,37 @@ const glory = [
     }
   }
 
+  /* ---------- 出席獎勵 ---------- */
   .att {
     display: grid;
     gap: 10px;
   }
   .att__week {
     display: grid;
-    grid-template-columns: 64px 1fr;
+    grid-template-columns: 62px 1fr;
     gap: 10px;
   }
   .att__wk {
-    display: grid;
-    place-items: center;
-    font-size: 0.88rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    font-size: 0.8rem;
     font-weight: 700;
-    color: #fff;
-    background: var(--band-800);
+    line-height: 1.2;
+    color: var(--band-muted);
+    background:
+      radial-gradient(120% 80% at 100% 0%, rgb(196 52 68 / 0.5), transparent 62%),
+      linear-gradient(180deg, #1c0e13, #34121c);
+    border: 1px solid #0b0508;
+    border-bottom: 3px solid var(--brand-500);
+  }
+  .att__wk b {
+    font-size: 1.7rem;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--gold-300);
   }
   .att__days {
     display: grid;
@@ -544,34 +760,83 @@ const glory = [
     gap: 6px;
   }
   .att__day {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 4px;
-    min-height: 96px;
+    min-height: 98px;
     padding: 8px 10px 10px;
     font-size: 0.85rem;
     line-height: 1.55;
-    background: var(--surface);
+    background: var(--surface-2);
     border: 1px solid var(--line);
+    transition:
+      transform 0.25s var(--ease),
+      box-shadow 0.25s var(--ease),
+      border-color 0.25s;
+  }
+  .att__day:hover {
+    transform: translateY(-2px);
+    border-color: var(--line-2);
+    box-shadow: var(--shadow-2);
   }
   .att__n {
     font-size: 0.78rem;
     font-weight: 700;
     color: var(--ink-3);
   }
+  .att__day :global(.att__ico) {
+    position: absolute;
+    right: 8px;
+    top: 7px;
+    width: 20px;
+    height: 20px;
+  }
   .att__day.is-coin {
-    background: var(--gold-100);
+    font-weight: 700;
+    color: var(--ink-strong);
+    background: linear-gradient(180deg, #fdf6dc, var(--gold-100));
     border-color: #e2c977;
   }
-  .att__day.is-coin .att__n {
-    color: var(--gold-700);
+  .att__day.is-coin .att__n,
+  .att__day.is-coin :global(.att__ico) {
+    color: var(--gold-600);
   }
   .att__day.is-final {
-    background: var(--brand-50);
-    border-color: #ecc9ce;
+    font-weight: 700;
+    color: var(--ink-strong);
+    background: linear-gradient(180deg, #fdf4f5, var(--brand-100));
+    border-color: var(--brand-200);
   }
-  .att__day.is-final .att__n {
+  .att__day.is-final .att__n,
+  .att__day.is-final :global(.att__ico) {
     color: var(--brand-600);
+  }
+  .att__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 20px;
+    margin-top: 14px;
+    font-size: 0.86rem;
+    color: var(--ink-2);
+  }
+  .att__key {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .att__key i {
+    width: 12px;
+    height: 12px;
+    border: 1px solid;
+  }
+  .att__key.is-coin i {
+    background: var(--gold-100);
+    border-color: #d9b247;
+  }
+  .att__key.is-final i {
+    background: var(--brand-100);
+    border-color: var(--brand-400);
   }
 
   @media (max-width: 1040px) {
@@ -593,30 +858,51 @@ const glory = [
     .zone__date {
       flex-direction: row;
       justify-self: start;
-      padding: 10px 16px;
+      gap: 12px;
+      padding: 12px 18px;
     }
     .zone__date i {
       width: 14px;
       height: 2px;
     }
     .zone__date b {
-      font-size: 1.4rem;
+      font-size: 1.5rem;
     }
   }
   @media (max-width: 600px) {
     .att__week {
       grid-template-columns: 1fr;
+      gap: 6px;
     }
     .att__wk {
-      padding: 4px;
-      justify-items: start;
-      padding-left: 10px;
+      flex-direction: row;
+      justify-content: flex-start;
+      gap: 6px;
+      padding: 6px 12px;
+      font-size: 0.9rem;
+      border-bottom-width: 2px;
+    }
+    .att__wk b {
+      font-size: 1.15rem;
     }
     .att__days {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
     .att__day {
       min-height: 0;
+    }
+    /* 每週最後一天的特別獎勵佔一整列 */
+    .att__day.is-final {
+      grid-column: 1 / -1;
+    }
+    .duel__head {
+      padding: 14px 16px;
+    }
+    .duel__body {
+      padding: 4px 16px 16px;
+    }
+    .zone__ticks {
+      font-size: 0.74rem;
     }
   }
 </style>

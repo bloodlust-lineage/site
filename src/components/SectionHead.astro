@@ -1,6 +1,7 @@
 ---
 /**
- * 區塊標題：左側紅色色條＋標題，下面一行灰色說明；右側可放按鈕或連結（預設插槽）
+ * 區塊標題：左側紅金色條＋標題，下面一行說明；右側可放按鈕或連結（預設插槽）
+ * 顏色跟著所在區塊走（深色區塊會自動換成淺色字）。
  */
 interface Props {
   title: string;
@@ -28,7 +29,7 @@ const hasAside = Astro.slots.has('default');
     align-items: flex-end;
     justify-content: space-between;
     gap: 12px 24px;
-    margin-bottom: 24px;
+    margin-bottom: 28px;
   }
   .sh__text {
     min-width: 0;
@@ -37,19 +38,22 @@ const hasAside = Astro.slots.has('default');
   .sh__title {
     display: flex;
     align-items: center;
-    gap: 10px;
-    font-size: clamp(1.4rem, 1.2rem + 0.8vw, 1.75rem);
+    gap: 12px;
+    font-size: clamp(1.5rem, 1.24rem + 1.1vw, 1.95rem);
+    font-weight: 800;
     letter-spacing: 0.02em;
+    line-height: 1.25;
   }
+  /* 色條：一道血紅＋一條細金線 */
   .sh__title::before {
     content: '';
-    width: 5px;
-    height: 1em;
+    width: 10px;
+    height: 1.02em;
     flex: none;
-    background: var(--brand-500);
+    background: linear-gradient(90deg, var(--brand-500) 0 6px, transparent 6px 8px, var(--gold-400) 8px 10px);
   }
   .sh__desc {
-    margin-top: 6px;
+    margin-top: 8px;
     max-width: 62em;
     color: var(--ink-2);
   }
