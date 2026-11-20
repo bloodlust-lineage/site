@@ -16,7 +16,7 @@ export const site = {
   tagline: '血月之下，經典再臨',
   taglineLatin: 'Beneath the blood moon, the classic returns',
   description:
-    '嗜血天堂II 經典服 — 經驗 5 倍、等級上限 99 的天堂II經典伺服器。隨身布告欄、免費內掛、90 級覺醒技能與 96 級史詩首領，在血月之下重返亞丁。',
+    '嗜血天堂II 經典服 — 經驗 5 倍起、等級上限 99 的天堂II經典伺服器。隨身布告欄、免費內掛、90 級覺醒技能與 96 級史詩首領，在血月之下重返亞丁。',
   keywords:
     '天堂2, 天堂II, 天堂2經典版, Lineage 2, Lineage II Classic, 私服, 私人伺服器, 嗜血天堂, 嗜血天堂2, 嗜血天堂II, 經典服, 5倍經驗, 繁體中文',
 
@@ -104,7 +104,7 @@ export const site = {
 
   /** 首頁主視覺下方的關鍵數字 */
   heroRates: [
-    { pre: '×', value: '5', post: '', label: '經驗值' },
+    { pre: '×', value: '5', post: '起', label: '經驗值' },
     { pre: '×', value: '2', post: '', label: 'SP' },
     { pre: '×', value: '2', post: '', label: '金幣掉落' },
     { pre: 'Lv.', value: '99', post: '', label: '等級上限' },
@@ -114,7 +114,7 @@ export const site = {
   /** 伺服器規格（features 與 download 頁使用） */
   specs: [
     ['客戶端版本', '經典：戰爭開始（協定 286）'],
-    ['經驗值／SP', '5 倍／2 倍（所有等級相同）'],
+    ['經驗值／SP', '經驗 1～39 級 5 倍、40～61 級 3.5 倍、62 級以上 2 倍／SP 2 倍'],
     ['金幣／物品掉落', '2 倍／1 倍'],
     ['等級上限', '99 級（副職業 85 級）'],
     ['轉職', '20、40、76 級，免任務、免費'],

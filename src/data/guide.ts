@@ -37,10 +37,10 @@ export const gifts: { name: string; qty: string; note: string; lasting?: boolean
   { name: '首領飾品 Lv3', qty: '4 件', note: '安塔瑞斯耳環、札肯耳環、巨蟻女王戒指、核心戒指' },
   { name: '+10 沙哈斗篷－白色', qty: '1 件', note: 'EXP／SP 獲得量 +30% 等效果' },
   { name: '胸針 Lv5＋Lv5 寶石', qty: '1 套', note: '金綠寶石、藍寶石、紅寶石、深紅寶石、鑽石、珍珠各一' },
-  { name: '靈魂彈／祝福的魔靈彈', qty: '各 10 萬', note: '可設定自動使用', lasting: true },
-  { name: '龍之特殊果實 Lv3', qty: '50 個', note: '20 分鐘內 EXP、SP +20% 等效果', lasting: true },
-  { name: '戰鬥的卷軸', qty: '100 張', note: '20 分鐘大幅提升攻防', lasting: true },
-  { name: 'HP 藥水／魔力恢復劑', qty: '10,000／50', note: '冒險初期不必為補給煩惱', lasting: true },
+  { name: '靈魂彈／祝福的魔靈彈', qty: '各 5 萬', note: '可設定自動使用', lasting: true },
+  { name: '龍的特殊果實 Lv2', qty: '20 個', note: '20 分鐘內 EXP、SP +15% 等效果', lasting: true },
+  { name: '戰鬥的卷軸', qty: '20 張', note: '20 分鐘大幅提升攻防', lasting: true },
+  { name: 'HP 藥水／魔力恢復劑', qty: '1,000／50', note: '冒險初期不必為補給煩惱', lasting: true },
 ];
 
 export const levelSpots: [string, string][] = [

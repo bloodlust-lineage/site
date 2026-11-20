@@ -27,7 +27,7 @@ export const featureGroups: FeatureGroup[] = [
     numeral: 'I',
     latin: 'Growth',
     title: '成長節奏',
-    lede: '經驗 5 倍、所有等級相同。不是一夜百級，而是每一級都扎實、每一次轉職都值得紀念。',
+    lede: '經驗 5 倍起，40 級、62 級後逐步遞減。不是一夜百級，而是每一級都扎實、每一次轉職都值得紀念。',
     items: [
       { icon: 'rank', title: '免任務轉職', desc: '20、40、76 級各轉職一次，畫面出現提示直接選職業，不用解任務、完全免費。', tag: '免費' },
       { icon: 'book', title: '技能自動學習', desc: '不需要技能書的技能，升級時自動學會；需要書的技能在布告欄用金幣直接購買。' },
@@ -126,7 +126,7 @@ export const homeExtras: Feature[] = [
 
 /** 倍率細節（首頁倍率之書與 features 頁） */
 export const rateBook = {
-  hero: { value: 5, label: '經驗值', latin: 'EXP', note: '所有等級相同，不設階梯倍率' },
+  hero: { value: 5, label: '經驗值', latin: 'EXP', note: '1～39 級 ×5、40～61 級 ×3.5、62 級以上 ×2' },
   items: [
     { value: '2', prefix: '×', label: 'SP', note: '技能點數' },
     { value: '2', prefix: '×', label: '金幣掉落', note: '一般怪與首領' },
@@ -137,5 +137,5 @@ export const rateBook = {
     { value: '2', prefix: '×', label: '精靈經驗', note: '元素精靈成長' },
     { value: '99', prefix: 'Lv.', label: '等級上限', note: '副職業最高 85 級' },
   ],
-  premium: '高級會員再乘經驗 ×2、SP ×2、金幣 ×1.5；物品掉落、回收與強化成功率不加成。組隊時會員倍率以全隊平均計算。',
+  premium: '高級會員再乘經驗 ×2、SP ×2、金幣 ×1.5；物品掉落、回收與強化成功率不加成。組隊時會員倍率以全隊平均計算。裝備與道具的經驗加成合計最多 +100%。',
 };
