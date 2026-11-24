@@ -85,7 +85,7 @@ export const site = {
       note: '每個人都要裝，更新也用它',
       size: '約 96 MB',
       unpacked: '解壓縮後覆蓋遊戲資料夾的 system',
-      version: '20261123',
+      version: '20261124',
       links: [
         // 只剩一個載點時，把 label 改成「下載登錄器補丁」
         {
